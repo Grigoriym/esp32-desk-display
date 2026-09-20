@@ -20,3 +20,8 @@ esp_err_t display_draw_text(int page, const char *text);
 // Draws an 8x8 bitmap (column-major, one byte per column) centered on the
 // given page. icon may be NULL to blank the page instead.
 esp_err_t display_draw_icon(int page, const uint8_t *icon);
+
+// Draws an 8x8 icon immediately followed by text, the pair centered together
+// on the given page. Either icon or text may be NULL/empty to draw just the
+// other one.
+esp_err_t display_draw_icon_and_text(int page, const uint8_t *icon, const char *text);

@@ -151,3 +151,33 @@ esp_err_t display_draw_icon(int page, const uint8_t *icon)
     }
     return ssd1306_write_page(page, row, OLED_WIDTH);
 }
+
+#define ICON_WIDTH 8
+#define ICON_TEXT_GAP 4
+
+esp_err_t display_draw_icon_and_text(int page, const uint8_t *icon, const char *text)
+{
+    uint8_t row[OLED_WIDTH];
+    memset(row, 0x00, sizeof(row));
+
+    int text_len = text ? (int)strlen(text) : 0;
+    int text_width = text_len > 0 ? text_len * 6 - 1 : 0;
+    int icon_width = icon ? ICON_WIDTH : 0;
+    int gap = (icon && text_width > 0) ? ICON_TEXT_GAP : 0;
+
+    int col = (OLED_WIDTH - (icon_width + gap + text_width)) / 2;
+
+    if (icon) {
+        memcpy(&row[col], icon, ICON_WIDTH);
+        col += icon_width + gap;
+    }
+    for (const char *p = text; p && *p && col + 5 <= OLED_WIDTH; p++) {
+        const uint8_t *glyph = glyph_for(*p);
+        if (glyph) {
+            memcpy(&row[col], glyph, 5);
+        }
+        col += 6;
+    }
+
+    return ssd1306_write_page(page, row, OLED_WIDTH);
+}
