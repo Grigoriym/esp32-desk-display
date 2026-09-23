@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -12,6 +13,22 @@ static const char *TAG = "desk_display";
 #define I2C_SDA_GPIO GPIO_NUM_21
 #define I2C_SCL_GPIO GPIO_NUM_22
 #define I2C_PORT     I2C_NUM_0
+
+#define SPLASH_HOLD_SECONDS 7
+#define SPLASH_PAGE_OLED    2
+#define SPLASH_PAGE_RTC     3
+#define SPLASH_PAGE_WIFI    4
+#define SPLASH_PAGE_NTP     5
+#define SPLASH_PAGE_WEATHER 6
+
+// One "NAME    OK" row of the boot status screen. Every row is padded to the
+// same width, so centering them also lines the status column up.
+static void splash_status(int page, const char *name, const char *status)
+{
+    char line[16];
+    snprintf(line, sizeof(line), "%-8s%s", name, status);
+    ESP_ERROR_CHECK(display_draw_text(page, line));
+}
 
 // NTP can transiently fail right after WiFi comes up (DNS/AP not fully
 // settled yet). Retry with backoff instead of ESP_ERROR_CHECK-ing straight
@@ -50,13 +67,33 @@ void app_main(void)
 
     ESP_LOGI(TAG, "milestone 1 done: OLED init OK");
 
+    // Boot status screen: lights the panel right away and shows each
+    // subsystem coming up, instead of a blank screen for ~6-8s.
+    ESP_ERROR_CHECK(display_draw_text(0, "HELLO"));
+    splash_status(SPLASH_PAGE_OLED, "OLED", "OK"); // if this is visible, it works
+    splash_status(SPLASH_PAGE_RTC, "RTC", "--");
+    splash_status(SPLASH_PAGE_WIFI, "WIFI", "--");
+    splash_status(SPLASH_PAGE_NTP, "NTP", "--");
+    splash_status(SPLASH_PAGE_WEATHER, "WEATHER", "--");
+
+    // RTC first, so the clock is right even if NTP fails later.
+    esp_err_t rerr = clock_rtc_init(bus);
+    if (rerr != ESP_OK) {
+        ESP_LOGW(TAG, "RTC not used: %s", esp_err_to_name(rerr));
+    }
+    splash_status(SPLASH_PAGE_RTC, "RTC", rerr == ESP_OK ? "OK" : "NO");
+
+    // Blocks until connected; the WIFI row stays at "--" meanwhile.
     ESP_ERROR_CHECK(wifi_connect());
     ESP_LOGI(TAG, "milestone 2 done: WiFi station connected");
+    splash_status(SPLASH_PAGE_WIFI, "WIFI", "OK");
 
     if (ntp_sync_with_retry() == ESP_OK) {
         ESP_LOGI(TAG, "milestone 3: NTP synced, rendering clock");
+        splash_status(SPLASH_PAGE_NTP, "NTP", "OK");
     } else {
         ESP_LOGE(TAG, "NTP sync failed after retries, continuing with unsynced clock");
+        splash_status(SPLASH_PAGE_NTP, "NTP", "NO");
     }
 
     char weather_str[8] = "--C";
@@ -67,6 +104,11 @@ void app_main(void)
     } else {
         ESP_LOGW(TAG, "weather fetch failed: %s", esp_err_to_name(werr));
     }
+    splash_status(SPLASH_PAGE_WEATHER, "WEATHER", werr == ESP_OK ? "OK" : "NO");
+
+    // Leave the final status up long enough to actually read it.
+    vTaskDelay(pdMS_TO_TICKS(SPLASH_HOLD_SECONDS * 1000));
+    ESP_ERROR_CHECK(display_clear());
     ESP_ERROR_CHECK(display_draw_icon_and_text(5, weather_icon_for_code(weather_code), weather_str));
 
 #define WEATHER_REFRESH_SECONDS (15 * 60)
@@ -74,8 +116,8 @@ void app_main(void)
     int seconds_since_weather = 0;
     // On failure, retry sooner than the normal cadence and back off toward
     // it, instead of leaving a stale reading up for a full 15 minutes.
-    int next_weather_interval = (werr == ESP_OK) ? WEATHER_REFRESH_SECONDS : WEATHER_RETRY_START_SECONDS;
     char time_str[6];
+    int next_weather_interval = (werr == ESP_OK) ? WEATHER_REFRESH_SECONDS : WEATHER_RETRY_START_SECONDS;
     for (;;) {
         clock_format_now(time_str, sizeof(time_str));
         ESP_ERROR_CHECK(display_draw_text(2, time_str));
