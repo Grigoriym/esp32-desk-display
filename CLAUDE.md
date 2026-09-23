@@ -74,6 +74,36 @@ that it wasn't raw AliExpress)
 no substitutions, all 3 ESP32 boards and 3 OLEDs tested working (see Hardware
 section above). Milestones 1-4 built on this hardware.
 
+## Power & bus budget (guardrail — check before wiring any new module)
+Everything runs from the DevKit's 3V3 pin (onboard regulator, likely AMS1117 —
+~500 mA safe continuous from USB, which itself caps at ~500 mA).
+
+| Part | Typical | Peak | Notes |
+|---|---|---|---|
+| ESP32 + WiFi | 100-150 mA | ~350 mA | TX bursts; the dominant load |
+| OLED SSD1315 | 10-15 mA | ~25 mA | scales with lit pixels |
+| DS3231 module | 1-2 mA | ~3 mA | mostly the power LED |
+| BME280 (planned) | 1-2 mA | ~3 mA | LDO + LED; sensor itself is µA |
+| KY-040 (planned) | ~0.3 mA | ~1 mA | pull-ups only |
+| **Total** | **~130-170 mA** | **~380 mA** | ~100+ mA headroom left |
+
+Rules:
+- New module → add a row above, re-check the total stays under ~450 mA peak.
+- **I2C pull-ups add up in parallel**: each module brings its own (4.7k/10k).
+  Keep combined ≥ ~1.1k (3 mA sink limit) — roughly 5-6 modules max before
+  removing pull-ups from some boards. Keep bus wires short.
+- New I2C address → check it doesn't clash, then add it to `KNOWN_I2C` in
+  `main/main.c` (boot log warns on any unknown address).
+- All I2C modules powered from 3.3V, never 5V (logic level + the DS3231
+  module's coin-cell "charging" circuit, which would overcharge a plain CR2032
+  on 5V). GPIOs are signals only (~12 mA each), never power.
+- 5V-hungry parts go on VIN, not 3V3: MQ-135 heater ~150 mA @5V (and its
+  analog out needs a divider); TFT backlight 50-100 mA.
+- Battery (open question below): ~150 mA average → 1000 mAh ≈ 6-7 h.
+- Runtime check: status screen `PWR NO` / log `last reset was a BROWNOUT`
+  means the supply sagged (overload or weak USB port/cable) — ESP-IDF's
+  brownout detector is on by default (`CONFIG_ESP_BROWNOUT_DET`).
+
 ## Software / ESP-IDF components used
 | Need | Component |
 |---|---|
@@ -161,7 +191,9 @@ reliable all session. The first read right after the board re-enumerates on USB
    **status screen** (2026-09-23): HELLO + `OLED/RTC/WIFI/NTP/WEATHER` rows going
    `--` → `OK`/`NO`, held `SPLASH_HOLD_SECONDS` (3s) after the last step, then the
    main screen. Main screen layout (2026-09-23): time on page 1, date `DD/MM/YYYY`
-   on page 3, icon+temperature on page 5. `WEATHER NO` only reflects the first fetch — a transient failure
+   on page 3, icon+temperature on page 5. Boot also runs power/bus guardrails
+   (2026-09-23): `PWR OK/NO` status row (brownout reset reason) and an I2C scan
+   against `KNOWN_I2C` — see Power & bus budget. `WEATHER NO` only reflects the first fetch — a transient failure
    there is normal and the 30s retry fills it in. Still open: anything further
    under Open questions below.
 

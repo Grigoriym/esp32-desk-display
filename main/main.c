@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "esp_log.h"
+#include "esp_system.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "driver/i2c_master.h"
@@ -20,6 +21,20 @@ static const char *TAG = "desk_display";
 #define SPLASH_PAGE_WIFI    4
 #define SPLASH_PAGE_NTP     5
 #define SPLASH_PAGE_WEATHER 6
+#define SPLASH_PAGE_PWR     7
+
+// Everything that's allowed to answer on the I2C bus. Anything else showing
+// up means an address clash or an unplanned module -- see "Power & bus
+// budget" in CLAUDE.md before wiring a new one, then add it here.
+static const struct { uint8_t addr; const char *name; } KNOWN_I2C[] = {
+    { 0x3C, "OLED" },
+    { 0x3D, "OLED (alt addr)" },
+    { 0x57, "DS3231 EEPROM (AT24C32)" },
+    { 0x5F, "DS3231 module extra addr" },
+    { 0x68, "DS3231 RTC" },
+    { 0x76, "BME280" },
+    { 0x77, "BME280 (alt addr)" },
+};
 
 // One "NAME    OK" row of the boot status screen. Every row is padded to the
 // same width, so centering them also lines the status column up.
@@ -28,6 +43,27 @@ static void splash_status(int page, const char *name, const char *status)
     char line[16];
     snprintf(line, sizeof(line), "%-8s%s", name, status);
     ESP_ERROR_CHECK(display_draw_text(page, line));
+}
+
+// Logs every device on the bus and warns about any not in KNOWN_I2C.
+// Missing required devices already show up as OLED/RTC failures.
+static void i2c_bus_check(i2c_master_bus_handle_t bus)
+{
+    int found = 0;
+    for (uint8_t addr = 0x08; addr < 0x78; addr++) {
+        if (i2c_master_probe(bus, addr, 20) != ESP_OK) continue;
+        found++;
+        const char *name = NULL;
+        for (size_t i = 0; i < sizeof(KNOWN_I2C) / sizeof(KNOWN_I2C[0]); i++) {
+            if (KNOWN_I2C[i].addr == addr) name = KNOWN_I2C[i].name;
+        }
+        if (name) {
+            ESP_LOGI(TAG, "I2C 0x%02X: %s", addr, name);
+        } else {
+            ESP_LOGW(TAG, "I2C 0x%02X: UNKNOWN device -- address clash or unplanned module?", addr);
+        }
+    }
+    ESP_LOGI(TAG, "I2C bus: %d address(es) answering", found);
 }
 
 // NTP can transiently fail right after WiFi comes up (DNS/AP not fully
@@ -62,6 +98,17 @@ void app_main(void)
     i2c_master_bus_handle_t bus;
     ESP_ERROR_CHECK(i2c_new_master_bus(&bus_cfg, &bus));
 
+    // A brownout reset means the supply sagged below ~2.4V: too much load on
+    // the 3.3V rail or a weak USB port/cable. Shown as "PWR NO" at boot.
+    esp_reset_reason_t reset_reason = esp_reset_reason();
+    bool brownout = (reset_reason == ESP_RST_BROWNOUT);
+    if (brownout) {
+        ESP_LOGE(TAG, "last reset was a BROWNOUT -- check power budget in CLAUDE.md");
+    } else {
+        ESP_LOGI(TAG, "reset reason: %d", reset_reason);
+    }
+    i2c_bus_check(bus);
+
     ESP_ERROR_CHECK(display_init(bus));
     ESP_ERROR_CHECK(display_clear());
 
@@ -75,6 +122,7 @@ void app_main(void)
     splash_status(SPLASH_PAGE_WIFI, "WIFI", "--");
     splash_status(SPLASH_PAGE_NTP, "NTP", "--");
     splash_status(SPLASH_PAGE_WEATHER, "WEATHER", "--");
+    splash_status(SPLASH_PAGE_PWR, "PWR", brownout ? "NO" : "OK");
 
     // RTC first, so the clock is right even if NTP fails later.
     esp_err_t rerr = clock_rtc_init(bus);
