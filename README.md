@@ -70,7 +70,7 @@ Settings are hardcoded constants. Change them and reflash:
 | What | Where |
 |---|---|
 | Weather location (default: Berlin) | `WEATHER_URL` in `main/weather.c` |
-| UTC offset, no automatic DST | `UTC_OFFSET_HOURS` in `main/clock.c` |
+| Timezone (default: Berlin, automatic DST) | `LOCAL_TZ` POSIX rule in `main/clock.c` |
 | Weather refresh interval | `WEATHER_REFRESH_SECONDS` in `main/main.c` |
 | Boot screen hold time | `SPLASH_HOLD_SECONDS` in `main/main.c` |
 | Display orientation | `0xA0`/`0xC0` in the init sequence in `main/display.c` (this build's panel is mounted upside-down; use `0xA1`/`0xC8` for the default orientation) |
@@ -83,6 +83,7 @@ main/
   display.c   SSD1306 driver, 5x7 font, text/icon drawing
   clock.c     NTP sync, DS3231 read/write, time formatting
   weather.c   Open-Meteo HTTPS fetch, JSON parsing, weather icons
+  bme280.c    BME280 indoor temperature/humidity/pressure
   wifi.c      WiFi station connect
 ```
 
@@ -91,8 +92,6 @@ sibling project, `esp32-hw-checks`.
 
 ## Known limitations
 
-- No automatic daylight-saving time, so `UTC_OFFSET_HOURS` is flipped by hand
-  twice a year.
 - WiFi connect has no timeout. With no network, the boot screen waits at
   `WIFI --`.
 

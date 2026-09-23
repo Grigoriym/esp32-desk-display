@@ -143,9 +143,12 @@ Rules:
   says the time is invalid); after every successful NTP sync the firmware writes
   the fresh time back. Boot log line `system time set from RTC` / `RTC not used`
   is the quickest way to check whether a swapped-in module works.
-- **Timezone**: hardcoded offset in `main/clock.c` (`UTC_OFFSET_HOURS`), no DST
-  logic. Currently `2` (Berlin CEST). **Needs manual flip to `1`** when Berlin's DST
-  ends (~last Sunday of October 2026), and back to `2` next spring.
+- **Timezone**: POSIX TZ rule `LOCAL_TZ` = `CET-1CEST,M3.5.0,M10.5.0/3` in
+  `main/clock.c` (since 2026-09-23), so the Berlin DST switch is automatic —
+  replaced the old hand-flipped `UTC_OFFSET_HOURS`. Because TZ is now set,
+  `mktime()` means *local* time: RTC→epoch conversion uses the TZ-independent
+  `utc_to_epoch()` helper instead (verified against glibc `timegm` for
+  2000-2100, and the 2026-10-25 / 2027-03-28 switch moments, on the host).
 - **Weather refresh cadence**: every 15 minutes (`WEATHER_REFRESH_SECONDS` in
   `main/main.c`), decided 2026-09-19 — gentle on the API, fresh enough for a desk
   display.
@@ -206,6 +209,10 @@ reliable all session. The first read right after the board re-enumerates on USB
    there is normal and the 30s retry fills it in. Still open: anything further
    under Open questions below.
 
+## Roadmap
+Next tasks live in `ROADMAP.md` as a checklist, one task per session — read it
+at the start of a session and tick items off there when done.
+
 ## Open questions
 - **Battery/accumulator autonomy** (raised 2026-09-17): user wants the option to run
   untethered, at least for short gaps — not fully scoped yet. Leaning toward a small
@@ -222,8 +229,6 @@ reliable all session. The first read right after the board re-enumerates on USB
   `WIFI --` indefinitely and the clock never appears, even though the RTC already
   has the right time. Fix: bounded wait, show `WIFI NO`, skip NTP/weather, go to
   the main screen on RTC time, keep reconnecting in the background.
-- UTC offset needs a manual flip twice a year (see Data source decisions) — a
-  standing maintenance task, not automated.
 
 ## Relationship to `esp32` lessons repo
 Separate git repo, not a subfolder of the lessons project — this is meant to be a
