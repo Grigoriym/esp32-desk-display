@@ -25,6 +25,12 @@ tutorial exercise, meant to actually sit on the desk.
   through the DS3231's 4-pin pass-through, one module setup left the OLED answering
   but no 0x68, another took the whole bus down (nothing answered); root cause not
   pinned down (wiring/joints, not the modules), the parallel wiring just worked.
+- **Pin table for every module lives in `docs/WIRING.md`**; keep it updated
+  when wiring changes. Build principle: every module sits in its own female
+  socket on the perfboard so it can be pulled and swapped. The ESP32 itself
+  plugs *down* into sockets, so its pins aren't reachable from above for a
+  jumper: a new module means soldering a new socket. The board may get
+  redesigned (2026-09-23).
 - LEDs: the red LED on the ESP32 DevKit and the red LED on the DS3231 are both
   plain **power** indicators (not error/short signs). The blue LED is GPIO2 —
   blinked by `esp32-hw-checks`, off in this firmware.
@@ -139,6 +145,10 @@ Rules:
 - Boot grid cells are `"%-8s%s"` = 10 chars (59px) per column, which exactly fills
   128px with the two columns flush left/right. A status name longer than 8 chars
   or a status longer than 2 breaks the alignment/overlaps — keep names ≤ 8.
+- **`CONFIG_FREERTOS_HZ=100`** here and in `esp32-hw-checks`: one tick is
+  10 ms, so `pdMS_TO_TICKS(<10)` is 0 and `vTaskDelay(0)` busy-loops. That's
+  why the KY-040 check decodes the quadrature in a GPIO any-edge ISR (10 ms
+  polling would drop steps on a quick spin) and only polls the button.
 - **Pure logic can be checked on the host before flashing**: copy the function out
   with `sed` and compile it with `gcc` against glibc (done for `utc_to_epoch()` and
   the TZ rule's switch dates). The same trick would work for glyph bitmaps

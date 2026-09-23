@@ -15,7 +15,14 @@ on the physical display, and note anything the next task needs to know.
   task 3.
 - [ ] **3. KY-040 rotary encoder + multiple screens**
   - [ ] Bring-up check in `../esp32-hw-checks` first (rotation direction,
-    button press, debounce), pick free GPIOs
+    button press, debounce), pick free GPIOs. *Status 2026-09-23*: GPIOs
+    picked (CLK D25, DT D26, SW D27, see `docs/WIRING.md`); the check is
+    written and builds (ISR quadrature decode, logs `encoder CW pos=N (last
+    detent steps=S)` and `button PRESSED`) but is **not flashed or tested**.
+    Waiting on the hardware: a 5-pin socket on the perfboard plus a Dupont
+    cable to the knob, possibly as part of a board redesign. Expect steps=4;
+    if it's 2 (half-step clone), the rest-at-CLK=1/DT=1 detent logic only
+    counts every other click and needs adjusting.
   - [ ] Screen rotation in this firmware: encoder turns between screens
     (e.g. clock/weather, sun/wind/UV, indoor, BVG)
 - [ ] **4. BVG departures screen**: next departures for one stop via the BVG
