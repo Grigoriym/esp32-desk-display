@@ -33,6 +33,8 @@ static const char *TAG = "desk_display";
 #define MAIN_PAGE_CLOCK   0 // time left, date right
 #define MAIN_PAGE_WEATHER 3
 #define MAIN_PAGE_INDOOR  5
+#define MAIN_PAGE_SUN     6 // sunrise left, sunset right
+#define MAIN_PAGE_WIND_UV 7 // wind left, today's max UV right
 
 // Everything that's allowed to answer on the I2C bus. Anything else showing
 // up means an address clash or an unplanned module -- see "Power & bus
@@ -54,6 +56,27 @@ static void splash_status(int page, int col, const char *name, const char *statu
     static char cells[8][2][12];
     snprintf(cells[page][col], sizeof(cells[page][col]), "%-8s%s", name, status);
     ESP_ERROR_CHECK(display_draw_text_columns(page, cells[page][0], cells[page][1]));
+}
+
+// Draws the outdoor rows of the main screen. w == NULL (no fetch succeeded
+// yet) shows "--C" with the cloud icon and leaves the sun/wind rows blank.
+static void draw_weather(const weather_t *w)
+{
+    if (!w) {
+        display_draw_icon_and_text(MAIN_PAGE_WEATHER, weather_icon_for_code(3), "--C");
+        return;
+    }
+    char buf[2][12];
+    snprintf(buf[0], sizeof(buf[0]), "%dC", w->temp_c);
+    display_draw_icon_and_text(MAIN_PAGE_WEATHER, weather_icon_for_code(w->weather_code), buf[0]);
+
+    snprintf(buf[0], sizeof(buf[0]), "RISE %s", w->sunrise);
+    snprintf(buf[1], sizeof(buf[1]), "SET %s", w->sunset);
+    display_draw_text_columns(MAIN_PAGE_SUN, buf[0], buf[1]);
+
+    snprintf(buf[0], sizeof(buf[0]), "WIND %dKMH", w->wind_kmh);
+    snprintf(buf[1], sizeof(buf[1]), "UV %d", w->uv_max);
+    display_draw_text_columns(MAIN_PAGE_WIND_UV, buf[0], buf[1]);
 }
 
 // Logs every device on the bus and warns about any not in KNOWN_I2C.
@@ -164,11 +187,11 @@ void app_main(void)
         splash_status(SPLASH_NTP, "NTP", "NO");
     }
 
-    char weather_str[8] = "--C";
-    int weather_code = 3; // default to "cloud" icon until first fetch succeeds
-    esp_err_t werr = weather_fetch(weather_str, sizeof(weather_str), &weather_code);
+    weather_t weather;
+    esp_err_t werr = weather_fetch(&weather);
     if (werr == ESP_OK) {
-        ESP_LOGI(TAG, "weather fetched (%s)", weather_str);
+        ESP_LOGI(TAG, "weather fetched (%dC, wind %dkm/h, UV %d, sun %s-%s)", weather.temp_c,
+                 weather.wind_kmh, weather.uv_max, weather.sunrise, weather.sunset);
     } else {
         ESP_LOGW(TAG, "weather fetch failed: %s", esp_err_to_name(werr));
     }
@@ -177,7 +200,7 @@ void app_main(void)
     // Leave the final status up long enough to actually read it.
     vTaskDelay(pdMS_TO_TICKS(SPLASH_HOLD_SECONDS * 1000));
     ESP_ERROR_CHECK(display_clear());
-    ESP_ERROR_CHECK(display_draw_icon_and_text(MAIN_PAGE_WEATHER, weather_icon_for_code(weather_code), weather_str));
+    draw_weather(werr == ESP_OK ? &weather : NULL);
 
 #define WEATHER_REFRESH_SECONDS (15 * 60)
 #define WEATHER_RETRY_START_SECONDS 30
@@ -211,10 +234,11 @@ void app_main(void)
 
         if (++seconds_since_weather >= next_weather_interval) {
             seconds_since_weather = 0;
-            werr = weather_fetch(weather_str, sizeof(weather_str), &weather_code);
+            werr = weather_fetch(&weather);
             if (werr == ESP_OK) {
-                ESP_LOGI(TAG, "weather refreshed (%s)", weather_str);
-                display_draw_icon_and_text(MAIN_PAGE_WEATHER, weather_icon_for_code(weather_code), weather_str);
+                ESP_LOGI(TAG, "weather refreshed (%dC, wind %dkm/h, UV %d, sun %s-%s)", weather.temp_c,
+                         weather.wind_kmh, weather.uv_max, weather.sunrise, weather.sunset);
+                draw_weather(&weather);
                 next_weather_interval = WEATHER_REFRESH_SECONDS;
             } else {
                 ESP_LOGW(TAG, "weather refresh failed: %s", esp_err_to_name(werr));

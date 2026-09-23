@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 #include "weather.h"
 #include "esp_http_client.h"
 #include "esp_crt_bundle.h"
@@ -8,9 +9,11 @@
 
 static const char *TAG = "weather";
 
-// Hardcoded location (CLAUDE.md: no GPS) -- central Berlin.
+// Hardcoded location (CLAUDE.md: no GPS) -- central Berlin. timezone makes
+// sunrise/sunset come back in local time, DST included.
 #define WEATHER_URL \
-    "https://api.open-meteo.com/v1/forecast?latitude=52.52&longitude=13.405&current_weather=true"
+    "https://api.open-meteo.com/v1/forecast?latitude=52.52&longitude=13.405&current_weather=true" \
+    "&daily=sunrise,sunset,uv_index_max&timezone=Europe%2FBerlin&forecast_days=1"
 
 #define RESPONSE_BUF_SIZE 2048
 
@@ -40,7 +43,7 @@ static esp_err_t http_event_handler(esp_http_client_event_t *evt)
     return ESP_OK;
 }
 
-esp_err_t weather_fetch(char *temp_buf, size_t temp_buf_size, int *weather_code_out)
+esp_err_t weather_fetch(weather_t *out)
 {
     s_response_len = 0;
     memset(s_response, 0, sizeof(s_response));
@@ -68,16 +71,32 @@ esp_err_t weather_fetch(char *temp_buf, size_t temp_buf_size, int *weather_code_
     cJSON *current = cJSON_GetObjectItem(root, "current_weather");
     cJSON *temp = current ? cJSON_GetObjectItem(current, "temperature") : NULL;
     cJSON *code = current ? cJSON_GetObjectItem(current, "weathercode") : NULL;
-    if (!cJSON_IsNumber(temp) || !cJSON_IsNumber(code)) {
+    cJSON *wind = current ? cJSON_GetObjectItem(current, "windspeed") : NULL;
+    cJSON *daily = cJSON_GetObjectItem(root, "daily");
+    // Daily fields are one-element arrays (forecast_days=1).
+    cJSON *sunrise = daily ? cJSON_GetArrayItem(cJSON_GetObjectItem(daily, "sunrise"), 0) : NULL;
+    cJSON *sunset = daily ? cJSON_GetArrayItem(cJSON_GetObjectItem(daily, "sunset"), 0) : NULL;
+    cJSON *uv = daily ? cJSON_GetArrayItem(cJSON_GetObjectItem(daily, "uv_index_max"), 0) : NULL;
+    if (!cJSON_IsNumber(temp) || !cJSON_IsNumber(code) || !cJSON_IsNumber(wind)
+        || !cJSON_IsString(sunrise) || !cJSON_IsString(sunset) || !cJSON_IsNumber(uv)) {
         cJSON_Delete(root);
         return ESP_FAIL;
     }
 
-    int rounded = (int)(temp->valuedouble < 0 ? temp->valuedouble - 0.5 : temp->valuedouble + 0.5);
-    snprintf(temp_buf, temp_buf_size, "%dC", rounded);
-    if (weather_code_out) {
-        *weather_code_out = code->valueint;
+    // Sunrise/sunset look like "2026-09-23T06:53" -- keep the "HH:MM" after 'T'.
+    const char *rise_t = strchr(sunrise->valuestring, 'T');
+    const char *set_t = strchr(sunset->valuestring, 'T');
+    if (!rise_t || !set_t) {
+        cJSON_Delete(root);
+        return ESP_FAIL;
     }
+
+    out->temp_c = (int)lround(temp->valuedouble);
+    out->weather_code = code->valueint;
+    out->wind_kmh = (int)lround(wind->valuedouble);
+    out->uv_max = (int)lround(uv->valuedouble);
+    snprintf(out->sunrise, sizeof(out->sunrise), "%.5s", rise_t + 1);
+    snprintf(out->sunset, sizeof(out->sunset), "%.5s", set_t + 1);
 
     cJSON_Delete(root);
     return ESP_OK;

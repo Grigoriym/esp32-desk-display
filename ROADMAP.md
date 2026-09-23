@@ -6,9 +6,13 @@ on the physical display, and note anything the next task needs to know.
 - [x] **1. Automatic summer/winter time** (2026-09-23): POSIX TZ rule
   `CET-1CEST,M3.5.0,M10.5.0/3` in `main/clock.c` replaces the hand-flipped
   `UTC_OFFSET_HOURS`. RTC still stores UTC.
-- [ ] **2. Sunrise/sunset + wind/UV**: same Open-Meteo request, extra fields
-  (`daily=sunrise,sunset,uv_index_max`, `current` wind speed). Where it goes on
-  screen depends on task 3; until then, fits the free rows 6-7.
+- [x] **2. Sunrise/sunset + wind/UV** (2026-09-23): same Open-Meteo request
+  plus `daily=sunrise,sunset,uv_index_max&timezone=Europe/Berlin` (sun times
+  arrive already local, DST included). `weather_fetch()` now fills a
+  `weather_t`; `draw_weather()` in `main/main.c` draws rows 3, 6
+  (`RISE 06:53` / `SET 19:02`) and 7 (`WIND 6KMH` / `UV 4`). UV is today's
+  max, not current. Rows 6-7 are candidates to move to their own screen in
+  task 3.
 - [ ] **3. KY-040 rotary encoder + multiple screens**
   - [ ] Bring-up check in `../esp32-hw-checks` first (rotation direction,
     button press, debounce), pick free GPIOs

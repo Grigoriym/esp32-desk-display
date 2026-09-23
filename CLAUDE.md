@@ -220,8 +220,9 @@ once if empty. Use it instead of ad-hoc pyserial snippets.
    `MAIN_PAGE_*`): page 0 time flush left + date `DD/MM/YYYY` flush right
    (`display_draw_text_columns()`), page 3 icon+outdoor temp, page 5 indoor
    `IN 26C 34H` (BME280, every 10s; font has no `%`/`.`, pressure log-only),
-   pages 6-7 free for more BME-derived data (pressure trend, dew point,
-   comfort, min/max were discussed, not chosen yet). Boot also runs power/bus
+   page 6 sunrise/sunset, page 7 wind + today's max UV (2026-09-23, from the
+   same Open-Meteo request) — screen is now full; more data needs task 3's
+   encoder-driven screens. Boot also runs power/bus
    guardrails (2026-09-23): `PWR OK/NO` status cell (brownout reset reason) and an I2C scan
    against `KNOWN_I2C` — see Power & bus budget. `WEATHER NO` only reflects the first fetch — a transient failure
    there is normal and the 30s retry fills it in. Still open: anything further
