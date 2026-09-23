@@ -66,7 +66,9 @@ that it wasn't raw AliExpress)
 - [x] Perforated/prototyping PCB grid board kit (Miuzei, 78-piece, 21 double-sided
   boards) — not in the original plan, general prototyping stock for soldering up
   the OLED/BME280/RTC wiring once breadboarding is done
-- [ ] 1-2x ESP32-WROVER-B DevKit (onboard antenna, PSRAM) — held in reserve for a
+- [ ] 1-2x ESP32-WROVER-B DevKit (onboard antenna, PSRAM) — note the Freenove kit
+  (see `esp32` lessons repo) already includes an **ESP32-WROVER** board with PSRAM,
+  so one is on hand before ordering — held in reserve for a
   future color-TFT/LVGL project, not this one — not ordered yet
 - MQ-135 (air quality) and RC522 (RFID) were discussed as optional future adds —
   not part of this order
@@ -130,6 +132,17 @@ Rules:
   mid-row bit, only visible once rendered on real hardware). When adding new
   characters/icons, expect to eyeball the result on the physical panel and fix bits
   as needed, not to get it right blind on the first try.
+- `display_draw_text_columns()` (2026-09-23) added a `blit_text()`/`text_width()`
+  helper pair; `display_draw_text()` and `display_draw_icon_and_text()` still
+  carry their own copies of that loop — deliberately not refactored in that
+  change, fold them onto the helper when next touching the file.
+- Boot grid cells are `"%-8s%s"` = 10 chars (59px) per column, which exactly fills
+  128px with the two columns flush left/right. A status name longer than 8 chars
+  or a status longer than 2 breaks the alignment/overlaps — keep names ≤ 8.
+- **Pure logic can be checked on the host before flashing**: copy the function out
+  with `sed` and compile it with `gcc` against glibc (done for `utc_to_epoch()` and
+  the TZ rule's switch dates). The same trick would work for glyph bitmaps
+  (print them as ASCII art) — the "no tooling" gap above is fixable this way.
 - Panel orientation: `0xA0`/`0xC0` (segment remap / COM scan) in the init sequence
   is flipped 180° from the SSD1306 default, to match how the OLED ended up mounted
   once soldered to the perfboard (upside-down relative to native wiring). If a new
@@ -162,6 +175,8 @@ already excludes `*_secrets.h` and `sdkconfig`.
 `. ~/esp/esp-idf/export.sh && idf.py -p /dev/ttyUSB0 build flash` (same for
 `../esp32-hw-checks`). Swapping between the two projects' firmware on one board is
 routine during hardware debugging — remember to flash this project back after.
+After such a swap, esptool may print "Verification failed after fast reflash ...
+Reflashing the whole image" — harmless, it recovers on its own and ends `Done`.
 
 ## Serial monitoring gotcha (this dev harness)
 `idf.py monitor` fails here with "Monitor requires standard input to be attached to
@@ -176,7 +191,10 @@ Prefer asking the user for ground truth (what's on screen) over trusting these
 captures when something looks wrong. 2026-09-23 update: a short capture (toggle RTS
 to reset, read 5-20s, cap the buffer, grep for the log tags you care about) was
 reliable all session. The first read right after the board re-enumerates on USB
-(replug/rewire) sometimes returns nothing at all — just retry once.
+(replug/rewire) **or right after a flash** sometimes returns nothing at all — just
+retry once. This is packaged as **`tools/serial_log.py [seconds] [regex]`** (run
+with the IDF python env above): resets via RTS, caps the buffer, greps, retries
+once if empty. Use it instead of ad-hoc pyserial snippets.
 
 ## Build milestones (rough order)
 1. ✅ I2C bring-up — SSD1306 shows static text (2026-09-19)
@@ -238,6 +256,8 @@ standalone real build, not another numbered lesson. Reuses concepts learned ther
 ## Relationship to `esp32-hw-checks`
 Sibling folder (`../esp32-hw-checks`, not a subfolder), created 2026-09-19. Holds
 standalone bring-up/test firmware for verifying ESP32 boards and modules/sensors in
-isolation (LED blink + I2C scan + OLED fill/text test today; add a check there for
-each new sensor — BME280, DS3231, encoder — as it gets wired up) before that
-hardware is trusted enough to use in this project's real firmware.
+isolation (LED blink + I2C scan + OLED fill/text test + BME280 chip-ID check
+(0x60 BME280 vs 0x58 BMP280, added 2026-09-23); add a check there for each new
+sensor — encoder next — as it gets wired up) before that hardware is trusted
+enough to use in this project's real firmware. **It is not a git repo** — its
+changes exist only on disk, so there's nothing to commit there.
