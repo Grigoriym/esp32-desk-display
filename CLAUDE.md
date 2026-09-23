@@ -158,7 +158,7 @@ reliable all session. The first read right after the board re-enumerates on USB
    normal 15-min cadence on failure instead of leaving a stale reading up for the
    full interval. DS3231 wired in as the boot time source (2026-09-23). Boot
    **status screen** (2026-09-23): HELLO + `OLED/RTC/WIFI/NTP/WEATHER` rows going
-   `--` → `OK`/`NO`, held `SPLASH_HOLD_SECONDS` (7s) after the last step, then the
+   `--` → `OK`/`NO`, held `SPLASH_HOLD_SECONDS` (3s) after the last step, then the
    main screen. `WEATHER NO` only reflects the first fetch — a transient failure
    there is normal and the 30s retry fills it in. Still open: anything further
    under Open questions below.

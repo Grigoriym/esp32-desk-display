@@ -14,7 +14,7 @@ static const char *TAG = "desk_display";
 #define I2C_SCL_GPIO GPIO_NUM_22
 #define I2C_PORT     I2C_NUM_0
 
-#define SPLASH_HOLD_SECONDS 7
+#define SPLASH_HOLD_SECONDS 3
 #define SPLASH_PAGE_OLED    2
 #define SPLASH_PAGE_RTC     3
 #define SPLASH_PAGE_WIFI    4
