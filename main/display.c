@@ -165,6 +165,33 @@ esp_err_t display_draw_text(int page, const char *text)
     return ssd1306_write_page(page, row, OLED_WIDTH);
 }
 
+// Copies text into row starting at col; returns nothing, clips at the edge.
+static void blit_text(uint8_t *row, int col, const char *text)
+{
+    for (const char *p = text; p && *p && col + 5 <= OLED_WIDTH; p++) {
+        const uint8_t *glyph = glyph_for(*p);
+        if (glyph && col >= 0) {
+            memcpy(&row[col], glyph, 5);
+        }
+        col += 6; // 5px glyph + 1px gap
+    }
+}
+
+static int text_width(const char *text)
+{
+    int len = text ? (int)strlen(text) : 0;
+    return len > 0 ? len * 6 - 1 : 0;
+}
+
+esp_err_t display_draw_text_columns(int page, const char *left, const char *right)
+{
+    uint8_t row[OLED_WIDTH];
+    memset(row, 0x00, sizeof(row));
+    blit_text(row, 0, left);
+    blit_text(row, OLED_WIDTH - text_width(right), right);
+    return ssd1306_write_page(page, row, OLED_WIDTH);
+}
+
 esp_err_t display_draw_icon(int page, const uint8_t *icon)
 {
     uint8_t row[OLED_WIDTH];

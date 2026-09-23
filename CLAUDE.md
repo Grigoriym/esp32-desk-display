@@ -39,8 +39,11 @@ that it wasn't raw AliExpress)
   controller confirmed** (SSD1306-compatible) — APKLVSR, pack of 3, blue
 - [x] BME280 (temp/humidity/pressure, I2C) — 5V-labeled board, but schematic shows
   onboard 3.3V LDO + BSS138 level shifters, so **wire its VIN to the ESP32's 3.3V
-  pin** (not 5V) to keep the I2C lines at safe logic level; verify it's a real
-  BME280 not a mislabeled BMP280 once wired up (humidity should actually read)
+  pin** (not 5V) to keep the I2C lines at safe logic level. Board silkscreen says
+  "BME/BMP 280" (generic PCB for either chip); **confirmed real BME280
+  2026-09-23** via chip ID 0x60 (BMP280 would be 0x58) — check lives in
+  `esp32-hw-checks`. Wired in parallel on the bus (VIN→3V3, SDA→21, SCL→22),
+  answers at **0x76**; read by this firmware since 2026-09-23 (`main/bme280.c`)
 - [x] DS3231 RTC module (I2C, coin-cell backed, AT24C32 EEPROM bonus onboard) —
   APKLVSR, pack of 3; power VCC from 3.3V not 5V for the same I2C-safety reason.
   Module has two headers: a 6-pin one (32K, SQW, SCL, SDA, VCC, GND) and a 4-pin
@@ -83,7 +86,7 @@ Everything runs from the DevKit's 3V3 pin (onboard regulator, likely AMS1117 —
 | ESP32 + WiFi | 100-150 mA | ~350 mA | TX bursts; the dominant load |
 | OLED SSD1315 | 10-15 mA | ~25 mA | scales with lit pixels |
 | DS3231 module | 1-2 mA | ~3 mA | mostly the power LED |
-| BME280 (planned) | 1-2 mA | ~3 mA | LDO + LED; sensor itself is µA |
+| BME280 | 1-2 mA | ~3 mA | LDO + LED; sensor itself is µA |
 | KY-040 (planned) | ~0.3 mA | ~1 mA | pull-ups only |
 | **Total** | **~130-170 mA** | **~380 mA** | ~100+ mA headroom left |
 
@@ -108,6 +111,7 @@ Rules:
 | Need | Component |
 |---|---|
 | I2C bus | `esp_driver_i2c` |
+| BME280 | hand-rolled driver (`main/bme280.c`): chip-ID check, factory calibration, Bosch datasheet integer compensation, forced mode x1 oversampling |
 | OLED framebuffer + text rendering | hand-rolled minimal SSD1306 driver (`main/display.c`) — decided against a component-manager package |
 | WiFi station | `esp_wifi`, `esp_netif`, `nvs_flash` |
 | Clock sync | SNTP (`esp_netif_sntp`) |
@@ -188,11 +192,16 @@ reliable all session. The first read right after the board re-enumerates on USB
    board on a slow/flaky network); weather fetch backs off from 30s toward the
    normal 15-min cadence on failure instead of leaving a stale reading up for the
    full interval. DS3231 wired in as the boot time source (2026-09-23). Boot
-   **status screen** (2026-09-23): HELLO + `OLED/RTC/WIFI/NTP/WEATHER` rows going
-   `--` → `OK`/`NO`, held `SPLASH_HOLD_SECONDS` (3s) after the last step, then the
-   main screen. Main screen layout (2026-09-23): time on page 1, date `DD/MM/YYYY`
-   on page 3, icon+temperature on page 5. Boot also runs power/bus guardrails
-   (2026-09-23): `PWR OK/NO` status row (brownout reset reason) and an I2C scan
+   **status screen** (2026-09-23): HELLO + a two-column grid of `NAME OK` cells
+   (`SPLASH_*` in `main/main.c`: OLED|PWR, RTC|BME on pages 2-3; WIFI|NTP,
+   WEATHER on pages 5-6) going `--` → `OK`/`NO`, held `SPLASH_HOLD_SECONDS` (3s)
+   after the last step, then the main screen. Main screen layout (2026-09-23,
+   `MAIN_PAGE_*`): page 0 time flush left + date `DD/MM/YYYY` flush right
+   (`display_draw_text_columns()`), page 3 icon+outdoor temp, page 5 indoor
+   `IN 26C 34H` (BME280, every 10s; font has no `%`/`.`, pressure log-only),
+   pages 6-7 free for more BME-derived data (pressure trend, dew point,
+   comfort, min/max were discussed, not chosen yet). Boot also runs power/bus
+   guardrails (2026-09-23): `PWR OK/NO` status cell (brownout reset reason) and an I2C scan
    against `KNOWN_I2C` — see Power & bus budget. `WEATHER NO` only reflects the first fetch — a transient failure
    there is normal and the 30s retry fills it in. Still open: anything further
    under Open questions below.
@@ -203,10 +212,11 @@ reliable all session. The first read right after the board re-enumerates on USB
   LiPo + TP4056 charge module sized as backup/short-gap runtime (keeps the "always
   on" display concept intact) rather than a full multi-day-portable redesign, but
   not decided or ordered. Revisit once the base build works.
-- Rotary encoder and BME280 aren't wired into the app yet (milestones 1-4 only
-  used the ESP32 + OLED) — fold in as a later milestone. Screen layout is
-  currently a single static screen; revisit if/when local-sensor data needs to
-  join the rotation.
+- Rotary encoder isn't wired into the app yet — fold in as a later milestone.
+  Screen layout is a single static screen; with BME280 data it's near full,
+  so more readings need rotation or encoder-driven screens.
+- BME280 temperature may read high from the ESP32/regulator's own heat
+  (26.5°C seen on first read, not yet cross-checked against a thermometer).
 - **WiFi has no timeout** (seen 2026-09-23, deliberately left alone):
   `wifi_connect()` waits forever, so with no network the status screen sits at
   `WIFI --` indefinitely and the clock never appears, even though the RTC already

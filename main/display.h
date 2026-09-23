@@ -15,6 +15,10 @@ esp_err_t display_clear(void);
 // Draws text centered on the given page (0-7), 8px rows each.
 esp_err_t display_draw_text(int page, const char *text);
 
+// Draws left flush against the left edge and right flush against the right
+// edge of the given page. Either may be NULL/empty.
+esp_err_t display_draw_text_columns(int page, const char *left, const char *right);
+
 // Draws an 8x8 bitmap (column-major, one byte per column) centered on the
 // given page. icon may be NULL to blank the page instead.
 esp_err_t display_draw_icon(int page, const uint8_t *icon);
