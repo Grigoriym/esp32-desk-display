@@ -117,10 +117,13 @@ void app_main(void)
     // On failure, retry sooner than the normal cadence and back off toward
     // it, instead of leaving a stale reading up for a full 15 minutes.
     char time_str[6];
+    char date_str[11];
     int next_weather_interval = (werr == ESP_OK) ? WEATHER_REFRESH_SECONDS : WEATHER_RETRY_START_SECONDS;
     for (;;) {
         clock_format_now(time_str, sizeof(time_str));
-        ESP_ERROR_CHECK(display_draw_text(2, time_str));
+        ESP_ERROR_CHECK(display_draw_text(1, time_str));
+        clock_format_date(date_str, sizeof(date_str));
+        ESP_ERROR_CHECK(display_draw_text(3, date_str));
 
         if (++seconds_since_weather >= next_weather_interval) {
             seconds_since_weather = 0;

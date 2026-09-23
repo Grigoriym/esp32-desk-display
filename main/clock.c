@@ -117,10 +117,20 @@ esp_err_t clock_sync_time(void)
     return ESP_OK;
 }
 
-void clock_format_now(char *buf, size_t buf_size)
+static void format_local(char *buf, size_t buf_size, const char *fmt)
 {
     time_t now = time(NULL) + (time_t)(UTC_OFFSET_HOURS * 3600);
     struct tm timeinfo;
     gmtime_r(&now, &timeinfo);
-    strftime(buf, buf_size, "%H:%M", &timeinfo);
+    strftime(buf, buf_size, fmt, &timeinfo);
+}
+
+void clock_format_now(char *buf, size_t buf_size)
+{
+    format_local(buf, buf_size, "%H:%M");
+}
+
+void clock_format_date(char *buf, size_t buf_size)
+{
+    format_local(buf, buf_size, "%d/%m/%Y");
 }

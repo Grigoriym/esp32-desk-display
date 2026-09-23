@@ -4,7 +4,7 @@
 #include "driver/i2c_master.h"
 
 // SSD1315/SSD1306 128x64 OLED, page-addressing mode.
-// Font covers A-Z, 0-9, ':' and '-'; anything else renders as blank.
+// Font covers A-Z, 0-9, ':', '-' and '/'; anything else renders as blank.
 
 // Probes the bus for the display at 0x3C/0x3D, runs the init sequence.
 esp_err_t display_init(i2c_master_bus_handle_t bus);

@@ -15,3 +15,6 @@ esp_err_t clock_sync_time(void);
 
 // Formats the current local time as "HH:MM" into buf (needs at least 6 bytes).
 void clock_format_now(char *buf, size_t buf_size);
+
+// Formats the current local date as "DD/MM/YYYY" into buf (needs at least 11 bytes).
+void clock_format_date(char *buf, size_t buf_size);

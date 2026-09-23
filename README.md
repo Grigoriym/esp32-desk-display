@@ -10,7 +10,7 @@ graphics library.
 
 ## Features
 
-- **Clock**: `HH:MM`. The RTC sets it at boot, NTP corrects it, and the RTC is
+- **Clock**: `HH:MM` plus the date as `DD/MM/YYYY`. The RTC sets it at boot, NTP corrects it, and the RTC is
   updated after every sync.
 - **Weather**: current temperature plus an 8x8 icon (sun, cloud, rain, snow or
   storm), refreshed every 15 minutes. A failed fetch is retried after 30s, then

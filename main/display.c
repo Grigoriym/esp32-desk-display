@@ -69,6 +69,7 @@ static const uint8_t glyph_8[5] = {0x36, 0x49, 0x49, 0x49, 0x36};
 static const uint8_t glyph_9[5] = {0x06, 0x49, 0x49, 0x29, 0x1E};
 static const uint8_t glyph_colon[5] = {0x00, 0x00, 0x14, 0x00, 0x00};
 static const uint8_t glyph_minus[5] = {0x08, 0x08, 0x08, 0x08, 0x08};
+static const uint8_t glyph_slash[5] = {0x20, 0x10, 0x08, 0x04, 0x02}; // glcdfont '/'
 
 static const uint8_t *glyph_for(char c)
 {
@@ -86,6 +87,7 @@ static const uint8_t *glyph_for(char c)
         case '9': return glyph_9;
         case ':': return glyph_colon;
         case '-': return glyph_minus;
+        case '/': return glyph_slash;
         default:  return NULL; // incl. space: left blank
     }
 }

@@ -88,7 +88,8 @@ section above). Milestones 1-4 built on this hardware.
 - Letters A-Z (added 2026-09-23 for the boot status screen) are the classic
   Adafruit GFX glcdfont 5x7 bitmaps, not hand-derived — all rendered correctly
   first time. `C` deliberately kept as the original open-sided variant. Anything
-  outside A-Z/0-9/`:`/`-` (incl. space) renders blank.
+  outside A-Z/0-9/`:`/`-`/`/` (incl. space) renders blank. `/` is also
+  glcdfont (added 2026-09-23 for the date).
 - Digits and weather icons are **hand-derived bitmaps**, one glyph at a time, with no
   rendering preview before flashing — there's no tooling to check the bit math ahead
   of time. Found one real transcription bug this way (digit '9' had a missing
@@ -159,7 +160,8 @@ reliable all session. The first read right after the board re-enumerates on USB
    full interval. DS3231 wired in as the boot time source (2026-09-23). Boot
    **status screen** (2026-09-23): HELLO + `OLED/RTC/WIFI/NTP/WEATHER` rows going
    `--` → `OK`/`NO`, held `SPLASH_HOLD_SECONDS` (3s) after the last step, then the
-   main screen. `WEATHER NO` only reflects the first fetch — a transient failure
+   main screen. Main screen layout (2026-09-23): time on page 1, date `DD/MM/YYYY`
+   on page 3, icon+temperature on page 5. `WEATHER NO` only reflects the first fetch — a transient failure
    there is normal and the 30s retry fills it in. Still open: anything further
    under Open questions below.
 
