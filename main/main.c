@@ -65,7 +65,7 @@ void app_main(void)
     ESP_ERROR_CHECK(display_init(bus));
     ESP_ERROR_CHECK(display_clear());
 
-    ESP_LOGI(TAG, "milestone 1 done: OLED init OK");
+    ESP_LOGI(TAG, "OLED init OK");
 
     // Boot status screen: lights the panel right away and shows each
     // subsystem coming up, instead of a blank screen for ~6-8s.
@@ -85,11 +85,11 @@ void app_main(void)
 
     // Blocks until connected; the WIFI row stays at "--" meanwhile.
     ESP_ERROR_CHECK(wifi_connect());
-    ESP_LOGI(TAG, "milestone 2 done: WiFi station connected");
+    ESP_LOGI(TAG, "WiFi connected");
     splash_status(SPLASH_PAGE_WIFI, "WIFI", "OK");
 
     if (ntp_sync_with_retry() == ESP_OK) {
-        ESP_LOGI(TAG, "milestone 3: NTP synced, rendering clock");
+        ESP_LOGI(TAG, "NTP synced");
         splash_status(SPLASH_PAGE_NTP, "NTP", "OK");
     } else {
         ESP_LOGE(TAG, "NTP sync failed after retries, continuing with unsynced clock");
@@ -100,7 +100,7 @@ void app_main(void)
     int weather_code = 3; // default to "cloud" icon until first fetch succeeds
     esp_err_t werr = weather_fetch(weather_str, sizeof(weather_str), &weather_code);
     if (werr == ESP_OK) {
-        ESP_LOGI(TAG, "milestone 4 done: weather fetched (%s)", weather_str);
+        ESP_LOGI(TAG, "weather fetched (%s)", weather_str);
     } else {
         ESP_LOGW(TAG, "weather fetch failed: %s", esp_err_to_name(werr));
     }

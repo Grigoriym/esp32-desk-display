@@ -33,7 +33,7 @@ tutorial exercise, meant to actually sit on the desk.
   the bus, trust the I2C scan (or power-cycle the board, not just reset it).
 
 ## Shopping list — ordered 2026-09-17 (sourced away from AliExpress, brand-name
-sellers, due to the EU duty tax note below; exact per-item source not logged, just
+sellers, to avoid EU import duty on AliExpress orders; exact per-item source not logged, just
 that it wasn't raw AliExpress)
 - [x] 0.96" 128x64 I2C OLED breakout, 4-pin (VCC/GND/SCL/SDA), **SSD1315
   controller confirmed** (SSD1306-compatible) — APKLVSR, pack of 3, blue
