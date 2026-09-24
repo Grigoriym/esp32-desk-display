@@ -27,9 +27,9 @@ on the physical display, and note anything the next task needs to know.
     on page 0 of all of them. Turn = next/previous (wraps), press = HOME.
     New screens (BVG, task 4): add a `screen_t` value and a `case`.
     Not done: auto-return to HOME after idle, a screen-position indicator.
-- [ ] **4. BVG departures screen** — *built 2026-09-24, not yet seen with
-  real data* (the API was down, 503/timeouts on both v6.bvg and v6.vbb
-  .transport.rest, while testing). U Cottbusser Platz, U5 towards Hbf; stop
+- [x] **4. BVG departures screen** (2026-09-24; verified on the panel with
+  real data during one of the wrapper's rare successful fetches: only U5
+  towards Hbf, minutes match the times, nothing under 6 min). U Cottbusser Platz, U5 towards Hbf; stop
   and direction IDs in gitignored `main/bvg_secrets.h` (template:
   `bvg_secrets.h.example`). `main/bvg.c` fetches in a background task, only
   while the screen is showing, every 60s; the API's `direction=<next stop
@@ -38,7 +38,8 @@ on the physical display, and note anything the next task needs to know.
   `U5 HAUPTBAHNHOF`, `LEAVE IN N`/`GO NOW` (10 min comfortable walk), then
   up to 3 trains >= 6 min away as `HH:MM   N MIN`. Verified: no crash, and a
   down API no longer freezes clock/encoder.
-  **Blocked on the data source (2026-09-24)**: the community wrapper
+- [ ] **4b. Switch BVG to the official VBB API** — *blocked on the key*.
+  Why: the community wrapper
   `v6.bvg.transport.rest` returns 503 on every data request and has done so
   mostly since July ([bvg-rest#30](https://github.com/derhuerst/bvg-rest/issues/30),
   no maintainer reply), while BVG's own backend (`bvg.hafas.cloud`, what the
