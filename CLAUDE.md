@@ -64,7 +64,8 @@ that it wasn't raw AliExpress)
   the scan it answers at **0x68** (clock), **0x57** (AT24C32 EEPROM) and **0x5F**
   (extra address some of these modules expose — normal, not a fault).
 - [x] Rotary encoder (KY-040) — GIAK, pack of 5; candidate UI input for cycling
-  screens/adjusting brightness, not yet wired into any milestone
+  screens/adjusting brightness; one is wired (D25/D26/D27) and drives the
+  screen switching since 2026-09-24
 - [x] ESP32-WROOM-family DevKit boards, onboard PCB antenna, USB-C, CP2102 — ELEGOO
   "ESP-32S", pack of 3, 30-pin, 4MB flash; bulk restock, same chip family as the
   current lesson board (exact WROOM-32D marking unconfirmed but functionally
@@ -120,6 +121,7 @@ Rules:
 |---|---|
 | I2C bus | `esp_driver_i2c` |
 | BME280 | hand-rolled driver (`main/bme280.c`): chip-ID check, factory calibration, Bosch datasheet integer compensation, forced mode x1 oversampling |
+| KY-040 encoder | hand-rolled `main/encoder.c`: rotation decoded in a GPIO any-edge ISR (4 steps/detent), button polled + debounced in its own task, both pushed to a FreeRTOS queue read by the main loop |
 | OLED framebuffer + text rendering | hand-rolled minimal SSD1306 driver (`main/display.c`) — decided against a component-manager package |
 | WiFi station | `esp_wifi`, `esp_netif`, `nvs_flash` |
 | Clock sync | SNTP (`esp_netif_sntp`) |
@@ -204,7 +206,10 @@ reliable all session. The first read right after the board re-enumerates on USB
 (replug/rewire) **or right after a flash** sometimes returns nothing at all — just
 retry once. This is packaged as **`tools/serial_log.py [seconds] [regex]`** (run
 with the IDF python env above): resets via RTS, caps the buffer, greps, retries
-once if empty. Use it instead of ad-hoc pyserial snippets.
+once if empty. Use it instead of ad-hoc pyserial snippets. For tests that need
+the user to act (turn the knob, press a button), list the steps in the reply
+*before* starting a ~40s capture, then grep for the relevant tags; this worked
+first time for both encoder tests on 2026-09-24.
 
 ## Build milestones (rough order)
 1. ✅ I2C bring-up — SSD1306 shows static text (2026-09-19)
