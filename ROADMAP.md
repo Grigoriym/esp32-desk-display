@@ -37,8 +37,19 @@ on the physical display, and note anything the next task needs to know.
   catches short-turning trains. Screen 4 (one click CCW from HOME): title
   `U5 HAUPTBAHNHOF`, `LEAVE IN N`/`GO NOW` (10 min comfortable walk), then
   up to 3 trains >= 6 min away as `HH:MM   N MIN`. Verified: no crash, and a
-  down API no longer freezes clock/encoder. **To finish**: once the API
-  answers, check the departures on the panel, then tick this off.
+  down API no longer freezes clock/encoder.
+  **Blocked on the data source (2026-09-24)**: the community wrapper
+  `v6.bvg.transport.rest` returns 503 on every data request and has done so
+  mostly since July ([bvg-rest#30](https://github.com/derhuerst/bvg-rest/issues/30),
+  no maintainer reply), while BVG's own backend (`bvg.hafas.cloud`, what the
+  wrapper relays) answered fine when queried directly, so the wrapper is
+  what's broken. Decision: switch to the **official VBB API**. Access
+  requested by email to api@vbb.de on 2026-09-24 (test system first, then
+  production after accepting their terms). When the key arrives: key into
+  `bvg_secrets.h`, new parser in `bvg.c` (different response format;
+  screen and background task stay). Talking to `bvg.hafas.cloud` directly
+  was considered and not chosen: unofficial web-app backend with a token
+  copied from BVG's web app.
 - [ ] **5. Later, from the Freenove kit**
   - [ ] PIR motion sensor: screen on only when someone is at the desk (OLED
     burn-in protection). Powered from VIN (5V), output is 3.3V-safe.
