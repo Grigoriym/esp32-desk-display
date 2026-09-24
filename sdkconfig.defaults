@@ -1,0 +1,5 @@
+# sdkconfig itself is gitignored; settings here apply when it's regenerated.
+
+# TLS handshake + cJSON parse run in the main task (weather, BVG departures);
+# the 3584 default overflowed on the first BVG fetch (2026-09-24).
+CONFIG_ESP_MAIN_TASK_STACK_SIZE=8192

@@ -12,6 +12,9 @@
 #include "weather.h"
 #include "bme280.h"
 #include "encoder.h"
+#include "bvg.h"
+#include "bvg_secrets.h"
+#include <time.h>
 
 static const char *TAG = "desk_display";
 
@@ -34,7 +37,7 @@ static const char *TAG = "desk_display";
 // Main screens, cycled with the encoder (press = back to home). The clock
 // row sits on page 0 of every screen; draw_screen() owns pages 1-7.
 #define PAGE_CLOCK 0 // time left, date right
-typedef enum { SCREEN_HOME, SCREEN_OUTDOOR, SCREEN_INDOOR, SCREEN_COUNT } screen_t;
+typedef enum { SCREEN_HOME, SCREEN_OUTDOOR, SCREEN_INDOOR, SCREEN_BVG, SCREEN_COUNT } screen_t;
 
 // Latest data the screens draw from.
 static struct {
@@ -43,7 +46,23 @@ static struct {
     weather_t weather;
     bool indoor_ok;  // false until the first BME280 read succeeds
     bme280_reading_t indoor;
+    bool bvg_ok;     // false until the first departures fetch succeeds
+    bool bvg_failed; // last fetch failed (shown only while there's no data)
+    bvg_departures_t bvg;
 } s_ui;
+
+// Minutes from now until a departure at hh:mm local, negative once it's gone.
+// Departures are at most an hour ahead, so wrapping over midnight is safe.
+static int minutes_until(int hour, int minute)
+{
+    time_t now = time(NULL);
+    struct tm t;
+    localtime_r(&now, &t);
+    int diff = (hour * 60 + minute) - (t.tm_hour * 60 + t.tm_min);
+    if (diff > 12 * 60) diff -= 24 * 60;
+    if (diff < -12 * 60) diff += 24 * 60;
+    return diff;
+}
 
 // Everything that's allowed to answer on the I2C bus. Anything else showing
 // up means an address clash or an unplanned module -- see "Power & bus
@@ -82,7 +101,7 @@ static void draw_clock_row(void)
 static void draw_screen(void)
 {
     // Font has no '%' or '.': humidity is "45H", pressure whole hPa.
-    char rows[8][2][16] = {0};
+    char rows[8][2][28] = {0}; // >21 chars (a full row) just clips at the edge
     const weather_t *w = &s_ui.weather;
     const bme280_reading_t *in = &s_ui.indoor;
 
@@ -116,6 +135,36 @@ static void draw_screen(void)
             strcpy(rows[4][0], "--");
         }
         break;
+    case SCREEN_BVG: {
+        if (!s_ui.bvg_ok) {
+            strcpy(rows[2][0], "BVG");
+            strcpy(rows[4][0], s_ui.bvg_failed ? "NO DATA" : "LOADING");
+            break;
+        }
+        // Title from the data, e.g. "U5 HAUPTBAHNHOF"; then the next trains
+        // that can still be caught on foot, with a leave-by hint for the first.
+        if (s_ui.bvg.count > 0) {
+            snprintf(rows[2][0], sizeof(rows[2][0]), "%s %s", s_ui.bvg.dep[0].line, s_ui.bvg.dep[0].direction);
+        } else {
+            strcpy(rows[2][0], "BVG");
+        }
+        int row = 5;
+        for (int i = 0; i < s_ui.bvg.count && row <= 7; i++) {
+            const bvg_departure_t *d = &s_ui.bvg.dep[i];
+            int mins = minutes_until(d->hour, d->minute);
+            if (mins < BVG_WALK_MIN_MINUTES) continue;
+            if (row == 5) {
+                int leave_in = mins - BVG_WALK_COMFORT_MINUTES;
+                if (leave_in > 0) snprintf(rows[3][0], sizeof(rows[3][0]), "LEAVE IN %d", leave_in);
+                else strcpy(rows[3][0], "GO NOW");
+            }
+            snprintf(rows[row][0], sizeof(rows[row][0]), "%02d:%02d", d->hour, d->minute);
+            snprintf(rows[row][1], sizeof(rows[row][1]), "%d MIN", mins);
+            row++;
+        }
+        if (row == 5) strcpy(rows[4][0], "NO TRAINS");
+        break;
+    }
     default:
         break;
     }
@@ -257,6 +306,11 @@ void app_main(void)
 
     // Leave the final status up long enough to actually read it.
     vTaskDelay(pdMS_TO_TICKS(SPLASH_HOLD_SECONDS * 1000));
+    esp_err_t bverr = bvg_start();
+    if (bverr != ESP_OK) {
+        ESP_LOGW(TAG, "BVG not used: %s", esp_err_to_name(bverr));
+    }
+
     esp_err_t eerr = encoder_init();
     if (eerr != ESP_OK) {
         ESP_LOGW(TAG, "encoder not used: %s", esp_err_to_name(eerr));
@@ -274,10 +328,25 @@ void app_main(void)
     // On failure, retry sooner than the normal cadence and back off toward
     // it, instead of leaving a stale reading up for a full 15 minutes.
     int next_weather_interval = (werr == ESP_OK) ? WEATHER_REFRESH_SECONDS : WEATHER_RETRY_START_SECONDS;
+    int last_minute = -1;
     TickType_t next_second = xTaskGetTickCount();
     for (;;) {
         draw_clock_row();
         bool data_changed = false;
+
+        // Minute-based text (BVG countdown) goes stale on the minute.
+        time_t now = time(NULL);
+        struct tm now_tm;
+        localtime_r(&now, &now_tm);
+        if (now_tm.tm_min != last_minute) {
+            last_minute = now_tm.tm_min;
+            data_changed = true;
+        }
+
+        // Departures are fetched in the background, only while their screen
+        // is up; set from the 1s tick so spinning past it doesn't fetch.
+        bvg_set_active(s_ui.screen == SCREEN_BVG);
+        if (bvg_take_update(&s_ui.bvg, &s_ui.bvg_ok, &s_ui.bvg_failed)) data_changed = true;
 
         if (berr == ESP_OK && ++seconds_since_indoor >= INDOOR_REFRESH_SECONDS) {
             seconds_since_indoor = 0;

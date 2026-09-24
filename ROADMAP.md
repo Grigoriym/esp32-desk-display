@@ -27,9 +27,18 @@ on the physical display, and note anything the next task needs to know.
     on page 0 of all of them. Turn = next/previous (wraps), press = HOME.
     New screens (BVG, task 4): add a `screen_t` value and a `case`.
     Not done: auto-return to HOME after idle, a screen-position indicator.
-- [ ] **4. BVG departures screen**: next departures for one stop via the BVG
-  public API (`v6.bvg.transport.rest`, no key). Needs from the user: the stop,
-  and which lines/directions matter.
+- [ ] **4. BVG departures screen** — *built 2026-09-24, not yet seen with
+  real data* (the API was down, 503/timeouts on both v6.bvg and v6.vbb
+  .transport.rest, while testing). U Cottbusser Platz, U5 towards Hbf; stop
+  and direction IDs in gitignored `main/bvg_secrets.h` (template:
+  `bvg_secrets.h.example`). `main/bvg.c` fetches in a background task, only
+  while the screen is showing, every 60s; the API's `direction=<next stop
+  id>` filter picks the direction (U Kienberg = towards Hbf), which also
+  catches short-turning trains. Screen 4 (one click CCW from HOME): title
+  `U5 HAUPTBAHNHOF`, `LEAVE IN N`/`GO NOW` (10 min comfortable walk), then
+  up to 3 trains >= 6 min away as `HH:MM   N MIN`. Verified: no crash, and a
+  down API no longer freezes clock/encoder. **To finish**: once the API
+  answers, check the departures on the panel, then tick this off.
 - [ ] **5. Later, from the Freenove kit**
   - [ ] PIR motion sensor: screen on only when someone is at the desk (OLED
     burn-in protection). Powered from VIN (5V), output is 3.3V-safe.
