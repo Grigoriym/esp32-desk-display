@@ -156,6 +156,9 @@ Rules:
   HTTPS fetch + cJSON parse needs ~8 KB. Crash captures: include
   `overflow|Guru|Backtrace|rst:` in the `serial_log.py` regex, or the panic
   gets filtered out.
+- `snprintf` into a buffer that can't hold the worst case fails the build
+  (`-Werror=format-truncation`): size buffers for the longest possible
+  value, not the typical one.
 - **`CONFIG_FREERTOS_HZ=100`** here and in `esp32-hw-checks`: one tick is
   10 ms, so `pdMS_TO_TICKS(<10)` is 0 and `vTaskDelay(0)` busy-loops. That's
   why the KY-040 check decodes the quadrature in a GPIO any-edge ISR (10 ms
@@ -183,6 +186,16 @@ Rules:
   `mktime()` means *local* time: RTC→epoch conversion uses the TZ-independent
   `utc_to_epoch()` helper instead (verified against glibc `timegm` for
   2000-2100, and the 2026-10-25 / 2027-03-28 switch moments, on the host).
+- **BVG departures**: stop/direction IDs in gitignored `main/bvg_secrets.h`.
+  Direction is filtered with the API's `direction=<next stop id>` (not the
+  destination name, which misses short-turning trains; the maintainer's
+  caveat about trusting it is bvg-rest#29). Source is the community wrapper
+  for now, switching to the official VBB API once the key arrives (ROADMAP
+  4b). **To tell a wrapper outage from a BVG one**, query BVG's backend
+  directly: endpoint + auth in hafas-client's `p/bvg/base.js`
+  (`bvg.hafas.cloud/apps/gate`, `StationBoard` request); on 2026-09-24 it
+  answered in 0.1s while the wrapper 503'd. The wrapper's homepage
+  answering 200 proves nothing: only data requests hit the upstream.
 - **Weather refresh cadence**: every 15 minutes (`WEATHER_REFRESH_SECONDS` in
   `main/main.c`), decided 2026-09-19 — gentle on the API, fresh enough for a desk
   display.

@@ -50,7 +50,12 @@ on the physical display, and note anything the next task needs to know.
   `bvg_secrets.h`, new parser in `bvg.c` (different response format;
   screen and background task stay). Talking to `bvg.hafas.cloud` directly
   was considered and not chosen: unofficial web-app backend with a token
-  copied from BVG's web app.
+  copied from BVG's web app. Self-hosting the wrapper (Docker image
+  `derhuerst/bvg-rest:6`, last updated Oct 2025, untested) was also
+  considered as a bridge and not chosen: same unofficial backend, and the
+  ESP32 can't join Tailscale, so it would need a host on the display's
+  own LAN or a public HTTPS one. It would need only a URL change in
+  `bvg.c` (same response format) if revisited.
 - [ ] **5. Later, from the Freenove kit**
   - [ ] PIR motion sensor: screen on only when someone is at the desk (OLED
     burn-in protection). Powered from VIN (5V), output is 3.3V-safe.
