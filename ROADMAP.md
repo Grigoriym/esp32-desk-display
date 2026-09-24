@@ -35,7 +35,7 @@ on the physical display, and note anything the next task needs to know.
   while the screen is showing, every 60s; the API's `direction=<next stop
   id>` filter picks the direction (U Kienberg = towards Hbf), which also
   catches short-turning trains. Screen 4 (one click CCW from HOME): title
-  `U5 HAUPTBAHNHOF`, `LEAVE IN N`/`GO NOW` (10 min comfortable walk), then
+  `U5 HAUPTBAHNHOF`, `LEAVE IN N` (12+ min left), `GO NOW` (11), `HURRY` (6-10), then
   up to 3 trains >= 6 min away as `HH:MM   N MIN`. Verified: no crash, and a
   down API no longer freezes clock/encoder.
 - [ ] **4b. Switch BVG to the official VBB API** — *blocked on the key*.

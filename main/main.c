@@ -154,9 +154,12 @@ static void draw_screen(void)
             int mins = minutes_until(d->hour, d->minute);
             if (mins < BVG_WALK_MIN_MINUTES) continue;
             if (row == 5) {
+                // Before the comfortable-walk point: countdown; at it: go;
+                // after it (but still catchable): hurry.
                 int leave_in = mins - BVG_WALK_COMFORT_MINUTES;
                 if (leave_in > 0) snprintf(rows[3][0], sizeof(rows[3][0]), "LEAVE IN %d", leave_in);
-                else strcpy(rows[3][0], "GO NOW");
+                else if (leave_in == 0) strcpy(rows[3][0], "GO NOW");
+                else strcpy(rows[3][0], "HURRY");
             }
             snprintf(rows[row][0], sizeof(rows[row][0]), "%02d:%02d", d->hour, d->minute);
             snprintf(rows[row][1], sizeof(rows[row][1]), "%d MIN", mins);
