@@ -226,13 +226,16 @@ once if empty. Use it instead of ad-hoc pyserial snippets.
    **status screen** (2026-09-23): HELLO + a two-column grid of `NAME OK` cells
    (`SPLASH_*` in `main/main.c`: OLED|PWR, RTC|BME on pages 2-3; WIFI|NTP,
    WEATHER on pages 5-6) going `--` → `OK`/`NO`, held `SPLASH_HOLD_SECONDS` (3s)
-   after the last step, then the main screen. Main screen layout (2026-09-23,
-   `MAIN_PAGE_*`): page 0 time flush left + date `DD/MM/YYYY` flush right
-   (`display_draw_text_columns()`), page 3 icon+outdoor temp, page 5 indoor
-   `IN 26C 34H` (BME280, every 10s; font has no `%`/`.`, pressure log-only),
-   page 6 sunrise/sunset, page 7 wind + today's max UV (2026-09-23, from the
-   same Open-Meteo request) — screen is now full; more data needs task 3's
-   encoder-driven screens. Boot also runs power/bus
+   after the last step, then the main screens. Since 2026-09-24 there are
+   three, switched with the KY-040 (turn = next/prev, wraps; press = HOME):
+   page 0 of every screen is time flush left + date `DD/MM/YYYY` flush right;
+   HOME has icon+outdoor temp (p3) and `IN 25C 43H` (p5), OUTDOOR has
+   sunrise/sunset and wind/today's max UV, INDOOR has temp/humidity and whole
+   hPa pressure (font has no `%`/`.`). `draw_screen()` rewrites pages 1-7 in
+   full on every change (blank pages via `display_draw_text(page, "")`), so
+   switching needs no `display_clear()` and doesn't flicker. The main loop
+   waits on the encoder event queue until the next 1s tick, so turns react
+   immediately; a quick spin's queued clicks are applied, then drawn once. Boot also runs power/bus
    guardrails (2026-09-23): `PWR OK/NO` status cell (brownout reset reason) and an I2C scan
    against `KNOWN_I2C` — see Power & bus budget. `WEATHER NO` only reflects the first fetch — a transient failure
    there is normal and the 30s retry fills it in. Still open: anything further
@@ -248,10 +251,6 @@ at the start of a session and tick items off there when done.
   LiPo + TP4056 charge module sized as backup/short-gap runtime (keeps the "always
   on" display concept intact) rather than a full multi-day-portable redesign, but
   not decided or ordered. Revisit once the base build works.
-- Rotary encoder is wired and passed bring-up (2026-09-24) but isn't used by
-  this firmware yet (ROADMAP task 3, screen rotation).
-  Screen layout is a single static screen; with BME280 data it's near full,
-  so more readings need rotation or encoder-driven screens.
 - BME280 temperature may read high from the ESP32/regulator's own heat
   (26.5°C seen on first read, not yet cross-checked against a thermometer).
 - **WiFi has no timeout** (seen 2026-09-23, deliberately left alone):

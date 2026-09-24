@@ -13,15 +13,20 @@ on the physical display, and note anything the next task needs to know.
   (`RISE 06:53` / `SET 19:02`) and 7 (`WIND 6KMH` / `UV 4`). UV is today's
   max, not current. Rows 6-7 are candidates to move to their own screen in
   task 3.
-- [ ] **3. KY-040 rotary encoder + multiple screens**
+- [x] **3. KY-040 rotary encoder + multiple screens** (2026-09-24)
   - [x] Bring-up check in `../esp32-hw-checks` (2026-09-24): CLK D25, DT
     D26, SW D27 (see `docs/WIRING.md`), connected through a socket on the
     perfboard. ISR quadrature decode: **4 steps per detent** confirmed (full-step
     part), direction correct, no missed or reversed clicks on a fast spin
     (~30-40 ms per detent), button clean with 30 ms debounce, no double
     presses. The decode + debounce code there can be lifted into this firmware.
-  - [ ] Screen rotation in this firmware: encoder turns between screens
-    (e.g. clock/weather, sun/wind/UV, indoor, BVG)
+  - [x] Screen rotation (2026-09-24): `main/encoder.c` (ISR rotation + polled
+    button -> event queue). Screens in `main/main.c` (`screen_t`,
+    `draw_screen()`): HOME (icon+outdoor temp, `IN 25C 43H`), OUTDOOR
+    (sunrise/sunset, wind/UV), INDOOR (temp, humidity, pressure). Clock row
+    on page 0 of all of them. Turn = next/previous (wraps), press = HOME.
+    New screens (BVG, task 4): add a `screen_t` value and a `case`.
+    Not done: auto-return to HOME after idle, a screen-position indicator.
 - [ ] **4. BVG departures screen**: next departures for one stop via the BVG
   public API (`v6.bvg.transport.rest`, no key). Needs from the user: the stop,
   and which lines/directions matter.

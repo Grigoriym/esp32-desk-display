@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include <math.h>
 #include "esp_log.h"
 #include "esp_system.h"
@@ -10,6 +11,7 @@
 #include "clock.h"
 #include "weather.h"
 #include "bme280.h"
+#include "encoder.h"
 
 static const char *TAG = "desk_display";
 
@@ -29,12 +31,19 @@ static const char *TAG = "desk_display";
 #define SPLASH_NTP     5, 1
 #define SPLASH_WEATHER 6, 0
 
-// Main screen pages.
-#define MAIN_PAGE_CLOCK   0 // time left, date right
-#define MAIN_PAGE_WEATHER 3
-#define MAIN_PAGE_INDOOR  5
-#define MAIN_PAGE_SUN     6 // sunrise left, sunset right
-#define MAIN_PAGE_WIND_UV 7 // wind left, today's max UV right
+// Main screens, cycled with the encoder (press = back to home). The clock
+// row sits on page 0 of every screen; draw_screen() owns pages 1-7.
+#define PAGE_CLOCK 0 // time left, date right
+typedef enum { SCREEN_HOME, SCREEN_OUTDOOR, SCREEN_INDOOR, SCREEN_COUNT } screen_t;
+
+// Latest data the screens draw from.
+static struct {
+    screen_t screen;
+    bool weather_ok; // false until the first fetch succeeds
+    weather_t weather;
+    bool indoor_ok;  // false until the first BME280 read succeeds
+    bme280_reading_t indoor;
+} s_ui;
 
 // Everything that's allowed to answer on the I2C bus. Anything else showing
 // up means an address clash or an unplanned module -- see "Power & bus
@@ -58,25 +67,70 @@ static void splash_status(int page, int col, const char *name, const char *statu
     ESP_ERROR_CHECK(display_draw_text_columns(page, cells[page][0], cells[page][1]));
 }
 
-// Draws the outdoor rows of the main screen. w == NULL (no fetch succeeded
-// yet) shows "--C" with the cloud icon and leaves the sun/wind rows blank.
-static void draw_weather(const weather_t *w)
+static void draw_clock_row(void)
 {
-    if (!w) {
-        display_draw_icon_and_text(MAIN_PAGE_WEATHER, weather_icon_for_code(3), "--C");
-        return;
+    char time_str[6];
+    char date_str[11];
+    clock_format_now(time_str, sizeof(time_str));
+    clock_format_date(date_str, sizeof(date_str));
+    display_draw_text_columns(PAGE_CLOCK, time_str, date_str);
+}
+
+// Redraws pages 1-7 for the current screen. Every page is written in full
+// (unused ones blank), so switching screens needs no display_clear() and
+// doesn't flicker. Missing data shows as "--".
+static void draw_screen(void)
+{
+    // Font has no '%' or '.': humidity is "45H", pressure whole hPa.
+    char rows[8][2][16] = {0};
+    const weather_t *w = &s_ui.weather;
+    const bme280_reading_t *in = &s_ui.indoor;
+
+    switch (s_ui.screen) {
+    case SCREEN_HOME:
+        if (s_ui.weather_ok) snprintf(rows[3][0], sizeof(rows[3][0]), "%dC", w->temp_c);
+        else strcpy(rows[3][0], "--C");
+        if (s_ui.indoor_ok) {
+            snprintf(rows[5][0], sizeof(rows[5][0]), "IN %dC %dH",
+                     (int)lroundf(in->temp_c), (int)lroundf(in->humidity_pct));
+        }
+        break;
+    case SCREEN_OUTDOOR:
+        strcpy(rows[2][0], "OUTDOOR");
+        if (s_ui.weather_ok) {
+            snprintf(rows[4][0], sizeof(rows[4][0]), "RISE %s", w->sunrise);
+            snprintf(rows[4][1], sizeof(rows[4][1]), "SET %s", w->sunset);
+            snprintf(rows[6][0], sizeof(rows[6][0]), "WIND %dKMH", w->wind_kmh);
+            snprintf(rows[6][1], sizeof(rows[6][1]), "UV %d", w->uv_max);
+        } else {
+            strcpy(rows[4][0], "--");
+        }
+        break;
+    case SCREEN_INDOOR:
+        strcpy(rows[2][0], "INDOOR");
+        if (s_ui.indoor_ok) {
+            snprintf(rows[4][0], sizeof(rows[4][0]), "TEMP %dC", (int)lroundf(in->temp_c));
+            snprintf(rows[4][1], sizeof(rows[4][1]), "HUM %dH", (int)lroundf(in->humidity_pct));
+            snprintf(rows[6][0], sizeof(rows[6][0]), "%d HPA", (int)lroundf(in->pressure_hpa));
+        } else {
+            strcpy(rows[4][0], "--");
+        }
+        break;
+    default:
+        break;
     }
-    char buf[2][12];
-    snprintf(buf[0], sizeof(buf[0]), "%dC", w->temp_c);
-    display_draw_icon_and_text(MAIN_PAGE_WEATHER, weather_icon_for_code(w->weather_code), buf[0]);
 
-    snprintf(buf[0], sizeof(buf[0]), "RISE %s", w->sunrise);
-    snprintf(buf[1], sizeof(buf[1]), "SET %s", w->sunset);
-    display_draw_text_columns(MAIN_PAGE_SUN, buf[0], buf[1]);
-
-    snprintf(buf[0], sizeof(buf[0]), "WIND %dKMH", w->wind_kmh);
-    snprintf(buf[1], sizeof(buf[1]), "UV %d", w->uv_max);
-    display_draw_text_columns(MAIN_PAGE_WIND_UV, buf[0], buf[1]);
+    for (int page = 1; page < 8; page++) {
+        if (s_ui.screen == SCREEN_HOME && page == 3) {
+            // Icon + outdoor temperature, centred together.
+            display_draw_icon_and_text(page, weather_icon_for_code(s_ui.weather_ok ? w->weather_code : 3),
+                                       rows[page][0]);
+        } else if (rows[page][1][0]) {
+            display_draw_text_columns(page, rows[page][0], rows[page][1]);
+        } else {
+            display_draw_text(page, rows[page][0]); // centred; "" blanks the page
+        }
+    }
 }
 
 // Logs every device on the bus and warns about any not in KNOWN_I2C.
@@ -190,6 +244,10 @@ void app_main(void)
     weather_t weather;
     esp_err_t werr = weather_fetch(&weather);
     if (werr == ESP_OK) {
+        s_ui.weather = weather;
+        s_ui.weather_ok = true;
+    }
+    if (werr == ESP_OK) {
         ESP_LOGI(TAG, "weather fetched (%dC, wind %dkm/h, UV %d, sun %s-%s)", weather.temp_c,
                  weather.wind_kmh, weather.uv_max, weather.sunrise, weather.sunset);
     } else {
@@ -199,8 +257,14 @@ void app_main(void)
 
     // Leave the final status up long enough to actually read it.
     vTaskDelay(pdMS_TO_TICKS(SPLASH_HOLD_SECONDS * 1000));
+    esp_err_t eerr = encoder_init();
+    if (eerr != ESP_OK) {
+        ESP_LOGW(TAG, "encoder not used: %s", esp_err_to_name(eerr));
+    }
+
     ESP_ERROR_CHECK(display_clear());
-    draw_weather(werr == ESP_OK ? &weather : NULL);
+    s_ui.screen = SCREEN_HOME;
+    draw_screen();
 
 #define WEATHER_REFRESH_SECONDS (15 * 60)
 #define WEATHER_RETRY_START_SECONDS 30
@@ -209,24 +273,20 @@ void app_main(void)
     int seconds_since_indoor = INDOOR_REFRESH_SECONDS; // read on the first pass
     // On failure, retry sooner than the normal cadence and back off toward
     // it, instead of leaving a stale reading up for a full 15 minutes.
-    char time_str[6];
-    char date_str[11];
     int next_weather_interval = (werr == ESP_OK) ? WEATHER_REFRESH_SECONDS : WEATHER_RETRY_START_SECONDS;
+    TickType_t next_second = xTaskGetTickCount();
     for (;;) {
-        clock_format_now(time_str, sizeof(time_str));
-        clock_format_date(date_str, sizeof(date_str));
-        ESP_ERROR_CHECK(display_draw_text_columns(MAIN_PAGE_CLOCK, time_str, date_str));
+        draw_clock_row();
+        bool data_changed = false;
 
         if (berr == ESP_OK && ++seconds_since_indoor >= INDOOR_REFRESH_SECONDS) {
             seconds_since_indoor = 0;
             bme280_reading_t r;
             if (bme280_read(&r) == ESP_OK) {
                 ESP_LOGI(TAG, "indoor %.1fC %.0f%% %.1fhPa", r.temp_c, r.humidity_pct, r.pressure_hpa);
-                // Font has no '%' or '.', so "IN 23C 45H" (H = humidity %).
-                char indoor_str[16];
-                snprintf(indoor_str, sizeof(indoor_str), "IN %dC %dH",
-                         (int)lroundf(r.temp_c), (int)lroundf(r.humidity_pct));
-                display_draw_text(MAIN_PAGE_INDOOR, indoor_str);
+                s_ui.indoor = r;
+                s_ui.indoor_ok = true;
+                data_changed = true;
             } else {
                 ESP_LOGW(TAG, "BME280 read failed");
             }
@@ -238,7 +298,9 @@ void app_main(void)
             if (werr == ESP_OK) {
                 ESP_LOGI(TAG, "weather refreshed (%dC, wind %dkm/h, UV %d, sun %s-%s)", weather.temp_c,
                          weather.wind_kmh, weather.uv_max, weather.sunrise, weather.sunset);
-                draw_weather(&weather);
+                s_ui.weather = weather;
+                s_ui.weather_ok = true;
+                data_changed = true;
                 next_weather_interval = WEATHER_REFRESH_SECONDS;
             } else {
                 ESP_LOGW(TAG, "weather refresh failed: %s", esp_err_to_name(werr));
@@ -250,6 +312,31 @@ void app_main(void)
             }
         }
 
-        vTaskDelay(pdMS_TO_TICKS(1000));
+        if (data_changed) draw_screen();
+
+        // Wait out the rest of this second, reacting to the encoder
+        // straight away instead of on the next tick.
+        next_second += pdMS_TO_TICKS(1000);
+        if ((int32_t)(xTaskGetTickCount() - next_second) > 0) {
+            next_second = xTaskGetTickCount(); // overran (slow fetch): don't try to catch up
+        }
+        for (;;) {
+            TickType_t now = xTaskGetTickCount();
+            if ((int32_t)(next_second - now) <= 0) break;
+            encoder_event_t ev;
+            if (!encoder_wait_event(&ev, next_second - now)) continue;
+            // A quick spin queues several clicks: apply them all, draw once.
+            int screen = s_ui.screen;
+            do {
+                if (ev == ENCODER_EV_CW) screen = (screen + 1) % SCREEN_COUNT;
+                else if (ev == ENCODER_EV_CCW) screen = (screen + SCREEN_COUNT - 1) % SCREEN_COUNT;
+                else screen = SCREEN_HOME;
+            } while (encoder_wait_event(&ev, 0));
+            if (screen != (int)s_ui.screen) {
+                s_ui.screen = screen;
+                ESP_LOGI(TAG, "screen %d", screen);
+                draw_screen();
+            }
+        }
     }
 }
