@@ -95,7 +95,7 @@ Everything runs from the DevKit's 3V3 pin (onboard regulator, likely AMS1117 —
 | OLED SSD1315 | 10-15 mA | ~25 mA | scales with lit pixels |
 | DS3231 module | 1-2 mA | ~3 mA | mostly the power LED |
 | BME280 | 1-2 mA | ~3 mA | LDO + LED; sensor itself is µA |
-| KY-040 (planned) | ~0.3 mA | ~1 mA | pull-ups only |
+| KY-040 | ~0.3 mA | ~1 mA | pull-ups only |
 | **Total** | **~130-170 mA** | **~380 mA** | ~100+ mA headroom left |
 
 Rules:
@@ -248,7 +248,8 @@ at the start of a session and tick items off there when done.
   LiPo + TP4056 charge module sized as backup/short-gap runtime (keeps the "always
   on" display concept intact) rather than a full multi-day-portable redesign, but
   not decided or ordered. Revisit once the base build works.
-- Rotary encoder isn't wired into the app yet — fold in as a later milestone.
+- Rotary encoder is wired and passed bring-up (2026-09-24) but isn't used by
+  this firmware yet (ROADMAP task 3, screen rotation).
   Screen layout is a single static screen; with BME280 data it's near full,
   so more readings need rotation or encoder-driven screens.
 - BME280 temperature may read high from the ESP32/regulator's own heat
@@ -268,7 +269,7 @@ standalone real build, not another numbered lesson. Reuses concepts learned ther
 Sibling folder (`../esp32-hw-checks`, not a subfolder), created 2026-09-19. Holds
 standalone bring-up/test firmware for verifying ESP32 boards and modules/sensors in
 isolation (LED blink + I2C scan + OLED fill/text test + BME280 chip-ID check
-(0x60 BME280 vs 0x58 BMP280, added 2026-09-23); add a check there for each new
-sensor — encoder next — as it gets wired up) before that hardware is trusted
+(0x60 BME280 vs 0x58 BMP280, added 2026-09-23) + KY-040 encoder on D25/D26/D27
+(passed 2026-09-24); add a check there for each new sensor as it gets wired up) before that hardware is trusted
 enough to use in this project's real firmware. **It is not a git repo** — its
 changes exist only on disk, so there's nothing to commit there.

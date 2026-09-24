@@ -14,15 +14,12 @@ on the physical display, and note anything the next task needs to know.
   max, not current. Rows 6-7 are candidates to move to their own screen in
   task 3.
 - [ ] **3. KY-040 rotary encoder + multiple screens**
-  - [ ] Bring-up check in `../esp32-hw-checks` first (rotation direction,
-    button press, debounce), pick free GPIOs. *Status 2026-09-23*: GPIOs
-    picked (CLK D25, DT D26, SW D27, see `docs/WIRING.md`); the check is
-    written and builds (ISR quadrature decode, logs `encoder CW pos=N (last
-    detent steps=S)` and `button PRESSED`) but is **not flashed or tested**.
-    Waiting on the hardware: a 5-pin socket on the perfboard plus a Dupont
-    cable to the knob, possibly as part of a board redesign. Expect steps=4;
-    if it's 2 (half-step clone), the rest-at-CLK=1/DT=1 detent logic only
-    counts every other click and needs adjusting.
+  - [x] Bring-up check in `../esp32-hw-checks` (2026-09-24): CLK D25, DT
+    D26, SW D27 (see `docs/WIRING.md`), connected through a socket on the
+    perfboard. ISR quadrature decode: **4 steps per detent** confirmed (full-step
+    part), direction correct, no missed or reversed clicks on a fast spin
+    (~30-40 ms per detent), button clean with 30 ms debounce, no double
+    presses. The decode + debounce code there can be lifted into this firmware.
   - [ ] Screen rotation in this firmware: encoder turns between screens
     (e.g. clock/weather, sun/wind/UV, indoor, BVG)
 - [ ] **4. BVG departures screen**: next departures for one stop via the BVG
