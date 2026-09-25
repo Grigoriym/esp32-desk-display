@@ -50,6 +50,35 @@ static void layout_outdoor(const screen_data_t *d, screen_rows_t *out)
     snprintf(ROW(6, 1), "UV %d", d->weather.uv_max);
 }
 
+// AQI, then the two strongest pollen types that are present at all.
+static void layout_air(const screen_data_t *d, screen_rows_t *out)
+{
+    snprintf(ROW(2, 0), "AIR");
+    if (!d->air_ok) {
+        snprintf(ROW(4, 0), "--");
+        return;
+    }
+    snprintf(ROW(4, 0), "AQI %d", d->air.aqi);
+    snprintf(ROW(4, 1), "%s", air_aqi_label(d->air.aqi));
+
+    bool shown[POLLEN_COUNT] = {false};
+    int row = 6;
+    for (; row <= 7; row++) {
+        int best = -1;
+        for (int i = 0; i < POLLEN_COUNT; i++) {
+            if (!shown[i] && air_pollen_level(d->air.pollen[i])
+                && (best < 0 || d->air.pollen[i] > d->air.pollen[best])) {
+                best = i;
+            }
+        }
+        if (best < 0) break;
+        shown[best] = true;
+        snprintf(ROW(row, 0), "%s", air_pollen_name((pollen_t)best));
+        snprintf(ROW(row, 1), "%s", air_pollen_level(d->air.pollen[best]));
+    }
+    if (row == 6) snprintf(ROW(6, 0), "POLLEN NONE");
+}
+
 static void layout_indoor(const screen_data_t *d, screen_rows_t *out)
 {
     snprintf(ROW(2, 0), "INDOOR");
@@ -103,6 +132,7 @@ void screen_layout(screen_t screen, const screen_data_t *data, int now_min, scre
     switch (screen) {
         case SCREEN_HOME: layout_home(data, out); break;
         case SCREEN_OUTDOOR: layout_outdoor(data, out); break;
+        case SCREEN_AIR: layout_air(data, out); break;
         case SCREEN_INDOOR: layout_indoor(data, out); break;
         case SCREEN_BVG: layout_bvg(data, now_min, out); break;
         default: break;

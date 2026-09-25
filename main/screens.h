@@ -6,16 +6,19 @@
 
 #include <stdbool.h>
 #include "weather_parse.h"
+#include "air_parse.h"
 #include "bme280_reading.h"
 #include "bvg_parse.h"
 
 // Cycled with the encoder (press = back to HOME).
-typedef enum { SCREEN_HOME, SCREEN_OUTDOOR, SCREEN_INDOOR, SCREEN_BVG, SCREEN_COUNT } screen_t;
+typedef enum { SCREEN_HOME, SCREEN_OUTDOOR, SCREEN_AIR, SCREEN_INDOOR, SCREEN_BVG, SCREEN_COUNT } screen_t;
 
 // Everything the screens draw from.
 typedef struct {
     bool weather_ok; // false until the first fetch succeeds
     weather_t weather;
+    bool air_ok; // false until the first air-quality fetch succeeds
+    air_t air;
     bool indoor_ok; // false until the first BME280 read succeeds
     bme280_reading_t indoor;
     bool bvg_ok;     // false until the first departures fetch succeeds

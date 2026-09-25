@@ -220,7 +220,7 @@ static void boot_local(i2c_master_bus_handle_t bus, app_state_t *st)
     st->indoor_present = (berr == ESP_OK);
 }
 
-// Fetches the weather into s_data; returns whether it worked.
+// Fetches the weather and air quality into s_data; returns whether both worked.
 static bool fetch_weather(const char *what)
 {
     weather_t weather;
@@ -234,6 +234,20 @@ static bool fetch_weather(const char *what)
              weather.rain_in_h, weather.rain_from, weather.rain_until);
     s_data.weather = weather;
     s_data.weather_ok = true;
+
+    // Air quality rides along on the same cadence; a failure keeps the last
+    // reading and makes the whole fetch count as failed, so it's retried soon.
+    air_t air;
+    err = air_fetch(&air);
+    if (err != ESP_OK) {
+        ESP_LOGW(TAG, "air %s failed: %s", what, esp_err_to_name(err));
+        return false;
+    }
+    ESP_LOGI(TAG, "air %s (AQI %d, pollen alder %d birch %d grass %d mugwort %d ragweed %d)", what, air.aqi,
+             air.pollen[POLLEN_ALDER], air.pollen[POLLEN_BIRCH], air.pollen[POLLEN_GRASS],
+             air.pollen[POLLEN_MUGWORT], air.pollen[POLLEN_RAGWEED]);
+    s_data.air = air;
+    s_data.air_ok = true;
     return true;
 }
 

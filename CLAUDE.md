@@ -126,6 +126,7 @@ Rules:
 | WiFi station | `esp_wifi`, `esp_netif`, `nvs_flash` |
 | Clock sync | SNTP (`esp_netif_sntp`) |
 | Weather fetch | `esp_http_client` + `mbedtls` (`esp_crt_bundle_attach` for TLS, Open-Meteo is HTTPS-only) |
+| Air quality + pollen | Open-Meteo air-quality API (free, no key), fetched right after the weather on the same 15-min cadence, same `http_get()` in `main/weather.c`; parsed in `main/air_parse.c` |
 | BVG departures | `esp_http_client` against `v6.bvg.transport.rest` (community-run, no key, **has outages**: 503 after 10s or no answer, the `v6.vbb` mirror too, seen 2026-09-24), in its own FreeRTOS task (`main/bvg.c`) so a slow/down API never blocks the main loop |
 | JSON parsing | `cJSON` — **not bundled** in this ESP-IDF version (v6.1-dev); pulled via the component manager (`main/idf_component.yml` → `espressif/cjson`), lands in gitignored `managed_components/` |
 
@@ -295,7 +296,9 @@ files with **no ESP-IDF includes**: that's why JSON parsing lives in
 `weather.c` / `bvg.c` (same for `clock_time.c` / `clock.c`,
 `encoder_decode.c` / `encoder.c`, `font.c` / `display.c`), and what each screen shows lives in `screens.c`
 (`screen_layout()` fills text rows from a `screen_data_t`; `main.c` only
-draws them). New screen = a `screen_t` value + a `layout_*()` + a test. Fixtures in `test/fixtures/` (see its README:
+draws them). New screen = a `screen_t` value + a `layout_*()` + a test. A test that
+needs a second pure source (e.g. `test_screens` → `air_parse.c`) gets it
+from `extra_sources()` in `tools/test.sh`. Fixtures in `test/fixtures/` (see its README:
 `bvg_ok.json` is hand-written, the wrapper was down).
 
 ## Serial monitoring gotcha (this dev harness)
@@ -344,7 +347,8 @@ first time for both encoder tests on 2026-09-24.
    page 0 of every screen is time flush left + date `DD/MM/YYYY` flush right;
    HOME has icon+outdoor temp (p3), `IN 25C 43H` (p5) and the rain hint (p7,
    see ROADMAP task 6), OUTDOOR has
-   sunrise/sunset and wind/today's max UV, INDOOR has temp/humidity and whole
+   sunrise/sunset and wind/today's max UV, AIR (since 2026-09-25) has the
+   European AQI and the two strongest pollen types, INDOOR has temp/humidity and whole
    hPa pressure (font has no `%`/`.`). `draw_screen()` rewrites pages 1-7 in
    full on every change (blank pages via `display_draw_text(page, "")`), so
    switching needs no `display_clear()` and doesn't flicker. The main loop

@@ -16,6 +16,13 @@ static const char *TAG = "weather";
     "&daily=sunrise,sunset,uv_index_max&hourly=precipitation_probability"                         \
     "&forecast_hours=" STR(WEATHER_RAIN_HOURS) "&timezone=Europe%2FBerlin&forecast_days=1"
 
+// Same spot, current European AQI + pollen (Open-Meteo's air-quality API,
+// free, no key; pollen is Europe-only and 0 off season).
+#define AIR_URL                                                                                  \
+    "https://air-quality-api.open-meteo.com/v1/air-quality?latitude=52.52&longitude=13.405"      \
+    "&current=european_aqi,alder_pollen,birch_pollen,grass_pollen,mugwort_pollen,ragweed_pollen" \
+    "&timezone=Europe%2FBerlin"
+
 #define RESPONSE_BUF_SIZE 2048
 
 static char s_response[RESPONSE_BUF_SIZE];
@@ -36,13 +43,14 @@ static esp_err_t http_event_handler(esp_http_client_event_t *evt)
     return ESP_OK;
 }
 
-esp_err_t weather_fetch(weather_t *out)
+// GETs url into s_response (NUL-terminated); ESP_OK only on HTTP 200.
+static esp_err_t http_get(const char *url)
 {
     s_response_len = 0;
     memset(s_response, 0, sizeof(s_response));
 
     esp_http_client_config_t config = {
-        .url = WEATHER_URL,
+        .url = url,
         .event_handler = http_event_handler,
         .crt_bundle_attach = esp_crt_bundle_attach,
         .timeout_ms = 10000,
@@ -57,6 +65,19 @@ esp_err_t weather_fetch(weather_t *out)
         ESP_LOGW(TAG, "unexpected HTTP status %d", status);
         return ESP_FAIL;
     }
+    return ESP_OK;
+}
 
+esp_err_t weather_fetch(weather_t *out)
+{
+    esp_err_t err = http_get(WEATHER_URL);
+    if (err != ESP_OK) return err;
     return weather_parse(s_response, out) ? ESP_OK : ESP_FAIL;
+}
+
+esp_err_t air_fetch(air_t *out)
+{
+    esp_err_t err = http_get(AIR_URL);
+    if (err != ESP_OK) return err;
+    return air_parse(s_response, out) ? ESP_OK : ESP_FAIL;
 }

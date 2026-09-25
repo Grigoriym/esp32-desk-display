@@ -103,6 +103,17 @@ on the physical display, and note anything the next task needs to know.
   `weather_parse.c`, text in `screens.c`, both host-tested. Response is
   ~1.2 KB of the 2 KB buffer in `weather.c`.
 
+- [ ] **7. Air quality + pollen screen** (2026-09-25, built, awaiting a look
+  at the panel): screen AIR, between OUTDOOR and INDOOR (two clicks CW from
+  HOME). `AQI 23` / `FAIR` (European AQI bands: GOOD <=20, FAIR <=40,
+  MODERATE <=60, POOR <=80, VERY POOR <=100, EXTREME), then the two
+  strongest of alder/birch/grass/mugwort/ragweed as `BIRCH` / `HIGH`, or
+  `POLLEN NONE`. Pollen scale is one rough scale for all types (grains/m3:
+  1-10 LOW, 11-50 MED, >50 HIGH). Current values from Open-Meteo's
+  air-quality API, fetched with the weather; an air failure makes the
+  fetch retry with the weather backoff. Pollen is 0 off season (Sep-Jan),
+  so the pollen rows only get real data from spring.
+
 WiFi connect timeout: done 2026-09-25, see Open questions in `CLAUDE.md`.
 
 Other open items (not scheduled): battery backup, CO2

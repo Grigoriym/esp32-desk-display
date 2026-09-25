@@ -2,6 +2,9 @@
 
 - `weather_ok.json`: real Open-Meteo response, captured 2026-09-25 13:09 with the
   exact URL from `main/weather.c` (dry: rain chance at most 10% over the 12 h).
+- `air_ok.json`: real Open-Meteo air-quality response, captured 2026-09-25
+  14:00 with the exact `AIR_URL` from `main/weather.c` (off season: pollen
+  all ~0, only the AQI says much).
 - `bvg_real.json`: real transport.rest response, captured 2026-09-25 10:29
   with the URL from `main/bvg.c` (U Cottbusser Platz, U5 towards Hbf):
   6 departures every 10 min, no delays or cancellations.

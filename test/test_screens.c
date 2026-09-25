@@ -171,6 +171,38 @@ static void test_outdoor_and_indoor(void)
     TEST_ASSERT_EQUAL_STRING("1014 HPA", LEFT(6));
 }
 
+static void test_air(void)
+{
+    screen_layout(SCREEN_AIR, &data, 0, &rows);
+    TEST_ASSERT_EQUAL_STRING("AIR", LEFT(2));
+    TEST_ASSERT_EQUAL_STRING("--", LEFT(4));
+
+    data.air_ok = true;
+    data.air = (air_t){.aqi = 23};
+    screen_layout(SCREEN_AIR, &data, 0, &rows);
+    TEST_ASSERT_EQUAL_STRING("AQI 23", LEFT(4));
+    TEST_ASSERT_EQUAL_STRING("FAIR", RIGHT(4));
+    TEST_ASSERT_EQUAL_STRING("POLLEN NONE", LEFT(6));
+    TEST_ASSERT_EQUAL_STRING("", LEFT(7));
+
+    // Only the two strongest are shown, strongest first.
+    data.air.pollen[POLLEN_ALDER] = 5;
+    data.air.pollen[POLLEN_BIRCH] = 120;
+    data.air.pollen[POLLEN_GRASS] = 30;
+    screen_layout(SCREEN_AIR, &data, 0, &rows);
+    TEST_ASSERT_EQUAL_STRING("BIRCH", LEFT(6));
+    TEST_ASSERT_EQUAL_STRING("HIGH", RIGHT(6));
+    TEST_ASSERT_EQUAL_STRING("GRASS", LEFT(7));
+    TEST_ASSERT_EQUAL_STRING("MED", RIGHT(7));
+
+    // A single one leaves page 7 blank.
+    data.air = (air_t){.aqi = 23, .pollen[POLLEN_RAGWEED] = 1};
+    screen_layout(SCREEN_AIR, &data, 0, &rows);
+    TEST_ASSERT_EQUAL_STRING("RAGWEED", LEFT(6));
+    TEST_ASSERT_EQUAL_STRING("LOW", RIGHT(6));
+    TEST_ASSERT_EQUAL_STRING("", LEFT(7));
+}
+
 static void test_previous_screen_leaves_nothing_behind(void)
 {
     data.indoor_ok = true;
@@ -191,6 +223,7 @@ int main(void)
     RUN_TEST(test_home);
     RUN_TEST(test_home_rain);
     RUN_TEST(test_outdoor_and_indoor);
+    RUN_TEST(test_air);
     RUN_TEST(test_previous_screen_leaves_nothing_behind);
     return UNITY_END();
 }

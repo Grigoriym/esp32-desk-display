@@ -16,12 +16,19 @@ mkdir -p "$OUT"
 CFLAGS=(-std=gnu17 -Wall -Wextra -Werror -g -fsanitize=address,undefined -fno-omit-frame-pointer
         -Imain -Itest -I"$UNITY" -I"$CJSON" -DFIXTURES_DIR="\"$PWD/test/fixtures\"")
 
-# test_<name>.c tests main/<name>.c.
+# test_<name>.c tests main/<name>.c, plus any pure sources it calls into.
+extra_sources() {
+    case "$1" in
+        test_screens) echo main/air_parse.c ;;
+    esac
+}
+
 failed=0
 for t in test/test_*.c; do
     name=$(basename "$t" .c)
     src="main/${name#test_}.c"
-    gcc "${CFLAGS[@]}" "$t" "$src" "$UNITY/unity.c" "$CJSON/cJSON.c" -lm -o "$OUT/$name"
+    # shellcheck disable=SC2046 # word splitting of the list is intended
+    gcc "${CFLAGS[@]}" "$t" "$src" $(extra_sources "$name") "$UNITY/unity.c" "$CJSON/cJSON.c" -lm -o "$OUT/$name"
     echo "== $name"
     "$OUT/$name" || failed=1
 done
