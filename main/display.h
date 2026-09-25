@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stdbool.h>
 #include "esp_err.h"
 #include "driver/i2c_master.h"
 
@@ -11,6 +12,10 @@ esp_err_t display_init(i2c_master_bus_handle_t bus);
 
 // Blanks the whole panel.
 esp_err_t display_clear(void);
+
+// Turns the panel off (sleep, 0xAE) or back on (0xAF). Its RAM keeps what
+// was drawn, and drawing while off still updates it for when it comes back.
+esp_err_t display_set_on(bool on);
 
 // Draws text centered on the given page (0-7), 8px rows each.
 esp_err_t display_draw_text(int page, const char *text);

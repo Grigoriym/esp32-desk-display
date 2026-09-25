@@ -45,6 +45,7 @@ static const char *TAG = "desk_display";
 #define PAGE_CLOCK 0 // time left, date right
 
 static screen_t s_screen;
+static bool s_panel_on = true; // knob press toggles it
 static screen_data_t s_data = {
     .bvg_walk_min = BVG_WALK_MIN_MINUTES,
     .bvg_walk_comfort = BVG_WALK_COMFORT_MINUTES,
@@ -434,7 +435,8 @@ static void tick_metrics(app_state_t *st)
 
 // Waits out the rest of this second, reacting to the encoder straight away
 // instead of on the next tick. A quick spin queues several clicks: they're
-// all applied, then drawn once.
+// all applied, then drawn once. Press turns the panel off/on; a turn while
+// it is off only wakes it, without switching screens.
 static void wait_second_handling_encoder(TickType_t *next_second)
 {
     *next_second += pdMS_TO_TICKS(1000);
@@ -447,11 +449,18 @@ static void wait_second_handling_encoder(TickType_t *next_second)
         encoder_event_t ev;
         if (!encoder_wait_event(&ev, *next_second - now)) continue;
         int screen = s_screen;
+        bool on = s_panel_on;
         do {
-            if (ev == ENCODER_EV_CW) screen = (screen + 1) % SCREEN_COUNT;
-            else if (ev == ENCODER_EV_CCW) screen = (screen + SCREEN_COUNT - 1) % SCREEN_COUNT;
-            else screen = SCREEN_HOME;
+            if (ev == ENCODER_EV_PRESS) on = !on;
+            else if (!on) on = true; // a turn while off just wakes the panel
+            else if (ev == ENCODER_EV_CW) screen = (screen + 1) % SCREEN_COUNT;
+            else screen = (screen + SCREEN_COUNT - 1) % SCREEN_COUNT;
         } while (encoder_wait_event(&ev, 0));
+        if (on != s_panel_on) {
+            s_panel_on = on;
+            ESP_LOGI(TAG, "panel %s", on ? "on" : "off");
+            display_set_on(on);
+        }
         if (screen != (int)s_screen) {
             s_screen = screen;
             ESP_LOGI(TAG, "screen %d", screen);

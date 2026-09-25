@@ -366,7 +366,8 @@ first time for both encoder tests on 2026-09-24.
    (`SPLASH_*` in `main/main.c`: OLED|PWR, RTC|BME on pages 2-3; WIFI|NTP,
    WEATHER on pages 5-6) going `--` → `OK`/`NO`, then the main screens straight after the
    last step (the 3s hold was dropped 2026-09-25). Since 2026-09-24 there are
-   three, switched with the KY-040 (turn = next/prev, wraps; press = HOME):
+   three, switched with the KY-040 (turn = next/prev, wraps; press = panel
+   off/on since 2026-09-25, was HOME; a turn while off only wakes it):
    page 0 of every screen is time flush left + date `DD/MM/YYYY` flush right;
    HOME has the DWD warning if any, else the next holiday (p1, ROADMAP tasks 9/10), icon+outdoor temp
    (p3), `IN 25C 43H` (p5) and the rain hint (p7, see ROADMAP task 6), OUTDOOR has

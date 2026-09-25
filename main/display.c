@@ -81,6 +81,11 @@ esp_err_t display_clear(void)
     return ESP_OK;
 }
 
+esp_err_t display_set_on(bool on)
+{
+    return ssd1306_cmd(on ? 0xAF : 0xAE);
+}
+
 esp_err_t display_draw_text(int page, const char *text)
 {
     uint8_t row[OLED_WIDTH];
