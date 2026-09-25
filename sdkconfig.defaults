@@ -3,3 +3,9 @@
 # TLS handshake + cJSON parse run in the main task (weather, BVG departures);
 # the 3584 default overflowed on the first BVG fetch (2026-09-24).
 CONFIG_ESP_MAIN_TASK_STACK_SIZE=8192
+
+# The ESP32 DevKits here have 4 MB flash; the IDF default assumes 2 MB with a
+# 1 MB app partition, which was down to 4% free (2026-09-25). Large single
+# app partition: 1.5 MB.
+CONFIG_ESPTOOLPY_FLASHSIZE_4MB=y
+CONFIG_PARTITION_TABLE_SINGLE_APP_LARGE=y

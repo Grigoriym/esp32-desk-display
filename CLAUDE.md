@@ -156,11 +156,13 @@ Rules:
   HTTPS fetch + cJSON parse needs ~8 KB. Crash captures: include
   `overflow|Guru|Backtrace|rst:` in the `serial_log.py` regex, or the panic
   gets filtered out.
-- **Flash is nearly full**: the app is ~0xf5270 of the 1 MB (0x100000)
-  factory partition, ~44 KB (4%) free (2026-09-25; the build prints this).
-  The board has 4 MB flash, so when it runs out switch to a bigger
-  partition table (`CONFIG_PARTITION_TABLE_SINGLE_APP_LARGE`, 1.5 MB app)
-  rather than cutting features.
+- **Flash layout** (since 2026-09-25, in `sdkconfig.defaults`): 4 MB flash
+  (`CONFIG_ESPTOOLPY_FLASHSIZE_4MB`, the IDF default assumed 2 MB) and the
+  large single-app partition table: 1.5 MB app, ~35% free. Before that the
+  app was in a 1 MB partition with 4% left. Almost all of the ~980 KB is
+  ESP-IDF (WiFi ~370 KB, TLS/crypto ~200 KB, lwIP ~100 KB); this project's
+  own code is ~10 KB. `sdkconfig.defaults` only applies when `sdkconfig`
+  is regenerated: after changing it, delete the local `sdkconfig` and build.
 - `snprintf` into a buffer that can't hold the worst case fails the build
   (`-Werror=format-truncation`): size buffers for the longest possible
   value, not the typical one.
