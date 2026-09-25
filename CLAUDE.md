@@ -131,7 +131,7 @@ Rules:
 | Public holidays | Nager.Date (free, no key), `main/holidays.c` + pure `main/holidays_parse.c`: Berlin's (`DE-BE` + nationwide), fetched once a year (and the next year's after 26 Dec), shown on HOME page 1 unless a DWD warning is out. Its TLS chain is GTS Root R4 cross-signed by the old GlobalSign Root CA (not in the bundle), so `CONFIG_MBEDTLS_CERTIFICATE_BUNDLE_CROSS_SIGNED_VERIFY=y` (`sdkconfig.defaults`, ~700 B heap); symptom without it: `No matching trusted root certificate found` / `ESP_ERR_HTTP_CONNECT`. A new HTTPS host failing that way → check its chain with `openssl s_client -showcerts` |
 | HTTP GET | `main/http.c` `http_get(url, buf, size)`, shared by weather/air/alerts/holidays; big responses (alerts 16 KB, holidays 8 KB) get a heap buffer for the fetch only |
 | BVG departures | `esp_http_client` against `v6.bvg.transport.rest` (community-run, no key, **has outages**: 503 after 10s or no answer, the `v6.vbb` mirror too, seen 2026-09-24), in its own FreeRTOS task (`main/bvg.c`) so a slow/down API never blocks the main loop |
-| Dashboard upload | `esp_http_client` plain-HTTP POST of InfluxDB line protocol every 60 s, in its own task (`main/metrics.c`, 4 KB stack) so a down server never blocks the main loop; lines built by the pure `main/metrics_format.c` (host-tested). Server side (InfluxDB 2 + Grafana, Docker Compose) in `server/`, see `server/README.md` |
+| Dashboard upload | `esp_http_client` plain-HTTP POST of InfluxDB line protocol every 60 s, in its own task (`main/metrics.c`, 4 KB stack) so a down server never blocks the main loop; lines built by the pure `main/metrics_format.c` (host-tested). Server side (InfluxDB 2 + Grafana, Docker Compose) in `server/`, see `server/README.md`; runs on the always-on home box, Grafana at `http://192.168.0.139:34897/` (since 2026-09-25, the dev-machine copy is gone). `METRICS_TOKEN` must be the `INFLUX_TOKEN` of *that* server's `server/.env`: a token from another install gets `401` |
 | JSON parsing | `cJSON` — **not bundled** in this ESP-IDF version (v6.1-dev); pulled via the component manager (`main/idf_component.yml` → `espressif/cjson`), lands in gitignored `managed_components/` |
 
 ## Display driver notes (`main/display.c`)
@@ -181,7 +181,11 @@ Rules:
   can come **before a task's first real run**, so its number is meaningless
   there: to see bvg's, open the BVG screen before it; metrics' first upload
   is at ~69 s, so read its number from the 5-min report (a `serial_log.py`
-  capture of ~390 s, since the script resets the board).
+  capture of ~390 s, since the script resets the board). The "60 s" is
+  60 main-loop ticks, and boot fetches that block the loop push it back:
+  since the alerts + holidays fetches (2026-09-25) it lands at **~75 s**, so
+  a 70 s capture misses it; use 90 s. After those two fetches: heap lowest
+  139 KB, stack left main 4.5 KB.
 - `snprintf` into a buffer that can't hold the worst case fails the build
   (`-Werror=format-truncation`): size buffers for the longest possible
   value, not the typical one.
@@ -245,6 +249,8 @@ already excludes `*_secrets.h` and `sdkconfig`.
 routine during hardware debugging — remember to flash this project back after.
 After such a swap, esptool may print "Verification failed after fast reflash ...
 Reflashing the whole image" — harmless, it recovers on its own and ends `Done`.
+`A fatal error occurred: No serial data received` from the flash step
+was transient (2026-09-25): the same command worked on the next try.
 **Check the flash actually happened** before trusting a device test: when
 filtering `idf.py` output, grep case-insensitively (`-iE "error|failed|Done"`).
 The partition-overflow failure prints `Error: app partition is too small`
