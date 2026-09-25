@@ -222,6 +222,13 @@ clang-tidy) come from ESP-IDF's optional `esp-clang` tool, installed with
 tables that clang-format would flatten go between
 `// clang-format off` / `// clang-format on` (see `weather_icon_for_code()`).
 
+## CI (since 2026-09-25)
+`.github/workflows/ci.yml`: on every push/PR, in the `espressif/idf:latest`
+container (= ESP-IDF master, what this is developed on): firmware build,
+`tools/format.sh --check`, `tools/test.sh`, `tools/lint.sh`. The gitignored
+`*_secrets.h` are replaced by their `.example` templates there. Locally, run
+the same three scripts before pushing.
+
 ## Static analysis (since 2026-09-25)
 `tools/lint.sh` runs clang-tidy (checks in `.clang-tidy`, the detekt config
 here; every exclusion there says why) on all tracked `main/*.c`; any finding

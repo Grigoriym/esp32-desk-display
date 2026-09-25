@@ -74,8 +74,8 @@ on the physical display, and note anything the next task needs to know.
   - [ ] Split `app_main()` (boot sequence vs main loop) and `draw_screen()`
     (one function per screen; pulls the BVG leave/hurry logic out where
     it can be host-tested), then drop their complexity NOLINTs.
-  - [ ] GitHub Actions: firmware build (espressif/idf image), format check,
-    host tests.
+  - [x] GitHub Actions (2026-09-25): `.github/workflows/ci.yml`, firmware
+    build + format check + host tests + clang-tidy.
 - [ ] **5. Later, from the Freenove kit**
   - [ ] PIR motion sensor: screen on only when someone is at the desk (OLED
     burn-in protection). Powered from VIN (5V), output is 3.3V-safe.
