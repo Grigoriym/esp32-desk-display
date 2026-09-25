@@ -3,48 +3,20 @@
 #include <time.h>
 #include <sys/time.h>
 #include "clock.h"
+#include "clock_time.h"
 #include "esp_netif_sntp.h"
 #include "esp_log.h"
 
 static const char *TAG = "clock";
 
-// POSIX TZ rule for Berlin: CET (UTC+1), CEST (UTC+2) from the last Sunday
-// of March 02:00 until the last Sunday of October 03:00. newlib applies the
-// DST switch itself, so no manual flip twice a year.
-#define LOCAL_TZ "CET-1CEST,M3.5.0,M10.5.0/3"
-
-// DS3231 RTC: stores UTC (not local time), so the DST flip above never
-// needs to touch it.
+// DS3231 RTC: stores UTC (not local time), so the DST flip in LOCAL_TZ
+// never needs to touch it.
 #define DS3231_ADDR       0x68
 #define DS3231_REG_TIME   0x00 // 7 regs: sec, min, hour, weekday, date, month, year
 #define DS3231_REG_STATUS 0x0F
 #define DS3231_OSF        0x80 // oscillator stopped: time in the chip is invalid
 
 static i2c_master_dev_handle_t s_rtc; // NULL if no RTC on the bus
-
-// struct tm (UTC) -> epoch seconds, independent of TZ (mktime() would treat
-// t as local time now that TZ is set). Days-from-civil, proleptic Gregorian.
-static time_t utc_to_epoch(const struct tm *t)
-{
-    int y = t->tm_year + 1900;
-    int m = t->tm_mon + 1;
-    y -= m <= 2;
-    int era = (y >= 0 ? y : y - 399) / 400;
-    int yoe = y - era * 400;
-    int doy = (153 * (m + (m > 2 ? -3 : 9)) + 2) / 5 + t->tm_mday - 1;
-    int doe = yoe * 365 + yoe / 4 - yoe / 100 + doy;
-    long days = (long)era * 146097 + doe - 719468;
-    return (time_t)days * 86400 + (time_t)t->tm_hour * 3600 + (time_t)t->tm_min * 60 + t->tm_sec;
-}
-
-static uint8_t bcd_to_bin(uint8_t v)
-{
-    return (v >> 4) * 10 + (v & 0x0F);
-}
-static uint8_t bin_to_bcd(uint8_t v)
-{
-    return ((v / 10) << 4) | (v % 10);
-}
 
 static esp_err_t rtc_read(uint8_t reg, uint8_t *data, size_t len)
 {

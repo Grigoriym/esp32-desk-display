@@ -1,5 +1,6 @@
 #include <string.h>
 #include "display.h"
+#include "font.h"
 
 #define OLED_WIDTH 128
 #define OLED_PAGES 8
@@ -24,73 +25,6 @@ static const uint8_t ssd1306_init_cmds[] = {
     0xA6,       // normal (not inverted)
     0xAF,       // display on
 };
-
-// 5x7 font, column-major (bit0 = top row). Letters are the classic
-// Adafruit GFX glcdfont A-Z (C kept as this project's original open-sided
-// variant); digits/symbols below are hand-derived.
-static const uint8_t font_upper[26][5] = {
-    {0x7C, 0x12, 0x11, 0x12, 0x7C}, // A
-    {0x7F, 0x49, 0x49, 0x49, 0x36}, // B
-    {0x3E, 0x41, 0x41, 0x41, 0x00}, // C
-    {0x7F, 0x41, 0x41, 0x41, 0x3E}, // D
-    {0x7F, 0x49, 0x49, 0x49, 0x41}, // E
-    {0x7F, 0x09, 0x09, 0x09, 0x01}, // F
-    {0x3E, 0x41, 0x41, 0x51, 0x73}, // G
-    {0x7F, 0x08, 0x08, 0x08, 0x7F}, // H
-    {0x00, 0x41, 0x7F, 0x41, 0x00}, // I
-    {0x20, 0x40, 0x41, 0x3F, 0x01}, // J
-    {0x7F, 0x08, 0x14, 0x22, 0x41}, // K
-    {0x7F, 0x40, 0x40, 0x40, 0x40}, // L
-    {0x7F, 0x02, 0x1C, 0x02, 0x7F}, // M
-    {0x7F, 0x04, 0x08, 0x10, 0x7F}, // N
-    {0x3E, 0x41, 0x41, 0x41, 0x3E}, // O
-    {0x7F, 0x09, 0x09, 0x09, 0x06}, // P
-    {0x3E, 0x41, 0x51, 0x21, 0x5E}, // Q
-    {0x7F, 0x09, 0x19, 0x29, 0x46}, // R
-    {0x26, 0x49, 0x49, 0x49, 0x32}, // S
-    {0x03, 0x01, 0x7F, 0x01, 0x03}, // T
-    {0x3F, 0x40, 0x40, 0x40, 0x3F}, // U
-    {0x1F, 0x20, 0x40, 0x20, 0x1F}, // V
-    {0x3F, 0x40, 0x38, 0x40, 0x3F}, // W
-    {0x63, 0x14, 0x08, 0x14, 0x63}, // X
-    {0x03, 0x04, 0x78, 0x04, 0x03}, // Y
-    {0x61, 0x59, 0x49, 0x4D, 0x43}, // Z
-};
-
-static const uint8_t glyph_0[5] = {0x3E, 0x41, 0x41, 0x41, 0x3E};
-static const uint8_t glyph_1[5] = {0x00, 0x42, 0x7F, 0x40, 0x00};
-static const uint8_t glyph_2[5] = {0x42, 0x61, 0x51, 0x49, 0x46};
-static const uint8_t glyph_3[5] = {0x22, 0x41, 0x49, 0x49, 0x36};
-static const uint8_t glyph_4[5] = {0x18, 0x14, 0x12, 0x7F, 0x10};
-static const uint8_t glyph_5[5] = {0x2F, 0x49, 0x49, 0x49, 0x31};
-static const uint8_t glyph_6[5] = {0x3C, 0x4A, 0x49, 0x49, 0x30};
-static const uint8_t glyph_7[5] = {0x01, 0x01, 0x79, 0x05, 0x03};
-static const uint8_t glyph_8[5] = {0x36, 0x49, 0x49, 0x49, 0x36};
-static const uint8_t glyph_9[5] = {0x06, 0x49, 0x49, 0x29, 0x1E};
-static const uint8_t glyph_colon[5] = {0x00, 0x00, 0x14, 0x00, 0x00};
-static const uint8_t glyph_minus[5] = {0x08, 0x08, 0x08, 0x08, 0x08};
-static const uint8_t glyph_slash[5] = {0x20, 0x10, 0x08, 0x04, 0x02}; // glcdfont '/'
-
-static const uint8_t *glyph_for(char c)
-{
-    if (c >= 'A' && c <= 'Z') return font_upper[c - 'A'];
-    switch (c) {
-        case '0': return glyph_0;
-        case '1': return glyph_1;
-        case '2': return glyph_2;
-        case '3': return glyph_3;
-        case '4': return glyph_4;
-        case '5': return glyph_5;
-        case '6': return glyph_6;
-        case '7': return glyph_7;
-        case '8': return glyph_8;
-        case '9': return glyph_9;
-        case ':': return glyph_colon;
-        case '-': return glyph_minus;
-        case '/': return glyph_slash;
-        default: return NULL; // incl. space: left blank
-    }
-}
 
 static esp_err_t ssd1306_cmd(uint8_t cmd)
 {
@@ -151,44 +85,16 @@ esp_err_t display_draw_text(int page, const char *text)
 {
     uint8_t row[OLED_WIDTH];
     memset(row, 0x00, sizeof(row));
-
-    int width = (int)strlen(text) * 6 - 1; // 5px glyph + 1px gap, no trailing gap
-    int col = (OLED_WIDTH - width) / 2;
-    for (const char *p = text; *p && col + 5 <= OLED_WIDTH; p++) {
-        const uint8_t *glyph = glyph_for(*p);
-        if (glyph) {
-            memcpy(&row[col], glyph, 5);
-        }
-        col += 6; // 5px glyph + 1px gap
-    }
-
+    font_blit(row, OLED_WIDTH, (OLED_WIDTH - font_text_width(text)) / 2, text);
     return ssd1306_write_page(page, row, OLED_WIDTH);
-}
-
-// Copies text into row starting at col; returns nothing, clips at the edge.
-static void blit_text(uint8_t *row, int col, const char *text)
-{
-    for (const char *p = text; p && *p && col + 5 <= OLED_WIDTH; p++) {
-        const uint8_t *glyph = glyph_for(*p);
-        if (glyph && col >= 0) {
-            memcpy(&row[col], glyph, 5);
-        }
-        col += 6; // 5px glyph + 1px gap
-    }
-}
-
-static int text_width(const char *text)
-{
-    int len = text ? (int)strlen(text) : 0;
-    return len > 0 ? len * 6 - 1 : 0;
 }
 
 esp_err_t display_draw_text_columns(int page, const char *left, const char *right)
 {
     uint8_t row[OLED_WIDTH];
     memset(row, 0x00, sizeof(row));
-    blit_text(row, 0, left);
-    blit_text(row, OLED_WIDTH - text_width(right), right);
+    font_blit(row, OLED_WIDTH, 0, left);
+    font_blit(row, OLED_WIDTH, OLED_WIDTH - font_text_width(right), right);
     return ssd1306_write_page(page, row, OLED_WIDTH);
 }
 
@@ -210,8 +116,7 @@ esp_err_t display_draw_icon_and_text(int page, const uint8_t *icon, const char *
     uint8_t row[OLED_WIDTH];
     memset(row, 0x00, sizeof(row));
 
-    int text_len = text ? (int)strlen(text) : 0;
-    int text_width = text_len > 0 ? text_len * 6 - 1 : 0;
+    int text_width = font_text_width(text);
     int icon_width = icon ? ICON_WIDTH : 0;
     int gap = (icon && text_width > 0) ? ICON_TEXT_GAP : 0;
 
@@ -221,13 +126,7 @@ esp_err_t display_draw_icon_and_text(int page, const uint8_t *icon, const char *
         memcpy(&row[col], icon, ICON_WIDTH);
         col += icon_width + gap;
     }
-    for (const char *p = text; p && *p && col + 5 <= OLED_WIDTH; p++) {
-        const uint8_t *glyph = glyph_for(*p);
-        if (glyph) {
-            memcpy(&row[col], glyph, 5);
-        }
-        col += 6;
-    }
+    font_blit(row, OLED_WIDTH, col, text);
 
     return ssd1306_write_page(page, row, OLED_WIDTH);
 }

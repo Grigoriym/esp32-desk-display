@@ -26,7 +26,8 @@ on the physical display, and note anything the next task needs to know.
     (sunrise/sunset, wind/UV), INDOOR (temp, humidity, pressure). Clock row
     on page 0 of all of them. Turn = next/previous (wraps), press = HOME.
     New screens (BVG, task 4): add a `screen_t` value and a `case`.
-    Not done: auto-return to HOME after idle, a screen-position indicator.
+    Auto-return to HOME after idle and a screen-position indicator were
+    considered and dropped (2026-09-25): not wanted.
 - [x] **4. BVG departures screen** (2026-09-24; verified on the panel with
   real data during one of the wrapper's rare successful fetches: only U5
   towards Hbf, minutes match the times, nothing under 6 min). U Cottbusser Platz, U5 towards Hbf; stop
@@ -56,16 +57,21 @@ on the physical display, and note anything the next task needs to know.
   ESP32 can't join Tailscale, so it would need a host on the display's
   own LAN or a public HTTPS one. It would need only a URL change in
   `bvg.c` (same response format) if revisited.
-- [ ] **4c. Code quality: lint, tests, CI** (Android analogues: ktlint,
+- [x] **4c. Code quality: lint, tests, CI** (2026-09-25) (Android analogues: ktlint,
   detekt/lint, unit tests, GitHub Actions)
   - [x] clang-format (2026-09-25): `.clang-format` + `tools/format.sh
     [--check]`, whole codebase reformatted in one commit.
   - [x] Host unit tests (2026-09-25): `tools/test.sh`, Unity + gcc with
     ASan/UBSan. JSON parsing split into `weather_parse.c` / `bvg_parse.c`;
     12 tests (parsers, weather code -> icon, stop-name cleanup).
-  - [ ] More host tests: `utc_to_epoch()`/DST dates (needs the RTC code
-    split from I2C in `clock.c`), encoder decode, glyphs as ASCII art.
-    Real BVG capture added as `bvg_real.json` (2026-09-25).
+  - [x] More host tests (2026-09-25): pure logic split out again, like
+    the parsers: `clock_time.c` (`utc_to_epoch()` vs glibc `timegm()` for
+    every day 2000-2100, BCD, the Berlin DST switch moments through
+    `LOCAL_TZ`), `encoder_decode.c` (quadrature decode + button debounce,
+    fed by the ISR / button task), `font.c` (glyph tables + `font_blit()`).
+    Glyphs and weather icons are checked as ASCII art (`test/art.h`): a
+    wrong bit prints the picture as drawn next to the expected one. 47
+    tests. Real BVG capture added as `bvg_real.json` (2026-09-25).
   - [x] clang-tidy (2026-09-25): `.clang-tidy` + `tools/lint.sh`, clean.
     Tidied on the way (none were live bugs): int->time_t widening in `utc_to_epoch()` made
     explicit, int->float conversions in `bme280.c` made explicit, missing

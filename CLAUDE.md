@@ -121,7 +121,7 @@ Rules:
 |---|---|
 | I2C bus | `esp_driver_i2c` |
 | BME280 | hand-rolled driver (`main/bme280.c`): chip-ID check, factory calibration, Bosch datasheet integer compensation, forced mode x1 oversampling |
-| KY-040 encoder | hand-rolled `main/encoder.c`: rotation decoded in a GPIO any-edge ISR (4 steps/detent), button polled + debounced in its own task, both pushed to a FreeRTOS queue read by the main loop |
+| KY-040 encoder | hand-rolled `main/encoder.c`: rotation decoded in a GPIO any-edge ISR (4 steps/detent), button polled + debounced in its own task, both pushed to a FreeRTOS queue read by the main loop. The decode/debounce logic itself is pure, in `main/encoder_decode.c` (host-tested) |
 | OLED framebuffer + text rendering | hand-rolled minimal SSD1306 driver (`main/display.c`) — decided against a component-manager package |
 | WiFi station | `esp_wifi`, `esp_netif`, `nvs_flash` |
 | Clock sync | SNTP (`esp_netif_sntp`) |
@@ -135,16 +135,17 @@ Rules:
   first time. `C` deliberately kept as the original open-sided variant. Anything
   outside A-Z/0-9/`:`/`-`/`/` (incl. space) renders blank. `/` is also
   glcdfont (added 2026-09-23 for the date).
-- Digits and weather icons are **hand-derived bitmaps**, one glyph at a time, with no
-  rendering preview before flashing — there's no tooling to check the bit math ahead
-  of time. Found one real transcription bug this way (digit '9' had a missing
-  mid-row bit, only visible once rendered on real hardware). When adding new
-  characters/icons, expect to eyeball the result on the physical panel and fix bits
-  as needed, not to get it right blind on the first try.
-- `display_draw_text_columns()` (2026-09-23) added a `blit_text()`/`text_width()`
-  helper pair; `display_draw_text()` and `display_draw_icon_and_text()` still
-  carry their own copies of that loop — deliberately not refactored in that
-  change, fold them onto the helper when next touching the file.
+- Digits and weather icons are **hand-derived bitmaps**. Found one real
+  transcription bug on hardware (digit '9' had a missing mid-row bit). Since
+  2026-09-25 they're checked on the host as ASCII art (`test/test_font.c`,
+  `test_icon_art` in `test/test_weather_parse.c`, helper `test/art.h`):
+  **new glyph/icon → draw the expected picture in the test first**, run
+  `tools/test.sh`, and a wrong bit prints drawn vs expected with `<--` on
+  the bad row. Still eyeball it on the panel after flashing.
+- The font (glyph tables, `font_blit()`, `font_text_width()`) lives in the
+  pure `main/font.c` since 2026-09-25; all three `display_draw_*` text
+  functions go through `font_blit()`, which also drops glyphs past either
+  edge (the old centered-text loop wrote out of bounds on too-long text).
 - Boot grid cells are `"%-8s%s"` = 10 chars (59px) per column, which exactly fills
   128px with the two columns flush left/right. A status name longer than 8 chars
   or a status longer than 2 breaks the alignment/overlaps — keep names ≤ 8.
@@ -180,11 +181,10 @@ Rules:
   10 ms, so `pdMS_TO_TICKS(<10)` is 0 and `vTaskDelay(0)` busy-loops. That's
   why the KY-040 check decodes the quadrature in a GPIO any-edge ISR (10 ms
   polling would drop steps on a quick spin) and only polls the button.
-- **Pure logic can be checked on the host before flashing**: now done properly
-  by `tools/test.sh` (see Host unit tests). Before that: copied the function out
-  with `sed` and compiled it with `gcc` against glibc (done for `utc_to_epoch()` and
-  the TZ rule's switch dates). The same trick would work for glyph bitmaps
-  (print them as ASCII art) — the "no tooling" gap above is fixable this way.
+- **Pure logic is checked on the host before flashing** by `tools/test.sh`
+  (see Host unit tests), incl. `utc_to_epoch()` and the TZ rule's switch
+  dates (`test/test_clock_time.c`, against glibc: it checks the rule string,
+  not picolibc's parser of it).
 - Panel orientation: `0xA0`/`0xC0` (segment remap / COM scan) in the init sequence
   is flipped 180° from the SSD1306 default, to match how the OLED ended up mounted
   once soldered to the perfboard (upside-down relative to native wiring). If a new
@@ -287,7 +287,8 @@ the `./gradlew test` here. Unity (the C test framework) comes from
 build`). Only pure logic is testable this way, so code worth testing goes in
 files with **no ESP-IDF includes**: that's why JSON parsing lives in
 `weather_parse.c` / `bvg_parse.c`, split from the HTTP fetch in
-`weather.c` / `bvg.c`, and what each screen shows lives in `screens.c`
+`weather.c` / `bvg.c` (same for `clock_time.c` / `clock.c`,
+`encoder_decode.c` / `encoder.c`, `font.c` / `display.c`), and what each screen shows lives in `screens.c`
 (`screen_layout()` fills text rows from a `screen_data_t`; `main.c` only
 draws them). New screen = a `screen_t` value + a `layout_*()` + a test. Fixtures in `test/fixtures/` (see its README:
 `bvg_ok.json` is hand-written, the wrapper was down).

@@ -1,4 +1,5 @@
 #include "encoder.h"
+#include "encoder_decode.h"
 #include "driver/gpio.h"
 #include "freertos/queue.h"
 #include "freertos/task.h"
@@ -12,52 +13,34 @@ static const char *TAG = "encoder";
 #define BTN_POLL_MS     10          // = 1 tick at CONFIG_FREERTOS_HZ=100
 #define BTN_DEBOUNCE_MS 30
 
-// Quadrature decode, index = (prev_state << 2) | new_state, each state
-// being (CLK << 1) | DT. Valid Gray-code steps give +1/-1, bounce and
-// skipped states give 0, so contact bounce cancels itself out.
-static const int8_t ENC_STEP[16] = {
-    0, -1, +1, 0, +1, 0, 0, -1, -1, 0, 0, +1, 0, +1, -1, 0,
-};
-
 static QueueHandle_t s_events;
-static uint8_t s_state;
-static int s_steps; // quadrature steps since the last detent
+static enc_rotation_t s_rotation;
+
+static uint8_t IRAM_ATTR pin_state(void)
+{
+    return (gpio_get_level(ENC_CLK_GPIO) << 1) | gpio_get_level(ENC_DT_GPIO);
+}
 
 // Rotation is decoded in the pin-change interrupt: polling at the 10ms tick
 // would miss steps on a quick spin (bring-up saw ~30ms per detent).
 static void IRAM_ATTR encoder_isr(void *arg)
 {
-    uint8_t new_state = (gpio_get_level(ENC_CLK_GPIO) << 1) | gpio_get_level(ENC_DT_GPIO);
-    if (new_state == s_state) return;
-    s_steps += ENC_STEP[(s_state << 2) | new_state];
-    s_state = new_state;
-    // The KY-040 rests at CLK=1 DT=1 between detents (4 steps per detent,
-    // confirmed at bring-up): count one click each time it gets back there.
-    if (new_state == 0x3 && s_steps != 0) {
-        encoder_event_t ev = (s_steps > 0) ? ENCODER_EV_CW : ENCODER_EV_CCW;
-        s_steps = 0;
-        BaseType_t woken = pdFALSE;
-        xQueueSendFromISR(s_events, &ev, &woken);
-        portYIELD_FROM_ISR(woken);
-    }
+    int click = enc_rotation_update(&s_rotation, pin_state());
+    if (click == 0) return;
+    encoder_event_t ev = (click > 0) ? ENCODER_EV_CW : ENCODER_EV_CCW;
+    BaseType_t woken = pdFALSE;
+    xQueueSendFromISR(s_events, &ev, &woken);
+    portYIELD_FROM_ISR(woken);
 }
 
 static void button_task(void *arg)
 {
-    int stable = 1;
-    int last_raw = 1;
-    int same_ms = 0;
+    enc_button_t button;
+    enc_button_init(&button);
     for (;;) {
-        int raw = gpio_get_level(ENC_SW_GPIO);
-        if (raw != last_raw) {
-            last_raw = raw;
-            same_ms = 0;
-        } else if (raw != stable && (same_ms += BTN_POLL_MS) >= BTN_DEBOUNCE_MS) {
-            stable = raw;
-            if (!stable) {
-                encoder_event_t ev = ENCODER_EV_PRESS;
-                xQueueSend(s_events, &ev, 0);
-            }
+        if (enc_button_update(&button, gpio_get_level(ENC_SW_GPIO), BTN_POLL_MS, BTN_DEBOUNCE_MS)) {
+            encoder_event_t ev = ENCODER_EV_PRESS;
+            xQueueSend(s_events, &ev, 0);
         }
         vTaskDelay(pdMS_TO_TICKS(BTN_POLL_MS));
     }
@@ -78,7 +61,7 @@ esp_err_t encoder_init(void)
     s_events = xQueueCreate(16, sizeof(encoder_event_t));
     if (!s_events) return ESP_ERR_NO_MEM;
 
-    s_state = (gpio_get_level(ENC_CLK_GPIO) << 1) | gpio_get_level(ENC_DT_GPIO);
+    enc_rotation_init(&s_rotation, pin_state());
     gpio_set_intr_type(ENC_CLK_GPIO, GPIO_INTR_ANYEDGE);
     gpio_set_intr_type(ENC_DT_GPIO, GPIO_INTR_ANYEDGE);
     err = gpio_install_isr_service(0);

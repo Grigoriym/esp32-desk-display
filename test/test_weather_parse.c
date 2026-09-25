@@ -2,6 +2,7 @@
 #include "unity.h"
 #include "weather_parse.h"
 #include "fixtures.h"
+#include "art.h"
 
 void setUp(void)
 {
@@ -83,6 +84,33 @@ static void test_icon_mapping(void)
     }
 }
 
+// The icons as they should look on the panel (8x8, hand-derived).
+static void test_icon_art(void)
+{
+    // clang-format off
+    assert_art("sun", weather_icon_for_code(0), 8, 8, (const char *const[]){
+        "..####..", ".######.", "########", "########",
+        "########", "########", ".######.", "..####..",
+    });
+    assert_art("cloud", weather_icon_for_code(3), 8, 8, (const char *const[]){
+        "........", "..####..", ".######.", "########",
+        "########", "........", "........", "........",
+    });
+    assert_art("rain", weather_icon_for_code(61), 8, 8, (const char *const[]){
+        "........", "..####..", ".######.", "########",
+        "########", ".#.#.#..", "..#.#.#.", "........",
+    });
+    assert_art("snow", weather_icon_for_code(71), 8, 8, (const char *const[]){
+        "........", "..####..", ".######.", "########",
+        "########", ".#.#.#..", "#.#.#.#.", ".#.#.#..",
+    });
+    assert_art("storm", weather_icon_for_code(95), 8, 8, (const char *const[]){
+        "........", "..####..", ".######.", "########",
+        "########", "...##...", "..##....", ".##.....",
+    });
+    // clang-format on
+}
+
 int main(void)
 {
     UNITY_BEGIN();
@@ -92,5 +120,6 @@ int main(void)
     RUN_TEST(test_garbage_fails);
     RUN_TEST(test_sun_time_without_T_fails);
     RUN_TEST(test_icon_mapping);
+    RUN_TEST(test_icon_art);
     return UNITY_END();
 }
