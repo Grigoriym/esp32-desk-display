@@ -65,7 +65,7 @@ on the physical display, and note anything the next task needs to know.
     12 tests (parsers, weather code -> icon, stop-name cleanup).
   - [ ] More host tests: `utc_to_epoch()`/DST dates (needs the RTC code
     split from I2C in `clock.c`), encoder decode, glyphs as ASCII art.
-    Replace the hand-written `bvg_ok.json` with a real capture.
+    Real BVG capture added as `bvg_real.json` (2026-09-25).
   - [x] clang-tidy (2026-09-25): `.clang-tidy` + `tools/lint.sh`, clean.
     Tidied on the way (none were live bugs): int->time_t widening in `utc_to_epoch()` made
     explicit, int->float conversions in `bme280.c` made explicit, missing

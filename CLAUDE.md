@@ -163,6 +163,16 @@ Rules:
   ESP-IDF (WiFi ~370 KB, TLS/crypto ~200 KB, lwIP ~100 KB); this project's
   own code is ~10 KB. `sdkconfig.defaults` only applies when `sdkconfig`
   is regenerated: after changing it, delete the local `sdkconfig` and build.
+  **`tools/size_check.sh`** (in CI after the build) fails below 15% free
+  (`MIN_FREE_PCT`), well before the build's own hard stop at 100%.
+- **RAM guardrail** (`main/health.c`, since 2026-09-25): 60 s after boot
+  and every 5 min, logs free heap (now / lowest since boot / largest block)
+  and each task's worst-case stack headroom (`health:` tag), with a warning
+  under 40 KB heap or 1 KB stack. Baseline 2026-09-25 after a weather + BVG
+  fetch: heap lowest 145 KB; stack left main 4.8 KB (of 8), bvg 4.4 KB (of
+  8), enc_button 1.6 KB (of 2), sys_evt 1.7 KB. A new task goes in
+  `TASKS[]` there. To see bvg's real number, open the BVG screen before
+  the first report.
 - `snprintf` into a buffer that can't hold the worst case fails the build
   (`-Werror=format-truncation`): size buffers for the longest possible
   value, not the typical one.
@@ -232,7 +242,8 @@ tables that clang-format would flatten go between
 ## CI (since 2026-09-25)
 `.github/workflows/ci.yml`: on every push/PR, in the `espressif/idf:latest`
 container (= ESP-IDF master, what this is developed on): firmware build,
-`tools/format.sh --check`, `tools/test.sh`, `tools/lint.sh`. The gitignored
+`tools/size_check.sh`, `tools/format.sh --check`, `tools/test.sh`,
+`tools/lint.sh`. The gitignored
 `*_secrets.h` are replaced by their `.example` templates there. Locally, run
 the same three scripts before pushing.
 

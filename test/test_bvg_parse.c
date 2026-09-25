@@ -27,6 +27,21 @@ static void test_parses_fixture_skipping_cancelled(void)
     free(json);
 }
 
+static void test_parses_real_response(void)
+{
+    char *json = fixture_read("bvg_real.json");
+    bvg_departures_t d;
+    TEST_ASSERT_TRUE(bvg_parse(json, &d));
+    TEST_ASSERT_EQUAL_INT(6, d.count);
+    TEST_ASSERT_EQUAL_STRING("U5", d.dep[0].line);
+    TEST_ASSERT_EQUAL_STRING("HAUPTBAHNHOF", d.dep[0].direction);
+    TEST_ASSERT_EQUAL_INT(10, d.dep[0].hour);
+    TEST_ASSERT_EQUAL_INT(30, d.dep[0].minute);
+    TEST_ASSERT_EQUAL_INT(11, d.dep[5].hour);
+    TEST_ASSERT_EQUAL_INT(20, d.dep[5].minute);
+    free(json);
+}
+
 static void test_caps_at_max_departures(void)
 {
     char json[4096] = "{\"departures\":[";
@@ -90,6 +105,7 @@ int main(void)
 {
     UNITY_BEGIN();
     RUN_TEST(test_parses_fixture_skipping_cancelled);
+    RUN_TEST(test_parses_real_response);
     RUN_TEST(test_caps_at_max_departures);
     RUN_TEST(test_empty_list_is_success);
     RUN_TEST(test_garbage_fails_and_leaves_out_untouched);

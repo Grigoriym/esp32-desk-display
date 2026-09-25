@@ -14,6 +14,7 @@
 #include "encoder.h"
 #include "bvg.h"
 #include "screens.h"
+#include "health.h"
 #include "bvg_secrets.h"
 #include <time.h>
 
@@ -149,6 +150,7 @@ static esp_err_t ntp_sync_with_retry(void)
 #define WEATHER_REFRESH_SECONDS     (15 * 60)
 #define WEATHER_RETRY_START_SECONDS 30
 #define INDOOR_REFRESH_SECONDS      10
+#define HEALTH_LOG_SECONDS          (5 * 60)
 
 // What the boot sequence found out, and the main loop's timers.
 typedef struct {
@@ -158,6 +160,7 @@ typedef struct {
     int next_weather_interval; // shortened after a failure, see tick_weather()
     int seconds_since_indoor;
     int seconds_since_ntp;
+    int seconds_since_health;
     int last_minute;
 } app_state_t;
 
@@ -329,6 +332,15 @@ static bool tick_weather(app_state_t *st)
     return false;
 }
 
+// Heap and stack headroom, every few minutes and once a minute after boot
+// (by then the first TLS fetch has run, so the numbers mean something).
+static void tick_health(app_state_t *st)
+{
+    if (++st->seconds_since_health < HEALTH_LOG_SECONDS) return;
+    st->seconds_since_health = 0;
+    health_log();
+}
+
 // Waits out the rest of this second, reacting to the encoder straight away
 // instead of on the next tick. A quick spin queues several clicks: they're
 // all applied, then drawn once.
@@ -359,8 +371,12 @@ static void wait_second_handling_encoder(TickType_t *next_second)
 
 void app_main(void)
 {
-    app_state_t st = {.seconds_since_indoor = INDOOR_REFRESH_SECONDS,
-                      .last_minute = -1}; // indoor read on 1st pass
+    // Indoor read on the first pass, health report 60s in.
+    app_state_t st = {
+        .seconds_since_indoor = INDOOR_REFRESH_SECONDS,
+        .seconds_since_health = HEALTH_LOG_SECONDS - 60,
+        .last_minute = -1,
+    };
 
     i2c_master_bus_handle_t bus = i2c_init();
     bool brownout = last_reset_was_brownout();
@@ -389,6 +405,7 @@ void app_main(void)
         changed |= tick_indoor(&st);
         tick_ntp(&st);
         changed |= tick_weather(&st);
+        tick_health(&st);
         if (changed) draw_screen();
         wait_second_handling_encoder(&next_second);
     }

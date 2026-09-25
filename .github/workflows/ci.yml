@@ -33,6 +33,9 @@ jobs:
       - name: Firmware build
         run: . "$IDF_PATH/export.sh" >/dev/null && idf.py build
 
+      - name: Flash budget
+        run: . "$IDF_PATH/export.sh" >/dev/null && tools/size_check.sh
+
       - name: Formatting
         if: success() || failure()
         run: tools/format.sh --check
