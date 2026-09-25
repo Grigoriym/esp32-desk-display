@@ -97,7 +97,6 @@ Everything runs from the DevKit's 3V3 pin (onboard regulator, likely AMS1117 —
 | DS3231 module | 1-2 mA | ~3 mA | mostly the power LED |
 | BME280 | 1-2 mA | ~3 mA | LDO + LED; sensor itself is µA |
 | KY-040 | ~0.3 mA | ~1 mA | pull-ups only |
-| LDR + 10k divider | ~0.3 mA | ~0.3 mA | 3.3 V across ≥10k |
 | **Total** | **~130-170 mA** | **~380 mA** | ~100+ mA headroom left |
 
 Rules:
@@ -373,8 +372,8 @@ at the start of a session and tick items off there when done.
   `WEATHER NO` and goes to the main screen on RTC time. WiFi keeps retrying
   in the background; the main loop runs NTP (every `NTP_RETRY_SECONDS`) and
   the weather fetch once `wifi_is_connected()`. Offline boot verified with a
-  fake SSID; the catch-up once WiFi appears *after* boot is not yet tested
-  on hardware.
+  fake SSID; the catch-up once WiFi appears *after* boot was not tested
+  on hardware (dropped, not needed).
 
 ## Relationship to `esp32` lessons repo
 Separate git repo, not a subfolder of the lessons project — this is meant to be a
@@ -386,6 +385,7 @@ Sibling folder (`../esp32-hw-checks`, not a subfolder), created 2026-09-19. Hold
 standalone bring-up/test firmware for verifying ESP32 boards and modules/sensors in
 isolation (LED blink + I2C scan + OLED fill/text test + BME280 chip-ID check
 (0x60 BME280 vs 0x58 BMP280, added 2026-09-23) + KY-040 encoder on D25/D26/D27
-(passed 2026-09-24) + LDR raw ADC readout on D34 (added 2026-09-25); add a check there for each new sensor as it gets wired up) before that hardware is trusted
+(passed 2026-09-24) + LDR raw ADC readout on D34 (added 2026-09-25; the LDR is no longer on the
+desk-display board); add a check there for each new sensor as it gets wired up) before that hardware is trusted
 enough to use in this project's real firmware. **It is not a git repo** — its
 changes exist only on disk, so there's nothing to commit there.
