@@ -93,7 +93,7 @@ on the physical display, and note anything the next task needs to know.
     brighter. The dimming firmware (ADC reader, hysteresis logic) was
     written and removed unmerged. The LDR stays wired for later use.
 
-- [ ] **6. Rain hint on HOME** (2026-09-25, built, awaiting a look at the
+- [x] **6. Rain hint on HOME** (2026-09-25, `NO RAIN 12H` seen on the
   panel): page 7 shows `NO RAIN 12H`, `RAIN 16:00` (next rainy hour),
   `RAIN TILL 15:00` (raining now) or `RAIN NEXT 12H`. Same Open-Meteo
   request plus `hourly=precipitation_probability&forecast_hours=12`
