@@ -222,6 +222,19 @@ clang-tidy) come from ESP-IDF's optional `esp-clang` tool, installed with
 tables that clang-format would flatten go between
 `// clang-format off` / `// clang-format on` (see `weather_icon_for_code()`).
 
+## Static analysis (since 2026-09-25)
+`tools/lint.sh` runs clang-tidy (checks in `.clang-tidy`, the detekt config
+here; every exclusion there says why) on all tracked `main/*.c`; any finding
+fails it. clang-tidy needs clang-compatible flags, so the script configures
+a separate `build/clang` tree with `IDF_TOOLCHAIN=clang` and **its own copy
+of `sdkconfig`**: configuring clang against the shared `./sdkconfig` flips
+its toolchain options, and the next normal build then recompiles everything.
+The firmware itself is still built by gcc in `build/`. A finding that's a
+false positive gets `// NOLINTNEXTLINE(<check>): <reason>` (see
+`weather_parse.c`: the analyzer can't see into cJSON.c). `draw_screen()` and
+`app_main()` carry a NOLINT for cognitive complexity until they're split
+(ROADMAP 4c).
+
 ## Host unit tests (since 2026-09-25)
 `tools/test.sh` (after sourcing `export.sh`) builds `test/test_<name>.c`
 against `main/<name>.c` with the PC's gcc, ASan/UBSan on, and runs it:

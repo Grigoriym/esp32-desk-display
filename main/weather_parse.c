@@ -32,6 +32,9 @@ bool weather_parse(const char *json, weather_t *out)
         return false;
     }
 
+    // The analyzer can't see that cJSON_Is*(NULL) is false (cJSON.c is
+    // another translation unit), so it flags the dereferences below.
+    // NOLINTBEGIN(clang-analyzer-core.NullDereference)
     // Sunrise/sunset look like "2026-09-23T06:53" -- keep the "HH:MM" after 'T'.
     const char *rise_t = strchr(sunrise->valuestring, 'T');
     const char *set_t = strchr(sunset->valuestring, 'T');
@@ -46,6 +49,7 @@ bool weather_parse(const char *json, weather_t *out)
     out->uv_max = (int)lround(uv->valuedouble);
     snprintf(out->sunrise, sizeof(out->sunrise), "%.5s", rise_t + 1);
     snprintf(out->sunset, sizeof(out->sunset), "%.5s", set_t + 1);
+    // NOLINTEND(clang-analyzer-core.NullDereference)
 
     cJSON_Delete(root);
     return true;

@@ -102,6 +102,7 @@ static void draw_clock_row(void)
 // Redraws pages 1-7 for the current screen. Every page is written in full
 // (unused ones blank), so switching screens needs no display_clear() and
 // doesn't flicker. Missing data shows as "--".
+// NOLINTNEXTLINE(readability-function-cognitive-complexity): split planned, ROADMAP 4c
 static void draw_screen(void)
 {
     // Font has no '%' or '.': humidity is "45H", pressure whole hPa.
@@ -229,6 +230,7 @@ static esp_err_t ntp_sync_with_retry(void)
     return ESP_FAIL;
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity): split planned, ROADMAP 4c
 void app_main(void)
 {
     i2c_master_bus_config_t bus_cfg = {

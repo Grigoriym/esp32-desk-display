@@ -67,8 +67,13 @@ on the physical display, and note anything the next task needs to know.
     split from I2C in `clock.c`), BVG leave/hurry logic (lives in
     `draw_screen()`, needs pulling out), encoder decode, glyphs as ASCII art.
     Replace the hand-written `bvg_ok.json` with a real capture.
-  - [ ] clang-tidy (via `idf.py clang-check`) or cppcheck; maybe `-Wextra`
-    for `main/` only.
+  - [x] clang-tidy (2026-09-25): `.clang-tidy` + `tools/lint.sh`, clean.
+    Tidied on the way (none were live bugs): int->time_t widening in `utc_to_epoch()` made
+    explicit, int->float conversions in `bme280.c` made explicit, missing
+    `default:` in the umlaut switch.
+  - [ ] Split `app_main()` (boot sequence vs main loop) and `draw_screen()`
+    (one function per screen; pulls the BVG leave/hurry logic out where
+    it can be host-tested), then drop their complexity NOLINTs.
   - [ ] GitHub Actions: firmware build (espressif/idf image), format check,
     host tests.
 - [ ] **5. Later, from the Freenove kit**

@@ -20,6 +20,7 @@ void bvg_display_name(const char *src, char *dst, size_t dst_size)
                 case 0xBC:
                 case 0x9C: sub = "UE"; break;
                 case 0x9F: sub = "SS"; break;
+                default: break; // other 2-byte chars: dropped
             }
             p++;
         } else if (isalnum(*p) || *p == ' ' || *p == '-' || *p == '/') {
@@ -55,6 +56,7 @@ bool bvg_parse(const char *json, bvg_departures_t *out)
 
         // "2026-09-24T22:41:00+02:00" -- already local time, keep HH:MM.
         bvg_departure_t *dep = &result.dep[result.count];
+        // NOLINTNEXTLINE(cert-err34-c): match count is checked, fields are 2 digits
         if (sscanf(when->valuestring, "%*d-%*d-%*dT%d:%d", &dep->hour, &dep->minute) != 2) continue;
         bvg_display_name(line->valuestring, dep->line, sizeof(dep->line));
         bvg_display_name(dir->valuestring, dep->direction, sizeof(dep->direction));

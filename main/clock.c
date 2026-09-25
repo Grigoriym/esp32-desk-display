@@ -34,7 +34,7 @@ static time_t utc_to_epoch(const struct tm *t)
     int doy = (153 * (m + (m > 2 ? -3 : 9)) + 2) / 5 + t->tm_mday - 1;
     int doe = yoe * 365 + yoe / 4 - yoe / 100 + doy;
     long days = (long)era * 146097 + doe - 719468;
-    return (time_t)days * 86400 + t->tm_hour * 3600 + t->tm_min * 60 + t->tm_sec;
+    return (time_t)days * 86400 + (time_t)t->tm_hour * 3600 + (time_t)t->tm_min * 60 + t->tm_sec;
 }
 
 static uint8_t bcd_to_bin(uint8_t v)

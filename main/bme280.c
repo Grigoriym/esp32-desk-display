@@ -183,8 +183,8 @@ esp_err_t bme280_read(bme280_reading_t *out)
     int32_t adc_h = ((int32_t)d[6] << 8) | d[7];
 
     int32_t t_fine;
-    out->temp_c = compensate_temp(adc_t, &t_fine) / 100.0f;
-    out->pressure_hpa = compensate_press(adc_p, t_fine) / 25600.0f; // Q24.8 Pa -> hPa
-    out->humidity_pct = compensate_hum(adc_h, t_fine) / 1024.0f;
+    out->temp_c = (float)compensate_temp(adc_t, &t_fine) / 100.0f;
+    out->pressure_hpa = (float)compensate_press(adc_p, t_fine) / 25600.0f; // Q24.8 Pa -> hPa
+    out->humidity_pct = (float)compensate_hum(adc_h, t_fine) / 1024.0f;
     return ESP_OK;
 }

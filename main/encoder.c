@@ -44,7 +44,9 @@ static void IRAM_ATTR encoder_isr(void *arg)
 
 static void button_task(void *arg)
 {
-    int stable = 1, last_raw = 1, same_ms = 0;
+    int stable = 1;
+    int last_raw = 1;
+    int same_ms = 0;
     for (;;) {
         int raw = gpio_get_level(ENC_SW_GPIO);
         if (raw != last_raw) {
