@@ -15,6 +15,8 @@
 #include "bvg.h"
 #include "screens.h"
 #include "health.h"
+#include "metrics.h"
+#include "metrics_format.h"
 #include "bvg_secrets.h"
 #include <time.h>
 
@@ -151,6 +153,7 @@ static esp_err_t ntp_sync_with_retry(void)
 #define WEATHER_RETRY_START_SECONDS 30
 #define INDOOR_REFRESH_SECONDS      10
 #define HEALTH_LOG_SECONDS          (5 * 60)
+#define METRICS_SECONDS             60
 
 // What the boot sequence found out, and the main loop's timers.
 typedef struct {
@@ -161,6 +164,7 @@ typedef struct {
     int seconds_since_indoor;
     int seconds_since_ntp;
     int seconds_since_health;
+    int seconds_since_metrics;
     int last_minute;
 } app_state_t;
 
@@ -284,6 +288,8 @@ static void start_background(void)
     if (bverr != ESP_OK) ESP_LOGW(TAG, "BVG not used: %s", esp_err_to_name(bverr));
     esp_err_t eerr = encoder_init();
     if (eerr != ESP_OK) ESP_LOGW(TAG, "encoder not used: %s", esp_err_to_name(eerr));
+    esp_err_t merr = metrics_start();
+    if (merr != ESP_OK) ESP_LOGI(TAG, "dashboard upload off: %s", esp_err_to_name(merr));
 }
 
 // The per-second jobs below return true when the screen needs a redraw.
@@ -356,6 +362,24 @@ static void tick_health(app_state_t *st)
     health_log();
 }
 
+// Readings to the dashboard (server/), handed to the upload task.
+static void tick_metrics(app_state_t *st)
+{
+    if (++st->seconds_since_metrics < METRICS_SECONDS || !wifi_is_connected()) return;
+    st->seconds_since_metrics = 0;
+    metrics_device_t dev = {
+        .uptime_s = (long)(xTaskGetTickCount() / configTICK_RATE_HZ), // wraps after ~497 days
+        .heap_free_kb = (int)(esp_get_free_heap_size() / 1024),
+    };
+    dev.rssi_ok = wifi_rssi(&dev.rssi);
+    char lines[512];
+    if (metrics_format(&s_data, &dev, lines, sizeof(lines)) < 0) {
+        ESP_LOGW(TAG, "metrics batch too big");
+        return;
+    }
+    metrics_submit(lines);
+}
+
 // Waits out the rest of this second, reacting to the encoder straight away
 // instead of on the next tick. A quick spin queues several clicks: they're
 // all applied, then drawn once.
@@ -421,6 +445,7 @@ void app_main(void)
         tick_ntp(&st);
         changed |= tick_weather(&st);
         tick_health(&st);
+        tick_metrics(&st);
         if (changed) draw_screen();
         wait_second_handling_encoder(&next_second);
     }

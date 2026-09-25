@@ -16,3 +16,6 @@ sdkconfig
 
 # Claude Code local (machine-specific) settings
 .claude/settings.local.json
+
+# Dashboard server secrets
+server/.env

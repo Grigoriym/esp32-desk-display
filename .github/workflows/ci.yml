@@ -26,6 +26,7 @@ jobs:
           # Real secrets are gitignored; the templates are enough to compile.
           cp main/wifi_secrets.h.example main/wifi_secrets.h
           cp main/bvg_secrets.h.example main/bvg_secrets.h
+          cp main/metrics_secrets.h.example main/metrics_secrets.h
           . "$IDF_PATH/export.sh" >/dev/null
           python "$IDF_PATH/tools/idf_tools.py" install esp-clang
           command -v gcc >/dev/null || (apt-get update && apt-get install -y --no-install-recommends gcc libc6-dev)

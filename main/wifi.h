@@ -11,3 +11,7 @@ esp_err_t wifi_connect(int timeout_ms);
 
 // True while the station is connected and has an IP.
 bool wifi_is_connected(void);
+
+// Signal strength of the current connection in dBm (about -30 great, -80
+// poor). False while not connected.
+bool wifi_rssi(int *out);

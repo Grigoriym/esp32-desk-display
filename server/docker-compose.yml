@@ -1,0 +1,45 @@
+# Dashboard for the desk display: the ESP32 writes its readings to InfluxDB
+# every minute, Grafana shows them. Run on an always-on machine on the same
+# WiFi/LAN as the display (the ESP32 can't reach Tailscale). See README.md.
+services:
+  influxdb:
+    image: influxdb:2.9
+    restart: unless-stopped
+    ports:
+      - "8086:8086" # the ESP32 writes here
+    environment:
+      # First start only: creates the org, bucket and the token the ESP32 and
+      # Grafana use. Changing these later has no effect on an existing volume.
+      DOCKER_INFLUXDB_INIT_MODE: setup
+      DOCKER_INFLUXDB_INIT_USERNAME: admin
+      DOCKER_INFLUXDB_INIT_PASSWORD: ${INFLUX_ADMIN_PASSWORD:?set in .env}
+      DOCKER_INFLUXDB_INIT_ORG: desk
+      DOCKER_INFLUXDB_INIT_BUCKET: desk
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: ${INFLUX_TOKEN:?set in .env}
+    volumes:
+      - influxdb-data:/var/lib/influxdb2
+      - influxdb-config:/etc/influxdb2
+
+  grafana:
+    image: grafana/grafana:13.2
+    restart: unless-stopped
+    ports:
+      - "3000:3000" # the dashboard: http://<this machine>:3000
+    environment:
+      INFLUX_TOKEN: ${INFLUX_TOKEN:?set in .env}
+      # Home LAN only: open the dashboard without logging in (read-only).
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /var/lib/grafana/dashboards/desk.json
+      GF_SECURITY_ADMIN_PASSWORD: ${INFLUX_ADMIN_PASSWORD:?set in .env}
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - influxdb
+
+volumes:
+  influxdb-data:
+  influxdb-config:
+  grafana-data:

@@ -73,3 +73,11 @@ bool wifi_is_connected(void)
 {
     return s_wifi_event_group && (xEventGroupGetBits(s_wifi_event_group) & WIFI_CONNECTED_BIT);
 }
+
+bool wifi_rssi(int *out)
+{
+    wifi_ap_record_t ap;
+    if (!wifi_is_connected() || esp_wifi_sta_get_ap_info(&ap) != ESP_OK) return false;
+    *out = (int)ap.rssi; // dBm, genuinely signed
+    return true;
+}

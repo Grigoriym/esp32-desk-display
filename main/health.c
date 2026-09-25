@@ -15,7 +15,7 @@ static const char *TAG = "health";
 
 // Tasks this firmware creates, plus the system event task that runs its
 // WiFi/IP event handler. Names as passed to xTaskCreate().
-static const char *const TASKS[] = {"bvg", "enc_button", "sys_evt"};
+static const char *const TASKS[] = {"bvg", "enc_button", "metrics", "sys_evt"};
 
 static void log_stack(const char *name, TaskHandle_t task)
 {

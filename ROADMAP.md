@@ -114,6 +114,15 @@ on the physical display, and note anything the next task needs to know.
   fetch retry with the weather backoff. Pollen is 0 off season (Sep-Jan),
   so the pollen rows only get real data from spring.
 
+- [ ] **8. Dashboard** (2026-09-25, built, awaiting a look in the browser
+  on the always-on machine): the display POSTs its readings every minute to
+  InfluxDB, Grafana shows them (`server/`, Docker Compose, setup in
+  `server/README.md`). Tested end to end with the stack on the dev machine
+  (192.168.0.241): all four measurements arrive, every dashboard query
+  returns data. Still to do: run `server/` on the always-on home machine,
+  put its LAN IP into `main/metrics_secrets.h`, reflash, then stop the
+  dev-machine stack (`docker compose down` in `server/`).
+
 WiFi connect timeout: done 2026-09-25, see Open questions in `CLAUDE.md`.
 
 Other open items (not scheduled): battery backup, CO2
