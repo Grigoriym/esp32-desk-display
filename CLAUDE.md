@@ -365,8 +365,6 @@ at the start of a session and tick items off there when done.
   LiPo + TP4056 charge module sized as backup/short-gap runtime (keeps the "always
   on" display concept intact) rather than a full multi-day-portable redesign, but
   not decided or ordered. Revisit once the base build works.
-- BME280 temperature may read high from the ESP32/regulator's own heat
-  (26.5°C seen on first read, not yet cross-checked against a thermometer).
 - **WiFi connect timeout** (done 2026-09-25): `wifi_connect()` waits at most
   `WIFI_CONNECT_TIMEOUT_SECONDS` (15s), then boot shows `WIFI NO`/`NTP NO`/
   `WEATHER NO` and goes to the main screen on RTC time. WiFi keeps retrying
