@@ -56,6 +56,18 @@ on the physical display, and note anything the next task needs to know.
   ESP32 can't join Tailscale, so it would need a host on the display's
   own LAN or a public HTTPS one. It would need only a URL change in
   `bvg.c` (same response format) if revisited.
+- [ ] **4c. Code quality: lint, tests, CI** (Android analogues: ktlint,
+  detekt/lint, unit tests, GitHub Actions)
+  - [x] clang-format (2026-09-25): `.clang-format` + `tools/format.sh
+    [--check]`, whole codebase reformatted in one commit.
+  - [ ] Host unit tests (Unity/gcc on the PC): first split the JSON parsing
+    out of `weather.c`/`bvg.c` into `parse_*(const char *json, ...)` and test
+    against saved real responses; then `utc_to_epoch()`/DST dates, weather
+    code -> icon, BVG leave/hurry logic, encoder decode, glyphs as ASCII art.
+  - [ ] clang-tidy (via `idf.py clang-check`) or cppcheck; maybe `-Wextra`
+    for `main/` only.
+  - [ ] GitHub Actions: firmware build (espressif/idf image), format check,
+    host tests.
 - [ ] **5. Later, from the Freenove kit**
   - [ ] PIR motion sensor: screen on only when someone is at the desk (OLED
     burn-in protection). Powered from VIN (5V), output is 3.3V-safe.

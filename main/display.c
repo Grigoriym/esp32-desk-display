@@ -1,8 +1,8 @@
 #include <string.h>
 #include "display.h"
 
-#define OLED_WIDTH  128
-#define OLED_PAGES  8
+#define OLED_WIDTH 128
+#define OLED_PAGES 8
 
 static i2c_master_dev_handle_t s_dev;
 
@@ -88,7 +88,7 @@ static const uint8_t *glyph_for(char c)
         case ':': return glyph_colon;
         case '-': return glyph_minus;
         case '/': return glyph_slash;
-        default:  return NULL; // incl. space: left blank
+        default: return NULL; // incl. space: left blank
     }
 }
 
@@ -202,7 +202,7 @@ esp_err_t display_draw_icon(int page, const uint8_t *icon)
     return ssd1306_write_page(page, row, OLED_WIDTH);
 }
 
-#define ICON_WIDTH 8
+#define ICON_WIDTH    8
 #define ICON_TEXT_GAP 4
 
 esp_err_t display_draw_icon_and_text(int page, const uint8_t *icon, const char *text)

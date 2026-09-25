@@ -23,7 +23,7 @@ static const char *TAG = "desk_display";
 #define I2C_PORT     I2C_NUM_0
 
 #define WIFI_CONNECT_TIMEOUT_SECONDS 15
-#define NTP_RETRY_SECONDS 60
+#define NTP_RETRY_SECONDS            60
 
 // Boot status grid: two columns, local hardware on top, network below.
 // Each item is a (page, column) cell; column 0 = left, 1 = right.
@@ -45,7 +45,7 @@ static struct {
     screen_t screen;
     bool weather_ok; // false until the first fetch succeeds
     weather_t weather;
-    bool indoor_ok;  // false until the first BME280 read succeeds
+    bool indoor_ok; // false until the first BME280 read succeeds
     bme280_reading_t indoor;
     bool bvg_ok;     // false until the first departures fetch succeeds
     bool bvg_failed; // last fetch failed (shown only while there's no data)
@@ -68,14 +68,17 @@ static int minutes_until(int hour, int minute)
 // Everything that's allowed to answer on the I2C bus. Anything else showing
 // up means an address clash or an unplanned module -- see "Power & bus
 // budget" in CLAUDE.md before wiring a new one, then add it here.
-static const struct { uint8_t addr; const char *name; } KNOWN_I2C[] = {
-    { 0x3C, "OLED" },
-    { 0x3D, "OLED (alt addr)" },
-    { 0x57, "DS3231 EEPROM (AT24C32)" },
-    { 0x5F, "DS3231 module extra addr" },
-    { 0x68, "DS3231 RTC" },
-    { 0x76, "BME280" },
-    { 0x77, "BME280 (alt addr)" },
+static const struct {
+    uint8_t addr;
+    const char *name;
+} KNOWN_I2C[] = {
+    {0x3C, "OLED"},
+    {0x3D, "OLED (alt addr)"},
+    {0x57, "DS3231 EEPROM (AT24C32)"},
+    {0x5F, "DS3231 module extra addr"},
+    {0x68, "DS3231 RTC"},
+    {0x76, "BME280"},
+    {0x77, "BME280 (alt addr)"},
 };
 
 // One "NAME    OK" cell of the boot status grid. Every cell is padded to
@@ -107,70 +110,70 @@ static void draw_screen(void)
     const bme280_reading_t *in = &s_ui.indoor;
 
     switch (s_ui.screen) {
-    case SCREEN_HOME:
-        if (s_ui.weather_ok) snprintf(rows[3][0], sizeof(rows[3][0]), "%dC", w->temp_c);
-        else strcpy(rows[3][0], "--C");
-        if (s_ui.indoor_ok) {
-            snprintf(rows[5][0], sizeof(rows[5][0]), "IN %dC %dH",
-                     (int)lroundf(in->temp_c), (int)lroundf(in->humidity_pct));
-        }
-        break;
-    case SCREEN_OUTDOOR:
-        strcpy(rows[2][0], "OUTDOOR");
-        if (s_ui.weather_ok) {
-            snprintf(rows[4][0], sizeof(rows[4][0]), "RISE %s", w->sunrise);
-            snprintf(rows[4][1], sizeof(rows[4][1]), "SET %s", w->sunset);
-            snprintf(rows[6][0], sizeof(rows[6][0]), "WIND %dKMH", w->wind_kmh);
-            snprintf(rows[6][1], sizeof(rows[6][1]), "UV %d", w->uv_max);
-        } else {
-            strcpy(rows[4][0], "--");
-        }
-        break;
-    case SCREEN_INDOOR:
-        strcpy(rows[2][0], "INDOOR");
-        if (s_ui.indoor_ok) {
-            snprintf(rows[4][0], sizeof(rows[4][0]), "TEMP %dC", (int)lroundf(in->temp_c));
-            snprintf(rows[4][1], sizeof(rows[4][1]), "HUM %dH", (int)lroundf(in->humidity_pct));
-            snprintf(rows[6][0], sizeof(rows[6][0]), "%d HPA", (int)lroundf(in->pressure_hpa));
-        } else {
-            strcpy(rows[4][0], "--");
-        }
-        break;
-    case SCREEN_BVG: {
-        if (!s_ui.bvg_ok) {
-            strcpy(rows[2][0], "BVG");
-            strcpy(rows[4][0], s_ui.bvg_failed ? "NO DATA" : "LOADING");
+        case SCREEN_HOME:
+            if (s_ui.weather_ok) snprintf(rows[3][0], sizeof(rows[3][0]), "%dC", w->temp_c);
+            else strcpy(rows[3][0], "--C");
+            if (s_ui.indoor_ok) {
+                snprintf(rows[5][0], sizeof(rows[5][0]), "IN %dC %dH", (int)lroundf(in->temp_c),
+                         (int)lroundf(in->humidity_pct));
+            }
+            break;
+        case SCREEN_OUTDOOR:
+            strcpy(rows[2][0], "OUTDOOR");
+            if (s_ui.weather_ok) {
+                snprintf(rows[4][0], sizeof(rows[4][0]), "RISE %s", w->sunrise);
+                snprintf(rows[4][1], sizeof(rows[4][1]), "SET %s", w->sunset);
+                snprintf(rows[6][0], sizeof(rows[6][0]), "WIND %dKMH", w->wind_kmh);
+                snprintf(rows[6][1], sizeof(rows[6][1]), "UV %d", w->uv_max);
+            } else {
+                strcpy(rows[4][0], "--");
+            }
+            break;
+        case SCREEN_INDOOR:
+            strcpy(rows[2][0], "INDOOR");
+            if (s_ui.indoor_ok) {
+                snprintf(rows[4][0], sizeof(rows[4][0]), "TEMP %dC", (int)lroundf(in->temp_c));
+                snprintf(rows[4][1], sizeof(rows[4][1]), "HUM %dH", (int)lroundf(in->humidity_pct));
+                snprintf(rows[6][0], sizeof(rows[6][0]), "%d HPA", (int)lroundf(in->pressure_hpa));
+            } else {
+                strcpy(rows[4][0], "--");
+            }
+            break;
+        case SCREEN_BVG: {
+            if (!s_ui.bvg_ok) {
+                strcpy(rows[2][0], "BVG");
+                strcpy(rows[4][0], s_ui.bvg_failed ? "NO DATA" : "LOADING");
+                break;
+            }
+            // Title from the data, e.g. "U5 HAUPTBAHNHOF"; then the next trains
+            // that can still be caught on foot, with a leave-by hint for the first.
+            if (s_ui.bvg.count > 0) {
+                snprintf(rows[2][0], sizeof(rows[2][0]), "%s %s", s_ui.bvg.dep[0].line,
+                         s_ui.bvg.dep[0].direction);
+            } else {
+                strcpy(rows[2][0], "BVG");
+            }
+            int row = 5;
+            for (int i = 0; i < s_ui.bvg.count && row <= 7; i++) {
+                const bvg_departure_t *d = &s_ui.bvg.dep[i];
+                int mins = minutes_until(d->hour, d->minute);
+                if (mins < BVG_WALK_MIN_MINUTES) continue;
+                if (row == 5) {
+                    // Before the comfortable-walk point: countdown; at it: go;
+                    // after it (but still catchable): hurry.
+                    int leave_in = mins - BVG_WALK_COMFORT_MINUTES;
+                    if (leave_in > 0) snprintf(rows[3][0], sizeof(rows[3][0]), "LEAVE IN %d", leave_in);
+                    else if (leave_in == 0) strcpy(rows[3][0], "GO NOW");
+                    else strcpy(rows[3][0], "HURRY");
+                }
+                snprintf(rows[row][0], sizeof(rows[row][0]), "%02d:%02d", d->hour, d->minute);
+                snprintf(rows[row][1], sizeof(rows[row][1]), "%d MIN", mins);
+                row++;
+            }
+            if (row == 5) strcpy(rows[4][0], "NO TRAINS");
             break;
         }
-        // Title from the data, e.g. "U5 HAUPTBAHNHOF"; then the next trains
-        // that can still be caught on foot, with a leave-by hint for the first.
-        if (s_ui.bvg.count > 0) {
-            snprintf(rows[2][0], sizeof(rows[2][0]), "%s %s", s_ui.bvg.dep[0].line, s_ui.bvg.dep[0].direction);
-        } else {
-            strcpy(rows[2][0], "BVG");
-        }
-        int row = 5;
-        for (int i = 0; i < s_ui.bvg.count && row <= 7; i++) {
-            const bvg_departure_t *d = &s_ui.bvg.dep[i];
-            int mins = minutes_until(d->hour, d->minute);
-            if (mins < BVG_WALK_MIN_MINUTES) continue;
-            if (row == 5) {
-                // Before the comfortable-walk point: countdown; at it: go;
-                // after it (but still catchable): hurry.
-                int leave_in = mins - BVG_WALK_COMFORT_MINUTES;
-                if (leave_in > 0) snprintf(rows[3][0], sizeof(rows[3][0]), "LEAVE IN %d", leave_in);
-                else if (leave_in == 0) strcpy(rows[3][0], "GO NOW");
-                else strcpy(rows[3][0], "HURRY");
-            }
-            snprintf(rows[row][0], sizeof(rows[row][0]), "%02d:%02d", d->hour, d->minute);
-            snprintf(rows[row][1], sizeof(rows[row][1]), "%d MIN", mins);
-            row++;
-        }
-        if (row == 5) strcpy(rows[4][0], "NO TRAINS");
-        break;
-    }
-    default:
-        break;
+        default: break;
     }
 
     for (int page = 1; page < 8; page++) {
@@ -331,9 +334,9 @@ void app_main(void)
     s_ui.screen = SCREEN_HOME;
     draw_screen();
 
-#define WEATHER_REFRESH_SECONDS (15 * 60)
+#define WEATHER_REFRESH_SECONDS     (15 * 60)
 #define WEATHER_RETRY_START_SECONDS 30
-#define INDOOR_REFRESH_SECONDS 10
+#define INDOOR_REFRESH_SECONDS      10
     int seconds_since_weather = 0;
     int seconds_since_ntp = 0;
     int seconds_since_indoor = INDOOR_REFRESH_SECONDS; // read on the first pass
@@ -395,7 +398,8 @@ void app_main(void)
             } else {
                 ESP_LOGW(TAG, "weather refresh failed: %s", esp_err_to_name(werr));
                 next_weather_interval = (next_weather_interval < WEATHER_REFRESH_SECONDS)
-                    ? next_weather_interval * 2 : WEATHER_REFRESH_SECONDS;
+                                            ? next_weather_interval * 2
+                                            : WEATHER_REFRESH_SECONDS;
                 if (next_weather_interval > WEATHER_REFRESH_SECONDS) {
                     next_weather_interval = WEATHER_REFRESH_SECONDS;
                 }

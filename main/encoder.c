@@ -6,20 +6,17 @@
 
 static const char *TAG = "encoder";
 
-#define ENC_CLK_GPIO GPIO_NUM_25 // channel A
-#define ENC_DT_GPIO  GPIO_NUM_26 // channel B
-#define ENC_SW_GPIO  GPIO_NUM_27 // push button, active low
-#define BTN_POLL_MS     10 // = 1 tick at CONFIG_FREERTOS_HZ=100
+#define ENC_CLK_GPIO    GPIO_NUM_25 // channel A
+#define ENC_DT_GPIO     GPIO_NUM_26 // channel B
+#define ENC_SW_GPIO     GPIO_NUM_27 // push button, active low
+#define BTN_POLL_MS     10          // = 1 tick at CONFIG_FREERTOS_HZ=100
 #define BTN_DEBOUNCE_MS 30
 
 // Quadrature decode, index = (prev_state << 2) | new_state, each state
 // being (CLK << 1) | DT. Valid Gray-code steps give +1/-1, bounce and
 // skipped states give 0, so contact bounce cancels itself out.
 static const int8_t ENC_STEP[16] = {
-     0, -1, +1,  0,
-    +1,  0,  0, -1,
-    -1,  0,  0, +1,
-     0, +1, -1,  0,
+    0, -1, +1, 0, +1, 0, 0, -1, -1, 0, 0, +1, 0, +1, -1, 0,
 };
 
 static QueueHandle_t s_events;

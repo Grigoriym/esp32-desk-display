@@ -37,8 +37,14 @@ static time_t utc_to_epoch(const struct tm *t)
     return (time_t)days * 86400 + t->tm_hour * 3600 + t->tm_min * 60 + t->tm_sec;
 }
 
-static uint8_t bcd_to_bin(uint8_t v) { return (v >> 4) * 10 + (v & 0x0F); }
-static uint8_t bin_to_bcd(uint8_t v) { return ((v / 10) << 4) | (v % 10); }
+static uint8_t bcd_to_bin(uint8_t v)
+{
+    return (v >> 4) * 10 + (v & 0x0F);
+}
+static uint8_t bin_to_bcd(uint8_t v)
+{
+    return ((v / 10) << 4) | (v % 10);
+}
 
 static esp_err_t rtc_read(uint8_t reg, uint8_t *data, size_t len)
 {
@@ -65,7 +71,7 @@ static esp_err_t rtc_write_utc(time_t now)
     // Clear OSF so the next boot trusts the stored time.
     uint8_t status;
     if ((err = rtc_read(DS3231_REG_STATUS, &status, 1)) != ESP_OK) return err;
-    uint8_t clr[2] = { DS3231_REG_STATUS, status & ~DS3231_OSF };
+    uint8_t clr[2] = {DS3231_REG_STATUS, status & ~DS3231_OSF};
     return i2c_master_transmit(s_rtc, clr, sizeof(clr), 1000);
 }
 
@@ -101,10 +107,10 @@ esp_err_t clock_rtc_init(i2c_master_bus_handle_t bus)
         .tm_mon = bcd_to_bin(r[5] & 0x1F) - 1,
         .tm_year = bcd_to_bin(r[6]) + 100,
     };
-    struct timeval tv = { .tv_sec = utc_to_epoch(&t) };
+    struct timeval tv = {.tv_sec = utc_to_epoch(&t)};
     settimeofday(&tv, NULL);
-    ESP_LOGI(TAG, "system time set from RTC: %04d-%02d-%02d %02d:%02d:%02d UTC",
-             t.tm_year + 1900, t.tm_mon + 1, t.tm_mday, t.tm_hour, t.tm_min, t.tm_sec);
+    ESP_LOGI(TAG, "system time set from RTC: %04d-%02d-%02d %02d:%02d:%02d UTC", t.tm_year + 1900,
+             t.tm_mon + 1, t.tm_mday, t.tm_hour, t.tm_min, t.tm_sec);
     return ESP_OK;
 }
 

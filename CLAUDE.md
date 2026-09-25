@@ -212,6 +212,15 @@ routine during hardware debugging — remember to flash this project back after.
 After such a swap, esptool may print "Verification failed after fast reflash ...
 Reflashing the whole image" — harmless, it recovers on its own and ends `Done`.
 
+## Code style (since 2026-09-25)
+`tools/format.sh` formats all tracked C sources with clang-format (style in
+`.clang-format`, CLion picks it up too); `tools/format.sh --check` only
+reports and fails, for CI. Run it before committing. clang-format (and
+clang-tidy) come from ESP-IDF's optional `esp-clang` tool, installed with
+`python $IDF_PATH/tools/idf_tools.py install esp-clang`. Hand-aligned
+tables that clang-format would flatten go between
+`// clang-format off` / `// clang-format on` (see `weather_icon_for_code()`).
+
 ## Serial monitoring gotcha (this dev harness)
 `idf.py monitor` fails here with "Monitor requires standard input to be attached to
 TTY" — the Claude Code Bash tool isn't a real terminal. Workaround used this session:

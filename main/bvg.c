@@ -13,7 +13,7 @@
 
 static const char *TAG = "bvg";
 
-#define BVG_URL \
+#define BVG_URL                                                                                  \
     "https://v6.bvg.transport.rest/stops/" BVG_STOP_ID "/departures?direction=" BVG_DIRECTION_ID \
     "&duration=60&results=6&" BVG_PRODUCTS "&remarks=false&linesOfStops=false&pretty=false"
 
@@ -52,10 +52,13 @@ static void to_display_name(const char *src, char *dst, size_t dst_size)
         char one[2] = {0};
         if (*p == 0xC3 && p[1]) { // UTF-8 umlauts / sharp s
             switch (p[1]) {
-                case 0xA4: case 0x84: sub = "AE"; break;
-                case 0xB6: case 0x96: sub = "OE"; break;
-                case 0xBC: case 0x9C: sub = "UE"; break;
-                case 0x9F:            sub = "SS"; break;
+                case 0xA4:
+                case 0x84: sub = "AE"; break;
+                case 0xB6:
+                case 0x96: sub = "OE"; break;
+                case 0xBC:
+                case 0x9C: sub = "UE"; break;
+                case 0x9F: sub = "SS"; break;
             }
             p++;
         } else if (isalnum(*p) || *p == ' ' || *p == '-' || *p == '/') {
@@ -105,7 +108,8 @@ static esp_err_t bvg_fetch(bvg_departures_t *out)
 
     bvg_departures_t result = {0};
     cJSON *d;
-    cJSON_ArrayForEach(d, deps) {
+    cJSON_ArrayForEach(d, deps)
+    {
         if (result.count >= BVG_MAX_DEPARTURES) break;
         // "when" is the real time incl. delay, null when cancelled.
         cJSON *when = cJSON_GetObjectItem(d, "when");

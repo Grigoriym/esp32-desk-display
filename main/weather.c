@@ -11,7 +11,7 @@ static const char *TAG = "weather";
 
 // Hardcoded location (CLAUDE.md: no GPS) -- central Berlin. timezone makes
 // sunrise/sunset come back in local time, DST included.
-#define WEATHER_URL \
+#define WEATHER_URL                                                                               \
     "https://api.open-meteo.com/v1/forecast?latitude=52.52&longitude=13.405&current_weather=true" \
     "&daily=sunrise,sunset,uv_index_max&timezone=Europe%2FBerlin&forecast_days=1"
 
@@ -22,10 +22,10 @@ static int s_response_len;
 
 // 8x8 icons, column-major (bit0 = top row). Rough pixel art -- not exact,
 // good enough to distinguish sun/cloud/rain/snow/storm at a glance.
-static const uint8_t icon_sun[8]   = {0x3C, 0x7E, 0xFF, 0xFF, 0xFF, 0xFF, 0x7E, 0x3C};
+static const uint8_t icon_sun[8] = {0x3C, 0x7E, 0xFF, 0xFF, 0xFF, 0xFF, 0x7E, 0x3C};
 static const uint8_t icon_cloud[8] = {0x18, 0x1C, 0x1E, 0x1E, 0x1E, 0x1E, 0x1C, 0x18};
-static const uint8_t icon_rain[8]  = {0x18, 0x3C, 0x5E, 0x3E, 0x5E, 0x3E, 0x5C, 0x18};
-static const uint8_t icon_snow[8]  = {0x58, 0xBC, 0x5E, 0xBE, 0x5E, 0xBE, 0x5C, 0x18};
+static const uint8_t icon_rain[8] = {0x18, 0x3C, 0x5E, 0x3E, 0x5E, 0x3E, 0x5C, 0x18};
+static const uint8_t icon_snow[8] = {0x58, 0xBC, 0x5E, 0xBE, 0x5E, 0xBE, 0x5C, 0x18};
 static const uint8_t icon_storm[8] = {0x18, 0x9C, 0xDE, 0x7E, 0x3E, 0x1E, 0x1C, 0x18};
 
 static esp_err_t http_event_handler(esp_http_client_event_t *evt)
@@ -77,8 +77,8 @@ esp_err_t weather_fetch(weather_t *out)
     cJSON *sunrise = daily ? cJSON_GetArrayItem(cJSON_GetObjectItem(daily, "sunrise"), 0) : NULL;
     cJSON *sunset = daily ? cJSON_GetArrayItem(cJSON_GetObjectItem(daily, "sunset"), 0) : NULL;
     cJSON *uv = daily ? cJSON_GetArrayItem(cJSON_GetObjectItem(daily, "uv_index_max"), 0) : NULL;
-    if (!cJSON_IsNumber(temp) || !cJSON_IsNumber(code) || !cJSON_IsNumber(wind)
-        || !cJSON_IsString(sunrise) || !cJSON_IsString(sunset) || !cJSON_IsNumber(uv)) {
+    if (!cJSON_IsNumber(temp) || !cJSON_IsNumber(code) || !cJSON_IsNumber(wind) || !cJSON_IsString(sunrise)
+        || !cJSON_IsString(sunset) || !cJSON_IsNumber(uv)) {
         cJSON_Delete(root);
         return ESP_FAIL;
     }
@@ -105,6 +105,7 @@ esp_err_t weather_fetch(weather_t *out)
 const uint8_t *weather_icon_for_code(int weather_code)
 {
     // WMO weather codes, as used by Open-Meteo's "weathercode" field.
+    // clang-format off: grouped by weather type, one family per line
     switch (weather_code) {
         case 0:
         case 1:
@@ -126,4 +127,5 @@ const uint8_t *weather_icon_for_code(int weather_code)
         default:
             return icon_cloud;
     }
+    // clang-format on
 }

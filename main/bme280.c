@@ -5,27 +5,31 @@
 
 static const char *TAG = "bme280";
 
-#define BME280_CHIP_ID       0x60 // a BMP280 reports 0x58
-#define BME280_REG_CALIB_TP  0x88 // 26 regs: T1-T3, P1-P9, (unused), H1
-#define BME280_REG_CHIP_ID   0xD0
-#define BME280_REG_CALIB_H   0xE1 // 7 regs: H2-H6
-#define BME280_REG_CTRL_HUM  0xF2
-#define BME280_REG_STATUS    0xF3
-#define BME280_REG_CTRL_MEAS 0xF4
-#define BME280_REG_DATA      0xF7 // 8 regs: press[3], temp[3], hum[2]
+#define BME280_CHIP_ID          0x60 // a BMP280 reports 0x58
+#define BME280_REG_CALIB_TP     0x88 // 26 regs: T1-T3, P1-P9, (unused), H1
+#define BME280_REG_CHIP_ID      0xD0
+#define BME280_REG_CALIB_H      0xE1 // 7 regs: H2-H6
+#define BME280_REG_CTRL_HUM     0xF2
+#define BME280_REG_STATUS       0xF3
+#define BME280_REG_CTRL_MEAS    0xF4
+#define BME280_REG_DATA         0xF7 // 8 regs: press[3], temp[3], hum[2]
 #define BME280_STATUS_MEASURING 0x08
 
 // Oversampling x1 for everything, forced mode: one measurement per request,
 // then the chip sleeps -- no self-heating from continuous sampling.
-#define BME280_CTRL_HUM_X1        0x01
-#define BME280_CTRL_MEAS_FORCED   ((1 << 5) | (1 << 2) | 0x01)
+#define BME280_CTRL_HUM_X1      0x01
+#define BME280_CTRL_MEAS_FORCED ((1 << 5) | (1 << 2) | 0x01)
 
 static i2c_master_dev_handle_t s_dev; // NULL if no BME280 on the bus
 
 static struct {
-    uint16_t t1; int16_t t2, t3;
-    uint16_t p1; int16_t p2, p3, p4, p5, p6, p7, p8, p9;
-    uint8_t h1, h3; int16_t h2, h4, h5; int8_t h6;
+    uint16_t t1;
+    int16_t t2, t3;
+    uint16_t p1;
+    int16_t p2, p3, p4, p5, p6, p7, p8, p9;
+    uint8_t h1, h3;
+    int16_t h2, h4, h5;
+    int8_t h6;
 } s_cal;
 
 static esp_err_t reg_read(uint8_t reg, uint8_t *data, size_t len)
@@ -35,11 +39,14 @@ static esp_err_t reg_read(uint8_t reg, uint8_t *data, size_t len)
 
 static esp_err_t reg_write(uint8_t reg, uint8_t value)
 {
-    uint8_t buf[2] = { reg, value };
+    uint8_t buf[2] = {reg, value};
     return i2c_master_transmit(s_dev, buf, sizeof(buf), 1000);
 }
 
-static uint16_t u16le(const uint8_t *b) { return (uint16_t)(b[0] | (b[1] << 8)); }
+static uint16_t u16le(const uint8_t *b)
+{
+    return (uint16_t)(b[0] | (b[1] << 8));
+}
 
 static esp_err_t load_calibration(void)
 {
@@ -116,7 +123,8 @@ static int32_t compensate_temp(int32_t adc_t, int32_t *t_fine)
 {
     int32_t var1 = ((((adc_t >> 3) - ((int32_t)s_cal.t1 << 1))) * (int32_t)s_cal.t2) >> 11;
     int32_t var2 = (((((adc_t >> 4) - (int32_t)s_cal.t1) * ((adc_t >> 4) - (int32_t)s_cal.t1)) >> 12)
-                    * (int32_t)s_cal.t3) >> 14;
+                    * (int32_t)s_cal.t3)
+                   >> 14;
     *t_fine = var1 + var2;
     return (*t_fine * 5 + 128) >> 8; // 0.01 degC
 }
@@ -143,7 +151,10 @@ static uint32_t compensate_hum(int32_t adc_h, int32_t t_fine)
     int32_t v = t_fine - (int32_t)76800;
     v = (((((adc_h << 14) - (((int32_t)s_cal.h4) << 20) - (((int32_t)s_cal.h5) * v)) + (int32_t)16384) >> 15)
          * (((((((v * (int32_t)s_cal.h6) >> 10) * (((v * (int32_t)s_cal.h3) >> 11) + (int32_t)32768)) >> 10)
-              + (int32_t)2097152) * (int32_t)s_cal.h2 + 8192) >> 14));
+              + (int32_t)2097152)
+                 * (int32_t)s_cal.h2
+             + 8192)
+            >> 14));
     v = v - (((((v >> 15) * (v >> 15)) >> 7) * (int32_t)s_cal.h1) >> 4);
     v = v < 0 ? 0 : v;
     v = v > 419430400 ? 419430400 : v;
