@@ -174,9 +174,11 @@ Rules:
   under 40 KB heap or 1 KB stack. Baseline 2026-09-25 after a weather + BVG
   fetch: heap lowest 145 KB; stack left main 4.8 KB (of 8), bvg 4.4 KB (of
   8), enc_button 1.6 KB (of 2), sys_evt 1.7 KB; metrics 2.5 KB (of 4, after
-uploads, 2026-09-25). A new task goes in
-  `TASKS[]` there. To see bvg's real number, open the BVG screen before
-  the first report.
+  uploads, 2026-09-25). A new task goes in `TASKS[]` there. The 60 s report
+  can come **before a task's first real run**, so its number is meaningless
+  there: to see bvg's, open the BVG screen before it; metrics' first upload
+  is at ~69 s, so read its number from the 5-min report (a `serial_log.py`
+  capture of ~390 s, since the script resets the board).
 - `snprintf` into a buffer that can't hold the worst case fails the build
   (`-Werror=format-truncation`): size buffers for the longest possible
   value, not the typical one.
@@ -282,7 +284,14 @@ feeding the gcc `build/compile_commands.json` to clang-tidy (rewriting the
 compiler, stripping gcc-only flags) fails on the C library headers
 (picolibc is selected via gcc `-specs=`), so the clang tree is required. A finding that's a
 false positive gets `// NOLINTNEXTLINE(<check>): <reason>` (see
-`weather_parse.c`: the analyzer can't see into cJSON.c).
+`weather_parse.c`: the analyzer can't see into cJSON.c). Two that bit new
+code (2026-09-25): a `va_start`/`vsnprintf`/`va_end` helper got a
+`valist.Uninitialized` false positive (`metrics_format.c` uses a `PUT()`
+macro around `snprintf` instead), and assigning an `int8_t` (e.g. WiFi
+`rssi`) to `int` trips `bugprone-signed-char-misuse` unless cast
+explicitly. `main/CMakeLists.txt` `REQUIRES` is explicit: a new ESP-IDF
+header (e.g. `esp_timer.h`) fails the gcc build until its component is
+added there.
 **Never configure clang against the shared `./sdkconfig`** (e.g. a bare
 `idf.py -D IDF_TOOLCHAIN=clang reconfigure`): besides the toolchain it
 switches the C library from picolibc to newlib (`CONFIG_LIBC_NEWLIB=y`), and
