@@ -173,7 +173,8 @@ Rules:
   and each task's worst-case stack headroom (`health:` tag), with a warning
   under 40 KB heap or 1 KB stack. Baseline 2026-09-25 after a weather + BVG
   fetch: heap lowest 145 KB; stack left main 4.8 KB (of 8), bvg 4.4 KB (of
-  8), enc_button 1.6 KB (of 2), sys_evt 1.7 KB. A new task goes in
+  8), enc_button 1.6 KB (of 2), sys_evt 1.7 KB; metrics 2.5 KB (of 4, after
+uploads, 2026-09-25). A new task goes in
   `TASKS[]` there. To see bvg's real number, open the BVG screen before
   the first report.
 - `snprintf` into a buffer that can't hold the worst case fails the build

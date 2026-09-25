@@ -43,7 +43,8 @@ static esp_err_t post(const char *body)
 static void metrics_task(void *arg)
 {
     static char batch[BATCH_SIZE];
-    esp_err_t last = ESP_FAIL + 1; // no upload yet
+    bool first = true;
+    esp_err_t last = ESP_OK;
     for (;;) {
         ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
         xSemaphoreTake(s_lock, portMAX_DELAY);
@@ -52,10 +53,11 @@ static void metrics_task(void *arg)
 
         esp_err_t err = post(batch);
         // Log changes only: a line a minute while the server is down is noise.
-        if (err != last) {
+        if (first || err != last) {
             if (err == ESP_OK) ESP_LOGI(TAG, "upload OK");
             else ESP_LOGW(TAG, "upload failed: %s", esp_err_to_name(err));
         }
+        first = false;
         last = err;
     }
 }
