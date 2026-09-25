@@ -62,5 +62,7 @@ on the physical display, and note anything the next task needs to know.
   - [ ] Photoresistor: auto-dim in a dark room (night mode)
   - [ ] Passive buzzer: timer / "train leaves soon" alert
 
-Other open items (not scheduled): WiFi connect timeout, battery backup, CO2
+WiFi connect timeout: done 2026-09-25, see Open questions in `CLAUDE.md`.
+
+Other open items (not scheduled): battery backup, CO2
 sensor (SCD41 was the pick if it happens) — see Open questions in `CLAUDE.md`.

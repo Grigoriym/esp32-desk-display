@@ -280,11 +280,13 @@ at the start of a session and tick items off there when done.
   not decided or ordered. Revisit once the base build works.
 - BME280 temperature may read high from the ESP32/regulator's own heat
   (26.5°C seen on first read, not yet cross-checked against a thermometer).
-- **WiFi has no timeout** (seen 2026-09-23, deliberately left alone):
-  `wifi_connect()` waits forever, so with no network the status screen sits at
-  `WIFI --` indefinitely and the clock never appears, even though the RTC already
-  has the right time. Fix: bounded wait, show `WIFI NO`, skip NTP/weather, go to
-  the main screen on RTC time, keep reconnecting in the background.
+- **WiFi connect timeout** (done 2026-09-25): `wifi_connect()` waits at most
+  `WIFI_CONNECT_TIMEOUT_SECONDS` (15s), then boot shows `WIFI NO`/`NTP NO`/
+  `WEATHER NO` and goes to the main screen on RTC time. WiFi keeps retrying
+  in the background; the main loop runs NTP (every `NTP_RETRY_SECONDS`) and
+  the weather fetch once `wifi_is_connected()`. Offline boot verified with a
+  fake SSID; the catch-up once WiFi appears *after* boot is not yet tested
+  on hardware.
 
 ## Relationship to `esp32` lessons repo
 Separate git repo, not a subfolder of the lessons project — this is meant to be a

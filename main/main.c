@@ -22,6 +22,9 @@ static const char *TAG = "desk_display";
 #define I2C_SCL_GPIO GPIO_NUM_22
 #define I2C_PORT     I2C_NUM_0
 
+#define WIFI_CONNECT_TIMEOUT_SECONDS 15
+#define NTP_RETRY_SECONDS 60
+
 // Boot status grid: two columns, local hardware on top, network below.
 // Each item is a (page, column) cell; column 0 = left, 1 = right.
 #define SPLASH_OLED    2, 0
@@ -278,30 +281,37 @@ void app_main(void)
     }
     splash_status(SPLASH_BME, "BME", berr == ESP_OK ? "OK" : "NO");
 
-    // Blocks until connected; the WIFI row stays at "--" meanwhile.
-    ESP_ERROR_CHECK(wifi_connect());
-    ESP_LOGI(TAG, "WiFi connected");
-    splash_status(SPLASH_WIFI, "WIFI", "OK");
+    // Bounded wait: with no network the clock still comes up on RTC time and
+    // WiFi keeps reconnecting in the background; NTP and weather catch up in
+    // the main loop once it connects.
+    esp_err_t wferr = wifi_connect(WIFI_CONNECT_TIMEOUT_SECONDS * 1000);
+    splash_status(SPLASH_WIFI, "WIFI", wferr == ESP_OK ? "OK" : "NO");
 
-    if (ntp_sync_with_retry() == ESP_OK) {
-        ESP_LOGI(TAG, "NTP synced");
-        splash_status(SPLASH_NTP, "NTP", "OK");
-    } else {
-        ESP_LOGE(TAG, "NTP sync failed after retries, continuing with unsynced clock");
-        splash_status(SPLASH_NTP, "NTP", "NO");
-    }
-
+    bool ntp_ok = false;
     weather_t weather;
-    esp_err_t werr = weather_fetch(&weather);
-    if (werr == ESP_OK) {
-        s_ui.weather = weather;
-        s_ui.weather_ok = true;
-    }
-    if (werr == ESP_OK) {
-        ESP_LOGI(TAG, "weather fetched (%dC, wind %dkm/h, UV %d, sun %s-%s)", weather.temp_c,
-                 weather.wind_kmh, weather.uv_max, weather.sunrise, weather.sunset);
+    esp_err_t werr = ESP_ERR_INVALID_STATE;
+    if (wferr == ESP_OK) {
+        ESP_LOGI(TAG, "WiFi connected");
+        ntp_ok = (ntp_sync_with_retry() == ESP_OK);
+        if (ntp_ok) {
+            ESP_LOGI(TAG, "NTP synced");
+        } else {
+            ESP_LOGE(TAG, "NTP sync failed after retries, continuing with unsynced clock");
+        }
+        splash_status(SPLASH_NTP, "NTP", ntp_ok ? "OK" : "NO");
+
+        werr = weather_fetch(&weather);
+        if (werr == ESP_OK) {
+            s_ui.weather = weather;
+            s_ui.weather_ok = true;
+            ESP_LOGI(TAG, "weather fetched (%dC, wind %dkm/h, UV %d, sun %s-%s)", weather.temp_c,
+                     weather.wind_kmh, weather.uv_max, weather.sunrise, weather.sunset);
+        } else {
+            ESP_LOGW(TAG, "weather fetch failed: %s", esp_err_to_name(werr));
+        }
     } else {
-        ESP_LOGW(TAG, "weather fetch failed: %s", esp_err_to_name(werr));
+        ESP_LOGW(TAG, "no WiFi, skipping NTP and weather for now");
+        splash_status(SPLASH_NTP, "NTP", "NO");
     }
     splash_status(SPLASH_WEATHER, "WEATHER", werr == ESP_OK ? "OK" : "NO");
 
@@ -325,6 +335,7 @@ void app_main(void)
 #define WEATHER_RETRY_START_SECONDS 30
 #define INDOOR_REFRESH_SECONDS 10
     int seconds_since_weather = 0;
+    int seconds_since_ntp = 0;
     int seconds_since_indoor = INDOOR_REFRESH_SECONDS; // read on the first pass
     // On failure, retry sooner than the normal cadence and back off toward
     // it, instead of leaving a stale reading up for a full 15 minutes.
@@ -362,7 +373,16 @@ void app_main(void)
             }
         }
 
-        if (++seconds_since_weather >= next_weather_interval) {
+        // Booted without WiFi (or NTP failed): sync once it's up. The RTC
+        // keeps the clock right meanwhile, if one is fitted.
+        if (!ntp_ok && ++seconds_since_ntp >= NTP_RETRY_SECONDS && wifi_is_connected()) {
+            seconds_since_ntp = 0;
+            ntp_ok = (clock_sync_time() == ESP_OK);
+            ESP_LOGI(TAG, "late NTP sync %s", ntp_ok ? "done" : "failed");
+        }
+
+        // Offline: hold the fetch until WiFi is back, then it fires right away.
+        if (++seconds_since_weather >= next_weather_interval && wifi_is_connected()) {
             seconds_since_weather = 0;
             werr = weather_fetch(&weather);
             if (werr == ESP_OK) {
