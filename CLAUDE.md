@@ -229,6 +229,13 @@ already excludes `*_secrets.h` and `sdkconfig`.
 routine during hardware debugging — remember to flash this project back after.
 After such a swap, esptool may print "Verification failed after fast reflash ...
 Reflashing the whole image" — harmless, it recovers on its own and ends `Done`.
+**Check the flash actually happened** before trusting a device test: when
+filtering `idf.py` output, grep case-insensitively (`-iE "error|failed|Done"`).
+The partition-overflow failure prints `Error: app partition is too small`
+and no `Done`; a case-sensitive `error` filter hid it on 2026-09-25, the old
+firmware kept running, and a device check "passed" against it. The boot
+log's `app_init: App version: <short hash>[-dirty]` / `Compile time` lines
+say which build is actually running.
 
 ## Code style (since 2026-09-25)
 `tools/format.sh` formats all tracked C sources with clang-format (style in
@@ -238,6 +245,9 @@ clang-tidy) come from ESP-IDF's optional `esp-clang` tool, installed with
 `python $IDF_PATH/tools/idf_tools.py install esp-clang`. Hand-aligned
 tables that clang-format would flatten go between
 `// clang-format off` / `// clang-format on` (see `weather_icon_for_code()`).
+`format.sh`, `lint.sh` and CI pick files via `git ls-files`: a **new file is
+skipped until it's `git add`-ed**, so the check says OK locally and CI then
+fails on it. Stage new files before running the checks.
 
 ## CI (since 2026-09-25)
 `.github/workflows/ci.yml`: on every push/PR, in the `espressif/idf:latest`
@@ -245,7 +255,9 @@ container (= ESP-IDF master, what this is developed on): firmware build,
 `tools/size_check.sh`, `tools/format.sh --check`, `tools/test.sh`,
 `tools/lint.sh`. The gitignored
 `*_secrets.h` are replaced by their `.example` templates there. Locally, run
-the same three scripts before pushing.
+the same scripts before pushing. The image's ESP-IDF is newer than the
+local checkout, so CI's firmware comes out ~15 KB bigger (996 vs 981 KB on
+2026-09-25): judge the flash budget by CI's number.
 
 ## Static analysis (since 2026-09-25)
 `tools/lint.sh` runs clang-tidy (checks in `.clang-tidy`, the detekt config
@@ -254,7 +266,10 @@ fails it. clang-tidy needs clang-compatible flags, so the script configures
 a separate `build/clang` tree with `IDF_TOOLCHAIN=clang` and **its own copy
 of `sdkconfig`**: configuring clang against the shared `./sdkconfig` flips
 its toolchain options, and the next normal build then recompiles everything.
-The firmware itself is still built by gcc in `build/`. A finding that's a
+The firmware itself is still built by gcc in `build/`. Tried and dropped:
+feeding the gcc `build/compile_commands.json` to clang-tidy (rewriting the
+compiler, stripping gcc-only flags) fails on the C library headers
+(picolibc is selected via gcc `-specs=`), so the clang tree is required. A finding that's a
 false positive gets `// NOLINTNEXTLINE(<check>): <reason>` (see
 `weather_parse.c`: the analyzer can't see into cJSON.c).
 **Never configure clang against the shared `./sdkconfig`** (e.g. a bare
