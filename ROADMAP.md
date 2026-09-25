@@ -82,10 +82,16 @@ on the physical display, and note anything the next task needs to know.
     one `tick_*()` per periodic job. Complexity NOLINTs gone.
   - [x] GitHub Actions (2026-09-25): `.github/workflows/ci.yml`, firmware
     build + format check + host tests + clang-tidy.
-- [ ] **5. Later, from the Freenove kit**
-  - [ ] PIR motion sensor: screen on only when someone is at the desk (OLED
-    burn-in protection). Powered from VIN (5V), output is 3.3V-safe.
-  - [ ] Photoresistor: auto-dim in a dark room (night mode)
+- [x] **5. Later, from the Freenove kit** (2026-09-25)
+  - PIR motion sensor and passive buzzer: dropped (2026-09-25), not wanted
+    (display runs ~1 h/day, so no burn-in concern; no sounds).
+  - [x] Photoresistor (2026-09-25): LDR + 10k divider soldered on D34
+    (`docs/WIRING.md`), reads fine (`esp32-hw-checks` LDR check). **Auto-dim
+    dropped**: this SSD1315 can't visibly dim. Tried with a knob-driven
+    trial: contrast 0x01-0x40 look identical, 0x00 switches the panel off
+    (also with shorter pre-charge / lower VCOMH), 0xFF only slightly
+    brighter. The dimming firmware (ADC reader, hysteresis logic) was
+    written and removed unmerged. The LDR stays wired for later use.
 
 WiFi connect timeout: done 2026-09-25, see Open questions in `CLAUDE.md`.
 

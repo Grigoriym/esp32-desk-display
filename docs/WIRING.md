@@ -26,6 +26,10 @@ Wire colours: 🟢 green = D21 (SDA), 🟡 yellow = D22 (SCL).
 | | SW | D27 | button, active low |
 | | DT | D26 | |
 | | CLK | D25 | |
+| Photoresistor (LDR) | one leg | 3V3 | no polarity |
+| | other leg | D34 | ADC1 ch6; also to the 10k |
+| 10k resistor | one end | D34 | voltage divider with the LDR |
+| | other end | GND | |
 
 - I2C modules are wired **in parallel** straight to D21/D22, not daisy-chained
   through the DS3231's pass-through header (that setup failed, see `CLAUDE.md`).
@@ -33,5 +37,9 @@ Wire colours: 🟢 green = D21 (SDA), 🟡 yellow = D22 (SCL).
   (GND, +, SW, DT, CLK), then a male-female Dupont cable to the knob so it can
   sit apart from the board. The encoder pins are only `#define`s, so they can
   move to D18/D19/D23 if a board redesign makes the right side more convenient.
+- LDR divider (2026-09-25): brighter room = higher reading. Measured with
+  the `esp32-hw-checks` LDR check: ~3820 raw (3.04 V) in room light, ~1500
+  covered by a finger, 4095 (max) under a phone flashlight. Analog sensors
+  must use **ADC1** pins (D32-D39): ADC2 is unusable while WiFi runs.
 - Free, non-strapping GPIOs for future modules: D4, D16, D17, D18, D19, D23,
-  D32, D33 (D34/D35/VP/VN are input-only).
+  D32, D33 (D35/VP/VN are input-only, ADC1-capable).

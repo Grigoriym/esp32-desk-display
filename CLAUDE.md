@@ -97,6 +97,7 @@ Everything runs from the DevKit's 3V3 pin (onboard regulator, likely AMS1117 —
 | DS3231 module | 1-2 mA | ~3 mA | mostly the power LED |
 | BME280 | 1-2 mA | ~3 mA | LDO + LED; sensor itself is µA |
 | KY-040 | ~0.3 mA | ~1 mA | pull-ups only |
+| LDR + 10k divider | ~0.3 mA | ~0.3 mA | 3.3 V across ≥10k |
 | **Total** | **~130-170 mA** | **~380 mA** | ~100+ mA headroom left |
 
 Rules:
@@ -185,6 +186,11 @@ Rules:
   (see Host unit tests), incl. `utc_to_epoch()` and the TZ rule's switch
   dates (`test/test_clock_time.c`, against glibc: it checks the rule string,
   not picolibc's parser of it).
+- **Brightness can't be dimmed on this SSD1315** (tested 2026-09-25):
+  contrast (`0x81`) 0x01-0x40 look the same, 0x00 turns the panel off,
+  0xFF is only slightly brighter; lowering pre-charge (`0xD9`) / VCOMH
+  (`0xDB`) together with contrast 0 also gives black. Effectively on/off
+  only. Contrast is 0x40 (was 0xCF, no visible difference).
 - Panel orientation: `0xA0`/`0xC0` (segment remap / COM scan) in the init sequence
   is flipped 180° from the SSD1306 default, to match how the OLED ended up mounted
   once soldered to the perfboard (upside-down relative to native wiring). If a new
@@ -379,6 +385,6 @@ Sibling folder (`../esp32-hw-checks`, not a subfolder), created 2026-09-19. Hold
 standalone bring-up/test firmware for verifying ESP32 boards and modules/sensors in
 isolation (LED blink + I2C scan + OLED fill/text test + BME280 chip-ID check
 (0x60 BME280 vs 0x58 BMP280, added 2026-09-23) + KY-040 encoder on D25/D26/D27
-(passed 2026-09-24); add a check there for each new sensor as it gets wired up) before that hardware is trusted
+(passed 2026-09-24) + LDR raw ADC readout on D34 (added 2026-09-25); add a check there for each new sensor as it gets wired up) before that hardware is trusted
 enough to use in this project's real firmware. **It is not a git repo** — its
 changes exist only on disk, so there's nothing to commit there.
