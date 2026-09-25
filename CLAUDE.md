@@ -252,8 +252,8 @@ first time for both encoder tests on 2026-09-24.
    full interval. DS3231 wired in as the boot time source (2026-09-23). Boot
    **status screen** (2026-09-23): HELLO + a two-column grid of `NAME OK` cells
    (`SPLASH_*` in `main/main.c`: OLED|PWR, RTC|BME on pages 2-3; WIFI|NTP,
-   WEATHER on pages 5-6) going `--` → `OK`/`NO`, held `SPLASH_HOLD_SECONDS` (3s)
-   after the last step, then the main screens. Since 2026-09-24 there are
+   WEATHER on pages 5-6) going `--` → `OK`/`NO`, then the main screens straight after the
+   last step (the 3s hold was dropped 2026-09-25). Since 2026-09-24 there are
    three, switched with the KY-040 (turn = next/prev, wraps; press = HOME):
    page 0 of every screen is time flush left + date `DD/MM/YYYY` flush right;
    HOME has icon+outdoor temp (p3) and `IN 25C 43H` (p5), OUTDOOR has

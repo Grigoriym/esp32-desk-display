@@ -22,8 +22,6 @@ static const char *TAG = "desk_display";
 #define I2C_SCL_GPIO GPIO_NUM_22
 #define I2C_PORT     I2C_NUM_0
 
-#define SPLASH_HOLD_SECONDS 3
-
 // Boot status grid: two columns, local hardware on top, network below.
 // Each item is a (page, column) cell; column 0 = left, 1 = right.
 #define SPLASH_OLED    2, 0
@@ -307,8 +305,8 @@ void app_main(void)
     }
     splash_status(SPLASH_WEATHER, "WEATHER", werr == ESP_OK ? "OK" : "NO");
 
-    // Leave the final status up long enough to actually read it.
-    vTaskDelay(pdMS_TO_TICKS(SPLASH_HOLD_SECONDS * 1000));
+    // No hold: the fast cells are read while WiFi/NTP/weather are still
+    // pending, so the main screens follow the last status straight away.
     esp_err_t bverr = bvg_start();
     if (bverr != ESP_OK) {
         ESP_LOGW(TAG, "BVG not used: %s", esp_err_to_name(bverr));
