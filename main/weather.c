@@ -7,10 +7,14 @@
 static const char *TAG = "weather";
 
 // Hardcoded location (CLAUDE.md: no GPS) -- central Berlin. timezone makes
-// sunrise/sunset come back in local time, DST included.
+// sunrise/sunset and the hourly times come back in local time, DST included.
+// Hourly data starts at the current hour.
+#define STR_(x) #x
+#define STR(x)  STR_(x)
 #define WEATHER_URL                                                                               \
     "https://api.open-meteo.com/v1/forecast?latitude=52.52&longitude=13.405&current_weather=true" \
-    "&daily=sunrise,sunset,uv_index_max&timezone=Europe%2FBerlin&forecast_days=1"
+    "&daily=sunrise,sunset,uv_index_max&hourly=precipitation_probability"                         \
+    "&forecast_hours=" STR(WEATHER_RAIN_HOURS) "&timezone=Europe%2FBerlin&forecast_days=1"
 
 #define RESPONSE_BUF_SIZE 2048
 

@@ -15,6 +15,16 @@ int screen_minutes_until(int now_min, int hour, int minute)
     return diff;
 }
 
+// Page 7 of HOME: when the next rain starts, or until when the current one
+// lasts, within the forecast window.
+static void rain_hint(const weather_t *w, screen_rows_t *out)
+{
+    if (w->rain_in_h < 0) snprintf(ROW(7, 0), "NO RAIN %dH", WEATHER_RAIN_HOURS);
+    else if (w->rain_in_h > 0) snprintf(ROW(7, 0), "RAIN %s", w->rain_from);
+    else if (w->rain_until[0]) snprintf(ROW(7, 0), "RAIN TILL %s", w->rain_until);
+    else snprintf(ROW(7, 0), "RAIN NEXT %dH", WEATHER_RAIN_HOURS);
+}
+
 static void layout_home(const screen_data_t *d, screen_rows_t *out)
 {
     // Page 3 is drawn with the weather icon in front (main.c).
@@ -24,6 +34,7 @@ static void layout_home(const screen_data_t *d, screen_rows_t *out)
         snprintf(ROW(5, 0), "IN %dC %dH", (int)lroundf(d->indoor.temp_c),
                  (int)lroundf(d->indoor.humidity_pct));
     }
+    if (d->weather_ok) rain_hint(&d->weather, out);
 }
 
 static void layout_outdoor(const screen_data_t *d, screen_rows_t *out)

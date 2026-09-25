@@ -343,7 +343,8 @@ first time for both encoder tests on 2026-09-24.
    last step (the 3s hold was dropped 2026-09-25). Since 2026-09-24 there are
    three, switched with the KY-040 (turn = next/prev, wraps; press = HOME):
    page 0 of every screen is time flush left + date `DD/MM/YYYY` flush right;
-   HOME has icon+outdoor temp (p3) and `IN 25C 43H` (p5), OUTDOOR has
+   HOME has icon+outdoor temp (p3), `IN 25C 43H` (p5) and the rain hint (p7,
+   see ROADMAP task 6), OUTDOOR has
    sunrise/sunset and wind/today's max UV, INDOOR has temp/humidity and whole
    hPa pressure (font has no `%`/`.`). `draw_screen()` rewrites pages 1-7 in
    full on every change (blank pages via `display_draw_text(page, "")`), so

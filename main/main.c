@@ -229,8 +229,9 @@ static bool fetch_weather(const char *what)
         ESP_LOGW(TAG, "weather %s failed: %s", what, esp_err_to_name(err));
         return false;
     }
-    ESP_LOGI(TAG, "weather %s (%dC, wind %dkm/h, UV %d, sun %s-%s)", what, weather.temp_c, weather.wind_kmh,
-             weather.uv_max, weather.sunrise, weather.sunset);
+    ESP_LOGI(TAG, "weather %s (%dC, wind %dkm/h, UV %d, sun %s-%s, rain in %dh from %s till %s)", what,
+             weather.temp_c, weather.wind_kmh, weather.uv_max, weather.sunrise, weather.sunset,
+             weather.rain_in_h, weather.rain_from, weather.rain_until);
     s_data.weather = weather;
     s_data.weather_ok = true;
     return true;

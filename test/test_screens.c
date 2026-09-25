@@ -125,6 +125,29 @@ static void test_home(void)
     TEST_ASSERT_EQUAL_STRING("IN 23C 43H", LEFT(5));
 }
 
+static void test_home_rain(void)
+{
+    screen_layout(SCREEN_HOME, &data, 0, &rows);
+    TEST_ASSERT_EQUAL_STRING("", LEFT(7)); // no weather yet
+
+    data.weather_ok = true;
+    data.weather = (weather_t){.rain_in_h = -1};
+    screen_layout(SCREEN_HOME, &data, 0, &rows);
+    TEST_ASSERT_EQUAL_STRING("NO RAIN 12H", LEFT(7));
+
+    data.weather = (weather_t){.rain_in_h = 3, .rain_from = "16:00", .rain_until = "18:00"};
+    screen_layout(SCREEN_HOME, &data, 0, &rows);
+    TEST_ASSERT_EQUAL_STRING("RAIN 16:00", LEFT(7));
+
+    data.weather = (weather_t){.rain_in_h = 0, .rain_from = "13:00", .rain_until = "15:00"};
+    screen_layout(SCREEN_HOME, &data, 0, &rows);
+    TEST_ASSERT_EQUAL_STRING("RAIN TILL 15:00", LEFT(7));
+
+    data.weather = (weather_t){.rain_in_h = 0, .rain_from = "13:00"};
+    screen_layout(SCREEN_HOME, &data, 0, &rows);
+    TEST_ASSERT_EQUAL_STRING("RAIN NEXT 12H", LEFT(7));
+}
+
 static void test_outdoor_and_indoor(void)
 {
     screen_layout(SCREEN_OUTDOOR, &data, 0, &rows);
@@ -166,6 +189,7 @@ int main(void)
     RUN_TEST(test_bvg_hides_uncatchable_and_caps_rows);
     RUN_TEST(test_bvg_no_trains);
     RUN_TEST(test_home);
+    RUN_TEST(test_home_rain);
     RUN_TEST(test_outdoor_and_indoor);
     RUN_TEST(test_previous_screen_leaves_nothing_behind);
     return UNITY_END();

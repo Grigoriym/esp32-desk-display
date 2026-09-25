@@ -12,6 +12,45 @@ static const uint8_t icon_rain[8] = {0x18, 0x3C, 0x5E, 0x3E, 0x5E, 0x3E, 0x5C, 0
 static const uint8_t icon_snow[8] = {0x58, 0xBC, 0x5E, 0xBE, 0x5E, 0xBE, 0x5C, 0x18};
 static const uint8_t icon_storm[8] = {0x18, 0x9C, 0xDE, 0x7E, 0x3E, 0x1E, 0x1C, 0x18};
 
+// "2026-09-25T14:00" -> "14:00"; false without the 'T'.
+static bool copy_hhmm(const cJSON *iso, char *dst, size_t dst_len)
+{
+    // NOLINTNEXTLINE(clang-analyzer-core.NullDereference): cJSON_IsString(NULL) is false (see below)
+    const char *t = cJSON_IsString(iso) ? strchr(iso->valuestring, 'T') : NULL;
+    if (!t) return false;
+    snprintf(dst, dst_len, "%.5s", t + 1);
+    return true;
+}
+
+// Finds the first rainy hour in the hourly arrays and the first dry one after
+// it. False if the arrays are missing, differ in length or hold junk.
+static bool parse_rain(const cJSON *hourly, weather_t *w)
+{
+    const cJSON *times = cJSON_GetObjectItem(hourly, "time");
+    const cJSON *probs = cJSON_GetObjectItem(hourly, "precipitation_probability");
+    int n = cJSON_GetArraySize(times);
+    if (!cJSON_IsArray(times) || !cJSON_IsArray(probs) || n == 0 || n != cJSON_GetArraySize(probs))
+        return false;
+
+    w->rain_in_h = -1;
+    w->rain_from[0] = '\0';
+    w->rain_until[0] = '\0';
+    for (int i = 0; i < n; i++) {
+        const cJSON *prob = cJSON_GetArrayItem(probs, i);
+        if (!cJSON_IsNull(prob) && !cJSON_IsNumber(prob)) return false;
+        // null = no data for that hour: counts as dry.
+        bool rainy = cJSON_IsNumber(prob) && prob->valuedouble >= WEATHER_RAIN_MIN_PROB;
+        const cJSON *time = cJSON_GetArrayItem(times, i);
+        if (w->rain_in_h < 0 && rainy) {
+            if (!copy_hhmm(time, w->rain_from, sizeof(w->rain_from))) return false;
+            w->rain_in_h = i;
+        } else if (w->rain_in_h >= 0 && !rainy) {
+            return copy_hhmm(time, w->rain_until, sizeof(w->rain_until));
+        }
+    }
+    return true;
+}
+
 bool weather_parse(const char *json, weather_t *out)
 {
     cJSON *root = cJSON_Parse(json);
@@ -26,33 +65,31 @@ bool weather_parse(const char *json, weather_t *out)
     cJSON *sunrise = daily ? cJSON_GetArrayItem(cJSON_GetObjectItem(daily, "sunrise"), 0) : NULL;
     cJSON *sunset = daily ? cJSON_GetArrayItem(cJSON_GetObjectItem(daily, "sunset"), 0) : NULL;
     cJSON *uv = daily ? cJSON_GetArrayItem(cJSON_GetObjectItem(daily, "uv_index_max"), 0) : NULL;
-    if (!cJSON_IsNumber(temp) || !cJSON_IsNumber(code) || !cJSON_IsNumber(wind) || !cJSON_IsString(sunrise)
-        || !cJSON_IsString(sunset) || !cJSON_IsNumber(uv)) {
+    cJSON *hourly = cJSON_GetObjectItem(root, "hourly");
+    if (!cJSON_IsNumber(temp) || !cJSON_IsNumber(code) || !cJSON_IsNumber(wind) || !cJSON_IsNumber(uv)) {
         cJSON_Delete(root);
         return false;
     }
 
-    // The analyzer can't see that cJSON_Is*(NULL) is false (cJSON.c is
-    // another translation unit), so it flags the dereferences below.
-    // NOLINTBEGIN(clang-analyzer-core.NullDereference)
-    // Sunrise/sunset look like "2026-09-23T06:53" -- keep the "HH:MM" after 'T'.
-    const char *rise_t = strchr(sunrise->valuestring, 'T');
-    const char *set_t = strchr(sunset->valuestring, 'T');
-    if (!rise_t || !set_t) {
-        cJSON_Delete(root);
-        return false;
+    // Filled into a copy so *out stays untouched on failure. Sunrise/sunset
+    // look like "2026-09-23T06:53" -- keep the "HH:MM" after 'T'.
+    weather_t w;
+    bool ok = copy_hhmm(sunrise, w.sunrise, sizeof(w.sunrise))
+              && copy_hhmm(sunset, w.sunset, sizeof(w.sunset)) && parse_rain(hourly, &w);
+    if (ok) {
+        // The analyzer can't see that cJSON_Is*(NULL) is false (cJSON.c is
+        // another translation unit), so it flags the dereferences below.
+        // NOLINTBEGIN(clang-analyzer-core.NullDereference)
+        w.temp_c = (int)lround(temp->valuedouble);
+        w.weather_code = code->valueint;
+        w.wind_kmh = (int)lround(wind->valuedouble);
+        w.uv_max = (int)lround(uv->valuedouble);
+        // NOLINTEND(clang-analyzer-core.NullDereference)
+        *out = w;
     }
-
-    out->temp_c = (int)lround(temp->valuedouble);
-    out->weather_code = code->valueint;
-    out->wind_kmh = (int)lround(wind->valuedouble);
-    out->uv_max = (int)lround(uv->valuedouble);
-    snprintf(out->sunrise, sizeof(out->sunrise), "%.5s", rise_t + 1);
-    snprintf(out->sunset, sizeof(out->sunset), "%.5s", set_t + 1);
-    // NOLINTEND(clang-analyzer-core.NullDereference)
 
     cJSON_Delete(root);
-    return true;
+    return ok;
 }
 
 const uint8_t *weather_icon_for_code(int weather_code)

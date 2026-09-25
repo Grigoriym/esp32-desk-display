@@ -93,6 +93,15 @@ on the physical display, and note anything the next task needs to know.
     brighter. The dimming firmware (ADC reader, hysteresis logic) was
     written and removed unmerged. The LDR stays wired for later use.
 
+- [ ] **6. Rain hint on HOME** (2026-09-25, built, awaiting a look at the
+  panel): page 7 shows `NO RAIN 12H`, `RAIN 16:00` (next rainy hour),
+  `RAIN TILL 15:00` (raining now) or `RAIN NEXT 12H`. Same Open-Meteo
+  request plus `hourly=precipitation_probability&forecast_hours=12`
+  (hourly starts at the current hour, local time); an hour counts as rainy
+  at >= 50% (`WEATHER_RAIN_MIN_PROB`), null = dry. Parsing in
+  `weather_parse.c`, text in `screens.c`, both host-tested. Response is
+  ~1.2 KB of the 2 KB buffer in `weather.c`.
+
 WiFi connect timeout: done 2026-09-25, see Open questions in `CLAUDE.md`.
 
 Other open items (not scheduled): battery backup, CO2
