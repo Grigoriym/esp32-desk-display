@@ -131,25 +131,26 @@ static void test_home_alert(void)
     data.weather = (weather_t){.rain_in_h = -1};
     data.alerts_ok = true; // but none out
     screen_layout(SCREEN_HOME, &data, 0, &rows);
-    TEST_ASSERT_EQUAL_STRING("NO RAIN 12H", LEFT(7));
+    TEST_ASSERT_EQUAL_STRING("", LEFT(1));
 
-    // A warning in effect replaces the rain hint.
+    // A warning in effect goes under the clock; the rain hint stays.
     data.alerts = (alerts_t){.count = 2, .started = true, .event = "HEAVY RAIN", .onset = "14:00"};
     screen_layout(SCREEN_HOME, &data, 0, &rows);
-    TEST_ASSERT_EQUAL_STRING("HEAVY RAIN", LEFT(7));
-    TEST_ASSERT_EQUAL_STRING("", RIGHT(7));
+    TEST_ASSERT_EQUAL_STRING("HEAVY RAIN", LEFT(1));
+    TEST_ASSERT_EQUAL_STRING("", RIGHT(1));
+    TEST_ASSERT_EQUAL_STRING("NO RAIN 12H", LEFT(7));
 
     // Upcoming: start time on the right, event clipped to leave a gap.
     data.alerts = (alerts_t){.count = 1, .event = "HEAVY THUNDERSTORMS", .onset = "18:00"};
     screen_layout(SCREEN_HOME, &data, 0, &rows);
-    TEST_ASSERT_EQUAL_STRING("HEAVY THUNDERST", LEFT(7));
-    TEST_ASSERT_EQUAL_STRING("18:00", RIGHT(7));
-    TEST_ASSERT_EQUAL_INT(SCREEN_COLUMNS, strlen(LEFT(7)) + 1 + strlen(RIGHT(7)));
+    TEST_ASSERT_EQUAL_STRING("HEAVY THUNDERST", LEFT(1));
+    TEST_ASSERT_EQUAL_STRING("18:00", RIGHT(1));
+    TEST_ASSERT_EQUAL_INT(SCREEN_COLUMNS, strlen(LEFT(1)) + 1 + strlen(RIGHT(1)));
 
-    // A failed warnings fetch falls back to the rain hint, not a stale warning.
+    // A failed warnings fetch blanks it rather than keep a stale warning.
     data.alerts_ok = false;
     screen_layout(SCREEN_HOME, &data, 0, &rows);
-    TEST_ASSERT_EQUAL_STRING("NO RAIN 12H", LEFT(7));
+    TEST_ASSERT_EQUAL_STRING("", LEFT(1));
 }
 
 static void test_home_rain(void)

@@ -255,7 +255,7 @@ static bool fetch_weather(const char *what)
     s_data.air_ok = true;
 
     // Warnings too, but a failure drops them instead of keeping the last
-    // ones: a stale warning on screen is worse than the rain hint.
+    // ones: a stale warning on screen is worse than none.
     char now_local[17];
     time_t now = time(NULL);
     struct tm now_tm;

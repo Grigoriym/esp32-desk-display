@@ -127,8 +127,8 @@ on the physical display, and note anything the next task needs to know.
   the panel yet): Bright Sky
   `https://api.brightsky.dev/alerts?lat=52.52&lon=13.405&tz=Europe%2FBerlin`
   (free, no key; warn cell 711000101 "Berl. - Mitte"), fetched after the
-  air quality every 15 min. While a warning is out, HOME page 7 shows it
-  instead of the rain hint: DWD's English label uppercased (`HEAVY RAIN`),
+  air quality every 15 min. While a warning is out, HOME shows it on
+  page 1, under the clock (the rain hint stays on page 7): DWD's English label uppercased (`HEAVY RAIN`),
   or for one that hasn't started yet the label plus its start, `18:00` today
   or `26/09` later. Pick: started beats upcoming, then severity
   (minor/moderate/severe/extreme = DWD yellow/orange/red/violet). Test

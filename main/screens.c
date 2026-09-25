@@ -25,17 +25,18 @@ static void rain_hint(const weather_t *w, screen_rows_t *out)
     else snprintf(ROW(7, 0), "RAIN NEXT %dH", WEATHER_RAIN_HOURS);
 }
 
-// Page 7 of HOME while a DWD warning is out: the event, plus its start time
-// if it hasn't begun (the event is clipped so the two don't touch).
+// Page 1 of HOME (under the clock) while a DWD warning is out: the event,
+// plus its start time if it hasn't begun (the event is clipped so the two
+// don't touch).
 static void alert_hint(const alerts_t *a, screen_rows_t *out)
 {
     if (a->started) {
-        snprintf(ROW(7, 0), "%s", a->event);
+        snprintf(ROW(1, 0), "%s", a->event);
         return;
     }
     int room = SCREEN_COLUMNS - 1 - (int)strlen(a->onset);
-    snprintf(ROW(7, 0), "%.*s", room, a->event);
-    snprintf(ROW(7, 1), "%s", a->onset);
+    snprintf(ROW(1, 0), "%.*s", room, a->event);
+    snprintf(ROW(1, 1), "%s", a->onset);
 }
 
 static void layout_home(const screen_data_t *d, screen_rows_t *out)
@@ -48,7 +49,7 @@ static void layout_home(const screen_data_t *d, screen_rows_t *out)
                  (int)lroundf(d->indoor.humidity_pct));
     }
     if (d->alerts_ok && d->alerts.count > 0) alert_hint(&d->alerts, out);
-    else if (d->weather_ok) rain_hint(&d->weather, out);
+    if (d->weather_ok) rain_hint(&d->weather, out);
 }
 
 static void layout_outdoor(const screen_data_t *d, screen_rows_t *out)
