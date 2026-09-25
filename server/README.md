@@ -10,6 +10,10 @@ talks plain HTTP to it and can't reach Tailscale.
 
 ## Setup
 
+Full step-by-step (prerequisites, verification, firewall, what to hand
+back) for setting it up on another machine: **`INSTALL.md`**. Short
+version:
+
 1. Copy this `server/` folder to the machine, then in it:
 
    ```sh

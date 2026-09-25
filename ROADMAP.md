@@ -119,7 +119,8 @@ on the physical display, and note anything the next task needs to know.
   InfluxDB, Grafana shows them (`server/`, Docker Compose, setup in
   `server/README.md`). Tested end to end with the stack on the dev machine
   (192.168.0.241): all four measurements arrive, every dashboard query
-  returns data. Still to do: run `server/` on the always-on home machine,
+  returns data. Still to do: run `server/` on the always-on home machine
+  (`server/INSTALL.md`),
   put its LAN IP into `main/metrics_secrets.h`, reflash, then stop the
   dev-machine stack (`docker compose down` in `server/`).
 
