@@ -1,13 +1,8 @@
 #pragma once
 
 #include "esp_err.h"
+#include "bme280_reading.h"
 #include "driver/i2c_master.h"
-
-typedef struct {
-    float temp_c;
-    float humidity_pct;
-    float pressure_hpa;
-} bme280_reading_t;
 
 // Looks for a BME280 at 0x76/0x77, checks its chip ID (rejects a BMP280,
 // which has no humidity) and loads its factory calibration.

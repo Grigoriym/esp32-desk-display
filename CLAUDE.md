@@ -156,6 +156,11 @@ Rules:
   HTTPS fetch + cJSON parse needs ~8 KB. Crash captures: include
   `overflow|Guru|Backtrace|rst:` in the `serial_log.py` regex, or the panic
   gets filtered out.
+- **Flash is nearly full**: the app is ~0xf5270 of the 1 MB (0x100000)
+  factory partition, ~44 KB (4%) free (2026-09-25; the build prints this).
+  The board has 4 MB flash, so when it runs out switch to a bigger
+  partition table (`CONFIG_PARTITION_TABLE_SINGLE_APP_LARGE`, 1.5 MB app)
+  rather than cutting features.
 - `snprintf` into a buffer that can't hold the worst case fails the build
   (`-Werror=format-truncation`): size buffers for the longest possible
   value, not the typical one.
@@ -238,9 +243,13 @@ of `sdkconfig`**: configuring clang against the shared `./sdkconfig` flips
 its toolchain options, and the next normal build then recompiles everything.
 The firmware itself is still built by gcc in `build/`. A finding that's a
 false positive gets `// NOLINTNEXTLINE(<check>): <reason>` (see
-`weather_parse.c`: the analyzer can't see into cJSON.c). `draw_screen()` and
-`app_main()` carry a NOLINT for cognitive complexity until they're split
-(ROADMAP 4c).
+`weather_parse.c`: the analyzer can't see into cJSON.c).
+**Never configure clang against the shared `./sdkconfig`** (e.g. a bare
+`idf.py -D IDF_TOOLCHAIN=clang reconfigure`): besides the toolchain it
+switches the C library from picolibc to newlib (`CONFIG_LIBC_NEWLIB=y`), and
+that sticks after going back to gcc. Newlib is bigger: the firmware grew
+~55 KB and overflowed the 1 MB app partition (2026-09-25). Fix: regenerate
+`sdkconfig` (delete it, `idf.py build`) or set `CONFIG_LIBC_PICOLIBC=y`.
 
 ## Host unit tests (since 2026-09-25)
 `tools/test.sh` (after sourcing `export.sh`) builds `test/test_<name>.c`
@@ -250,7 +259,9 @@ the `./gradlew test` here. Unity (the C test framework) comes from
 build`). Only pure logic is testable this way, so code worth testing goes in
 files with **no ESP-IDF includes**: that's why JSON parsing lives in
 `weather_parse.c` / `bvg_parse.c`, split from the HTTP fetch in
-`weather.c` / `bvg.c`. Fixtures in `test/fixtures/` (see its README:
+`weather.c` / `bvg.c`, and what each screen shows lives in `screens.c`
+(`screen_layout()` fills text rows from a `screen_data_t`; `main.c` only
+draws them). New screen = a `screen_t` value + a `layout_*()` + a test. Fixtures in `test/fixtures/` (see its README:
 `bvg_ok.json` is hand-written, the wrapper was down).
 
 ## Serial monitoring gotcha (this dev harness)

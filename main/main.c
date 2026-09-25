@@ -13,6 +13,7 @@
 #include "bme280.h"
 #include "encoder.h"
 #include "bvg.h"
+#include "screens.h"
 #include "bvg_secrets.h"
 #include <time.h>
 
@@ -35,35 +36,15 @@ static const char *TAG = "desk_display";
 #define SPLASH_NTP     5, 1
 #define SPLASH_WEATHER 6, 0
 
-// Main screens, cycled with the encoder (press = back to home). The clock
-// row sits on page 0 of every screen; draw_screen() owns pages 1-7.
+// Main screens (see screens.h). The clock row sits on page 0 of every
+// screen; draw_screen() owns pages 1-7.
 #define PAGE_CLOCK 0 // time left, date right
-typedef enum { SCREEN_HOME, SCREEN_OUTDOOR, SCREEN_INDOOR, SCREEN_BVG, SCREEN_COUNT } screen_t;
 
-// Latest data the screens draw from.
-static struct {
-    screen_t screen;
-    bool weather_ok; // false until the first fetch succeeds
-    weather_t weather;
-    bool indoor_ok; // false until the first BME280 read succeeds
-    bme280_reading_t indoor;
-    bool bvg_ok;     // false until the first departures fetch succeeds
-    bool bvg_failed; // last fetch failed (shown only while there's no data)
-    bvg_departures_t bvg;
-} s_ui;
-
-// Minutes from now until a departure at hh:mm local, negative once it's gone.
-// Departures are at most an hour ahead, so wrapping over midnight is safe.
-static int minutes_until(int hour, int minute)
-{
-    time_t now = time(NULL);
-    struct tm t;
-    localtime_r(&now, &t);
-    int diff = (hour * 60 + minute) - (t.tm_hour * 60 + t.tm_min);
-    if (diff > 12 * 60) diff -= 24 * 60;
-    if (diff < -12 * 60) diff += 24 * 60;
-    return diff;
-}
+static screen_t s_screen;
+static screen_data_t s_data = {
+    .bvg_walk_min = BVG_WALK_MIN_MINUTES,
+    .bvg_walk_comfort = BVG_WALK_COMFORT_MINUTES,
+};
 
 // Everything that's allowed to answer on the I2C bus. Anything else showing
 // up means an address clash or an unplanned module -- see "Power & bus
@@ -102,90 +83,25 @@ static void draw_clock_row(void)
 // Redraws pages 1-7 for the current screen. Every page is written in full
 // (unused ones blank), so switching screens needs no display_clear() and
 // doesn't flicker. Missing data shows as "--".
-// NOLINTNEXTLINE(readability-function-cognitive-complexity): split planned, ROADMAP 4c
 static void draw_screen(void)
 {
-    // Font has no '%' or '.': humidity is "45H", pressure whole hPa.
-    char rows[8][2][28] = {0}; // >21 chars (a full row) just clips at the edge
-    const weather_t *w = &s_ui.weather;
-    const bme280_reading_t *in = &s_ui.indoor;
-
-    switch (s_ui.screen) {
-        case SCREEN_HOME:
-            if (s_ui.weather_ok) snprintf(rows[3][0], sizeof(rows[3][0]), "%dC", w->temp_c);
-            else strcpy(rows[3][0], "--C");
-            if (s_ui.indoor_ok) {
-                snprintf(rows[5][0], sizeof(rows[5][0]), "IN %dC %dH", (int)lroundf(in->temp_c),
-                         (int)lroundf(in->humidity_pct));
-            }
-            break;
-        case SCREEN_OUTDOOR:
-            strcpy(rows[2][0], "OUTDOOR");
-            if (s_ui.weather_ok) {
-                snprintf(rows[4][0], sizeof(rows[4][0]), "RISE %s", w->sunrise);
-                snprintf(rows[4][1], sizeof(rows[4][1]), "SET %s", w->sunset);
-                snprintf(rows[6][0], sizeof(rows[6][0]), "WIND %dKMH", w->wind_kmh);
-                snprintf(rows[6][1], sizeof(rows[6][1]), "UV %d", w->uv_max);
-            } else {
-                strcpy(rows[4][0], "--");
-            }
-            break;
-        case SCREEN_INDOOR:
-            strcpy(rows[2][0], "INDOOR");
-            if (s_ui.indoor_ok) {
-                snprintf(rows[4][0], sizeof(rows[4][0]), "TEMP %dC", (int)lroundf(in->temp_c));
-                snprintf(rows[4][1], sizeof(rows[4][1]), "HUM %dH", (int)lroundf(in->humidity_pct));
-                snprintf(rows[6][0], sizeof(rows[6][0]), "%d HPA", (int)lroundf(in->pressure_hpa));
-            } else {
-                strcpy(rows[4][0], "--");
-            }
-            break;
-        case SCREEN_BVG: {
-            if (!s_ui.bvg_ok) {
-                strcpy(rows[2][0], "BVG");
-                strcpy(rows[4][0], s_ui.bvg_failed ? "NO DATA" : "LOADING");
-                break;
-            }
-            // Title from the data, e.g. "U5 HAUPTBAHNHOF"; then the next trains
-            // that can still be caught on foot, with a leave-by hint for the first.
-            if (s_ui.bvg.count > 0) {
-                snprintf(rows[2][0], sizeof(rows[2][0]), "%s %s", s_ui.bvg.dep[0].line,
-                         s_ui.bvg.dep[0].direction);
-            } else {
-                strcpy(rows[2][0], "BVG");
-            }
-            int row = 5;
-            for (int i = 0; i < s_ui.bvg.count && row <= 7; i++) {
-                const bvg_departure_t *d = &s_ui.bvg.dep[i];
-                int mins = minutes_until(d->hour, d->minute);
-                if (mins < BVG_WALK_MIN_MINUTES) continue;
-                if (row == 5) {
-                    // Before the comfortable-walk point: countdown; at it: go;
-                    // after it (but still catchable): hurry.
-                    int leave_in = mins - BVG_WALK_COMFORT_MINUTES;
-                    if (leave_in > 0) snprintf(rows[3][0], sizeof(rows[3][0]), "LEAVE IN %d", leave_in);
-                    else if (leave_in == 0) strcpy(rows[3][0], "GO NOW");
-                    else strcpy(rows[3][0], "HURRY");
-                }
-                snprintf(rows[row][0], sizeof(rows[row][0]), "%02d:%02d", d->hour, d->minute);
-                snprintf(rows[row][1], sizeof(rows[row][1]), "%d MIN", mins);
-                row++;
-            }
-            if (row == 5) strcpy(rows[4][0], "NO TRAINS");
-            break;
-        }
-        default: break;
-    }
+    time_t now = time(NULL);
+    struct tm t;
+    localtime_r(&now, &t);
+    screen_rows_t rows;
+    screen_layout(s_screen, &s_data, t.tm_hour * 60 + t.tm_min, &rows);
 
     for (int page = 1; page < 8; page++) {
-        if (s_ui.screen == SCREEN_HOME && page == 3) {
+        const char *left = rows.text[page][0];
+        const char *right = rows.text[page][1];
+        if (s_screen == SCREEN_HOME && page == 3) {
             // Icon + outdoor temperature, centred together.
-            display_draw_icon_and_text(page, weather_icon_for_code(s_ui.weather_ok ? w->weather_code : 3),
-                                       rows[page][0]);
-        } else if (rows[page][1][0]) {
-            display_draw_text_columns(page, rows[page][0], rows[page][1]);
+            int code = s_data.weather_ok ? s_data.weather.weather_code : 3;
+            display_draw_icon_and_text(page, weather_icon_for_code(code), left);
+        } else if (right[0]) {
+            display_draw_text_columns(page, left, right);
         } else {
-            display_draw_text(page, rows[page][0]); // centred; "" blanks the page
+            display_draw_text(page, left); // centred; "" blanks the page
         }
     }
 }
@@ -230,8 +146,22 @@ static esp_err_t ntp_sync_with_retry(void)
     return ESP_FAIL;
 }
 
-// NOLINTNEXTLINE(readability-function-cognitive-complexity): split planned, ROADMAP 4c
-void app_main(void)
+#define WEATHER_REFRESH_SECONDS     (15 * 60)
+#define WEATHER_RETRY_START_SECONDS 30
+#define INDOOR_REFRESH_SECONDS      10
+
+// What the boot sequence found out, and the main loop's timers.
+typedef struct {
+    bool indoor_present; // BME280 found at boot
+    bool ntp_ok;
+    int seconds_since_weather;
+    int next_weather_interval; // shortened after a failure, see tick_weather()
+    int seconds_since_indoor;
+    int seconds_since_ntp;
+    int last_minute;
+} app_state_t;
+
+static i2c_master_bus_handle_t i2c_init(void)
 {
     i2c_master_bus_config_t bus_cfg = {
         .i2c_port = I2C_PORT,
@@ -243,25 +173,26 @@ void app_main(void)
     };
     i2c_master_bus_handle_t bus;
     ESP_ERROR_CHECK(i2c_new_master_bus(&bus_cfg, &bus));
+    return bus;
+}
 
-    // A brownout reset means the supply sagged below ~2.4V: too much load on
-    // the 3.3V rail or a weak USB port/cable. Shown as "PWR NO" at boot.
+// A brownout reset means the supply sagged below ~2.4V: too much load on the
+// 3.3V rail or a weak USB port/cable. Shown as "PWR NO" at boot.
+static bool last_reset_was_brownout(void)
+{
     esp_reset_reason_t reset_reason = esp_reset_reason();
-    bool brownout = (reset_reason == ESP_RST_BROWNOUT);
-    if (brownout) {
+    if (reset_reason == ESP_RST_BROWNOUT) {
         ESP_LOGE(TAG, "last reset was a BROWNOUT -- check power budget in CLAUDE.md");
-    } else {
-        ESP_LOGI(TAG, "reset reason: %d", reset_reason);
+        return true;
     }
-    i2c_bus_check(bus);
+    ESP_LOGI(TAG, "reset reason: %d", reset_reason);
+    return false;
+}
 
-    ESP_ERROR_CHECK(display_init(bus));
-    ESP_ERROR_CHECK(display_clear());
-
-    ESP_LOGI(TAG, "OLED init OK");
-
-    // Boot status screen: lights the panel right away and shows each
-    // subsystem coming up, instead of a blank screen for ~6-8s.
+// Boot status screen: lights the panel right away and shows each subsystem
+// coming up, instead of a blank screen for ~6-8s.
+static void splash_begin(bool brownout)
+{
     ESP_ERROR_CHECK(display_draw_text(0, "HELLO"));
     splash_status(SPLASH_OLED, "OLED", "OK"); // if this is visible, it works
     splash_status(SPLASH_PWR, "PWR", brownout ? "NO" : "OK");
@@ -270,169 +201,195 @@ void app_main(void)
     splash_status(SPLASH_WIFI, "WIFI", "--");
     splash_status(SPLASH_NTP, "NTP", "--");
     splash_status(SPLASH_WEATHER, "WEATHER", "--");
+}
 
-    // RTC first, so the clock is right even if NTP fails later.
+// Local hardware: RTC first, so the clock is right even if NTP fails later.
+// The BME280 is optional; its screen rows just stay "--" without it.
+static void boot_local(i2c_master_bus_handle_t bus, app_state_t *st)
+{
     esp_err_t rerr = clock_rtc_init(bus);
-    if (rerr != ESP_OK) {
-        ESP_LOGW(TAG, "RTC not used: %s", esp_err_to_name(rerr));
-    }
+    if (rerr != ESP_OK) ESP_LOGW(TAG, "RTC not used: %s", esp_err_to_name(rerr));
     splash_status(SPLASH_RTC, "RTC", rerr == ESP_OK ? "OK" : "NO");
 
-    // Indoor sensor: optional, the main screen just leaves its row blank
-    // without it.
     esp_err_t berr = bme280_init(bus);
-    if (berr != ESP_OK) {
-        ESP_LOGW(TAG, "BME280 not used: %s", esp_err_to_name(berr));
-    }
+    if (berr != ESP_OK) ESP_LOGW(TAG, "BME280 not used: %s", esp_err_to_name(berr));
     splash_status(SPLASH_BME, "BME", berr == ESP_OK ? "OK" : "NO");
+    st->indoor_present = (berr == ESP_OK);
+}
 
-    // Bounded wait: with no network the clock still comes up on RTC time and
-    // WiFi keeps reconnecting in the background; NTP and weather catch up in
-    // the main loop once it connects.
+// Fetches the weather into s_data; returns whether it worked.
+static bool fetch_weather(const char *what)
+{
+    weather_t weather;
+    esp_err_t err = weather_fetch(&weather);
+    if (err != ESP_OK) {
+        ESP_LOGW(TAG, "weather %s failed: %s", what, esp_err_to_name(err));
+        return false;
+    }
+    ESP_LOGI(TAG, "weather %s (%dC, wind %dkm/h, UV %d, sun %s-%s)", what, weather.temp_c, weather.wind_kmh,
+             weather.uv_max, weather.sunrise, weather.sunset);
+    s_data.weather = weather;
+    s_data.weather_ok = true;
+    return true;
+}
+
+// Network: bounded WiFi wait. With no network the clock still comes up on RTC
+// time and WiFi keeps reconnecting in the background; NTP and weather catch
+// up in the main loop once it connects.
+static void boot_network(app_state_t *st)
+{
     esp_err_t wferr = wifi_connect(WIFI_CONNECT_TIMEOUT_SECONDS * 1000);
     splash_status(SPLASH_WIFI, "WIFI", wferr == ESP_OK ? "OK" : "NO");
 
-    bool ntp_ok = false;
-    weather_t weather;
-    esp_err_t werr = ESP_ERR_INVALID_STATE;
+    bool weather_ok = false;
     if (wferr == ESP_OK) {
         ESP_LOGI(TAG, "WiFi connected");
-        ntp_ok = (ntp_sync_with_retry() == ESP_OK);
-        if (ntp_ok) {
-            ESP_LOGI(TAG, "NTP synced");
-        } else {
-            ESP_LOGE(TAG, "NTP sync failed after retries, continuing with unsynced clock");
-        }
-        splash_status(SPLASH_NTP, "NTP", ntp_ok ? "OK" : "NO");
-
-        werr = weather_fetch(&weather);
-        if (werr == ESP_OK) {
-            s_ui.weather = weather;
-            s_ui.weather_ok = true;
-            ESP_LOGI(TAG, "weather fetched (%dC, wind %dkm/h, UV %d, sun %s-%s)", weather.temp_c,
-                     weather.wind_kmh, weather.uv_max, weather.sunrise, weather.sunset);
-        } else {
-            ESP_LOGW(TAG, "weather fetch failed: %s", esp_err_to_name(werr));
-        }
+        st->ntp_ok = (ntp_sync_with_retry() == ESP_OK);
+        if (st->ntp_ok) ESP_LOGI(TAG, "NTP synced");
+        else ESP_LOGE(TAG, "NTP sync failed after retries, continuing with unsynced clock");
+        splash_status(SPLASH_NTP, "NTP", st->ntp_ok ? "OK" : "NO");
+        weather_ok = fetch_weather("fetched");
     } else {
         ESP_LOGW(TAG, "no WiFi, skipping NTP and weather for now");
         splash_status(SPLASH_NTP, "NTP", "NO");
     }
-    splash_status(SPLASH_WEATHER, "WEATHER", werr == ESP_OK ? "OK" : "NO");
-
-    // No hold: the fast cells are read while WiFi/NTP/weather are still
-    // pending, so the main screens follow the last status straight away.
-    esp_err_t bverr = bvg_start();
-    if (bverr != ESP_OK) {
-        ESP_LOGW(TAG, "BVG not used: %s", esp_err_to_name(bverr));
-    }
-
-    esp_err_t eerr = encoder_init();
-    if (eerr != ESP_OK) {
-        ESP_LOGW(TAG, "encoder not used: %s", esp_err_to_name(eerr));
-    }
-
-    ESP_ERROR_CHECK(display_clear());
-    s_ui.screen = SCREEN_HOME;
-    draw_screen();
-
-#define WEATHER_REFRESH_SECONDS     (15 * 60)
-#define WEATHER_RETRY_START_SECONDS 30
-#define INDOOR_REFRESH_SECONDS      10
-    int seconds_since_weather = 0;
-    int seconds_since_ntp = 0;
-    int seconds_since_indoor = INDOOR_REFRESH_SECONDS; // read on the first pass
+    splash_status(SPLASH_WEATHER, "WEATHER", weather_ok ? "OK" : "NO");
     // On failure, retry sooner than the normal cadence and back off toward
     // it, instead of leaving a stale reading up for a full 15 minutes.
-    int next_weather_interval = (werr == ESP_OK) ? WEATHER_REFRESH_SECONDS : WEATHER_RETRY_START_SECONDS;
-    int last_minute = -1;
+    st->next_weather_interval = weather_ok ? WEATHER_REFRESH_SECONDS : WEATHER_RETRY_START_SECONDS;
+}
+
+// Background parts that don't block boot.
+static void start_background(void)
+{
+    esp_err_t bverr = bvg_start();
+    if (bverr != ESP_OK) ESP_LOGW(TAG, "BVG not used: %s", esp_err_to_name(bverr));
+    esp_err_t eerr = encoder_init();
+    if (eerr != ESP_OK) ESP_LOGW(TAG, "encoder not used: %s", esp_err_to_name(eerr));
+}
+
+// The per-second jobs below return true when the screen needs a redraw.
+
+// Minute-based text (BVG countdown) goes stale on the minute.
+static bool tick_minute(app_state_t *st)
+{
+    time_t now = time(NULL);
+    struct tm now_tm;
+    localtime_r(&now, &now_tm);
+    if (now_tm.tm_min == st->last_minute) return false;
+    st->last_minute = now_tm.tm_min;
+    return true;
+}
+
+// Departures are fetched in the background, only while their screen is up;
+// set from the 1s tick so spinning past it doesn't fetch.
+static bool tick_bvg(void)
+{
+    bvg_set_active(s_screen == SCREEN_BVG);
+    return bvg_take_update(&s_data.bvg, &s_data.bvg_ok, &s_data.bvg_failed);
+}
+
+static bool tick_indoor(app_state_t *st)
+{
+    if (!st->indoor_present || ++st->seconds_since_indoor < INDOOR_REFRESH_SECONDS) return false;
+    st->seconds_since_indoor = 0;
+    bme280_reading_t r;
+    if (bme280_read(&r) != ESP_OK) {
+        ESP_LOGW(TAG, "BME280 read failed");
+        return false;
+    }
+    ESP_LOGI(TAG, "indoor %.1fC %.0f%% %.1fhPa", r.temp_c, r.humidity_pct, r.pressure_hpa);
+    s_data.indoor = r;
+    s_data.indoor_ok = true;
+    return true;
+}
+
+// Booted without WiFi (or NTP failed): sync once it's up. The RTC keeps the
+// clock right meanwhile, if one is fitted.
+static void tick_ntp(app_state_t *st)
+{
+    if (st->ntp_ok || ++st->seconds_since_ntp < NTP_RETRY_SECONDS || !wifi_is_connected()) return;
+    st->seconds_since_ntp = 0;
+    st->ntp_ok = (clock_sync_time() == ESP_OK);
+    ESP_LOGI(TAG, "late NTP sync %s", st->ntp_ok ? "done" : "failed");
+}
+
+// Offline: hold the fetch until WiFi is back, then it fires right away.
+static bool tick_weather(app_state_t *st)
+{
+    if (++st->seconds_since_weather < st->next_weather_interval || !wifi_is_connected()) return false;
+    st->seconds_since_weather = 0;
+    if (fetch_weather("refreshed")) {
+        st->next_weather_interval = WEATHER_REFRESH_SECONDS;
+        return true;
+    }
+    st->next_weather_interval *= 2;
+    if (st->next_weather_interval > WEATHER_REFRESH_SECONDS)
+        st->next_weather_interval = WEATHER_REFRESH_SECONDS;
+    return false;
+}
+
+// Waits out the rest of this second, reacting to the encoder straight away
+// instead of on the next tick. A quick spin queues several clicks: they're
+// all applied, then drawn once.
+static void wait_second_handling_encoder(TickType_t *next_second)
+{
+    *next_second += pdMS_TO_TICKS(1000);
+    if ((int32_t)(xTaskGetTickCount() - *next_second) > 0) {
+        *next_second = xTaskGetTickCount(); // overran (slow fetch): don't try to catch up
+    }
+    for (;;) {
+        TickType_t now = xTaskGetTickCount();
+        if ((int32_t)(*next_second - now) <= 0) return;
+        encoder_event_t ev;
+        if (!encoder_wait_event(&ev, *next_second - now)) continue;
+        int screen = s_screen;
+        do {
+            if (ev == ENCODER_EV_CW) screen = (screen + 1) % SCREEN_COUNT;
+            else if (ev == ENCODER_EV_CCW) screen = (screen + SCREEN_COUNT - 1) % SCREEN_COUNT;
+            else screen = SCREEN_HOME;
+        } while (encoder_wait_event(&ev, 0));
+        if (screen != (int)s_screen) {
+            s_screen = screen;
+            ESP_LOGI(TAG, "screen %d", screen);
+            draw_screen();
+        }
+    }
+}
+
+void app_main(void)
+{
+    app_state_t st = {.seconds_since_indoor = INDOOR_REFRESH_SECONDS,
+                      .last_minute = -1}; // indoor read on 1st pass
+
+    i2c_master_bus_handle_t bus = i2c_init();
+    bool brownout = last_reset_was_brownout();
+    i2c_bus_check(bus);
+
+    ESP_ERROR_CHECK(display_init(bus));
+    ESP_ERROR_CHECK(display_clear());
+    ESP_LOGI(TAG, "OLED init OK");
+
+    splash_begin(brownout);
+    boot_local(bus, &st);
+    boot_network(&st);
+    // No hold: the fast cells are read while WiFi/NTP/weather are still
+    // pending, so the main screens follow the last status straight away.
+    start_background();
+
+    ESP_ERROR_CHECK(display_clear());
+    s_screen = SCREEN_HOME;
+    draw_screen();
+
     TickType_t next_second = xTaskGetTickCount();
     for (;;) {
         draw_clock_row();
-        bool data_changed = false;
-
-        // Minute-based text (BVG countdown) goes stale on the minute.
-        time_t now = time(NULL);
-        struct tm now_tm;
-        localtime_r(&now, &now_tm);
-        if (now_tm.tm_min != last_minute) {
-            last_minute = now_tm.tm_min;
-            data_changed = true;
-        }
-
-        // Departures are fetched in the background, only while their screen
-        // is up; set from the 1s tick so spinning past it doesn't fetch.
-        bvg_set_active(s_ui.screen == SCREEN_BVG);
-        if (bvg_take_update(&s_ui.bvg, &s_ui.bvg_ok, &s_ui.bvg_failed)) data_changed = true;
-
-        if (berr == ESP_OK && ++seconds_since_indoor >= INDOOR_REFRESH_SECONDS) {
-            seconds_since_indoor = 0;
-            bme280_reading_t r;
-            if (bme280_read(&r) == ESP_OK) {
-                ESP_LOGI(TAG, "indoor %.1fC %.0f%% %.1fhPa", r.temp_c, r.humidity_pct, r.pressure_hpa);
-                s_ui.indoor = r;
-                s_ui.indoor_ok = true;
-                data_changed = true;
-            } else {
-                ESP_LOGW(TAG, "BME280 read failed");
-            }
-        }
-
-        // Booted without WiFi (or NTP failed): sync once it's up. The RTC
-        // keeps the clock right meanwhile, if one is fitted.
-        if (!ntp_ok && ++seconds_since_ntp >= NTP_RETRY_SECONDS && wifi_is_connected()) {
-            seconds_since_ntp = 0;
-            ntp_ok = (clock_sync_time() == ESP_OK);
-            ESP_LOGI(TAG, "late NTP sync %s", ntp_ok ? "done" : "failed");
-        }
-
-        // Offline: hold the fetch until WiFi is back, then it fires right away.
-        if (++seconds_since_weather >= next_weather_interval && wifi_is_connected()) {
-            seconds_since_weather = 0;
-            werr = weather_fetch(&weather);
-            if (werr == ESP_OK) {
-                ESP_LOGI(TAG, "weather refreshed (%dC, wind %dkm/h, UV %d, sun %s-%s)", weather.temp_c,
-                         weather.wind_kmh, weather.uv_max, weather.sunrise, weather.sunset);
-                s_ui.weather = weather;
-                s_ui.weather_ok = true;
-                data_changed = true;
-                next_weather_interval = WEATHER_REFRESH_SECONDS;
-            } else {
-                ESP_LOGW(TAG, "weather refresh failed: %s", esp_err_to_name(werr));
-                next_weather_interval = (next_weather_interval < WEATHER_REFRESH_SECONDS)
-                                            ? next_weather_interval * 2
-                                            : WEATHER_REFRESH_SECONDS;
-                if (next_weather_interval > WEATHER_REFRESH_SECONDS) {
-                    next_weather_interval = WEATHER_REFRESH_SECONDS;
-                }
-            }
-        }
-
-        if (data_changed) draw_screen();
-
-        // Wait out the rest of this second, reacting to the encoder
-        // straight away instead of on the next tick.
-        next_second += pdMS_TO_TICKS(1000);
-        if ((int32_t)(xTaskGetTickCount() - next_second) > 0) {
-            next_second = xTaskGetTickCount(); // overran (slow fetch): don't try to catch up
-        }
-        for (;;) {
-            TickType_t now = xTaskGetTickCount();
-            if ((int32_t)(next_second - now) <= 0) break;
-            encoder_event_t ev;
-            if (!encoder_wait_event(&ev, next_second - now)) continue;
-            // A quick spin queues several clicks: apply them all, draw once.
-            int screen = s_ui.screen;
-            do {
-                if (ev == ENCODER_EV_CW) screen = (screen + 1) % SCREEN_COUNT;
-                else if (ev == ENCODER_EV_CCW) screen = (screen + SCREEN_COUNT - 1) % SCREEN_COUNT;
-                else screen = SCREEN_HOME;
-            } while (encoder_wait_event(&ev, 0));
-            if (screen != (int)s_ui.screen) {
-                s_ui.screen = screen;
-                ESP_LOGI(TAG, "screen %d", screen);
-                draw_screen();
-            }
-        }
+        bool changed = tick_minute(&st);
+        changed |= tick_bvg();
+        changed |= tick_indoor(&st);
+        tick_ntp(&st);
+        changed |= tick_weather(&st);
+        if (changed) draw_screen();
+        wait_second_handling_encoder(&next_second);
     }
 }

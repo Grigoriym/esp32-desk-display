@@ -64,16 +64,16 @@ on the physical display, and note anything the next task needs to know.
     ASan/UBSan. JSON parsing split into `weather_parse.c` / `bvg_parse.c`;
     12 tests (parsers, weather code -> icon, stop-name cleanup).
   - [ ] More host tests: `utc_to_epoch()`/DST dates (needs the RTC code
-    split from I2C in `clock.c`), BVG leave/hurry logic (lives in
-    `draw_screen()`, needs pulling out), encoder decode, glyphs as ASCII art.
+    split from I2C in `clock.c`), encoder decode, glyphs as ASCII art.
     Replace the hand-written `bvg_ok.json` with a real capture.
   - [x] clang-tidy (2026-09-25): `.clang-tidy` + `tools/lint.sh`, clean.
     Tidied on the way (none were live bugs): int->time_t widening in `utc_to_epoch()` made
     explicit, int->float conversions in `bme280.c` made explicit, missing
     `default:` in the umlaut switch.
-  - [ ] Split `app_main()` (boot sequence vs main loop) and `draw_screen()`
-    (one function per screen; pulls the BVG leave/hurry logic out where
-    it can be host-tested), then drop their complexity NOLINTs.
+  - [x] Split `app_main()` and `draw_screen()` (2026-09-25): screen text in
+    `screens.c` (pure, 8 host tests incl. the LEAVE IN / GO NOW / HURRY
+    boundaries and the midnight wrap); `app_main()` is now boot steps +
+    one `tick_*()` per periodic job. Complexity NOLINTs gone.
   - [x] GitHub Actions (2026-09-25): `.github/workflows/ci.yml`, firmware
     build + format check + host tests + clang-tidy.
 - [ ] **5. Later, from the Freenove kit**
