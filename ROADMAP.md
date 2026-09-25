@@ -103,8 +103,8 @@ on the physical display, and note anything the next task needs to know.
   `weather_parse.c`, text in `screens.c`, both host-tested. Response is
   ~1.2 KB of the 2 KB buffer in `weather.c`.
 
-- [ ] **7. Air quality + pollen screen** (2026-09-25, built, awaiting a look
-  at the panel): screen AIR, between OUTDOOR and INDOOR (two clicks CW from
+- [x] **7. Air quality + pollen screen** (2026-09-25, `AQI 23 FAIR` /
+  `POLLEN NONE` seen on the panel): screen AIR, between OUTDOOR and INDOOR (two clicks CW from
   HOME). `AQI 23` / `FAIR` (European AQI bands: GOOD <=20, FAIR <=40,
   MODERATE <=60, POOR <=80, VERY POOR <=100, EXTREME), then the two
   strongest of alder/birch/grass/mugwort/ragweed as `BIRCH` / `HIGH`, or
