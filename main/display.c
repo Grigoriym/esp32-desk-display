@@ -18,7 +18,7 @@ static const uint8_t ssd1306_init_cmds[] = {
     0xA0,       // segment remap (rotated 180 from panel default)
     0xC0,       // COM scan direction (rotated 180 from panel default)
     0xDA, 0x12, // COM pins config for 128x64
-    0x81, 0xCF, // contrast
+    0x81, 0x40, // contrast (0x00-0xFF; was 0xCF, 0x40 looks the same indoors)
     0xD9, 0xF1, // precharge
     0xDB, 0x40, // VCOMH deselect level
     0xA4,       // resume to RAM content display

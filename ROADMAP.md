@@ -86,7 +86,6 @@ on the physical display, and note anything the next task needs to know.
   - [ ] PIR motion sensor: screen on only when someone is at the desk (OLED
     burn-in protection). Powered from VIN (5V), output is 3.3V-safe.
   - [ ] Photoresistor: auto-dim in a dark room (night mode)
-  - [ ] Passive buzzer: timer / "train leaves soon" alert
 
 WiFi connect timeout: done 2026-09-25, see Open questions in `CLAUDE.md`.
 
