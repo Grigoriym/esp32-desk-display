@@ -5,6 +5,14 @@
 - `air_ok.json`: real Open-Meteo air-quality response, captured 2026-09-25
   14:00 with the exact `AIR_URL` from `main/weather.c` (off season: pollen
   all ~0, only the AQI says much).
+- `alerts_none.json`: real Bright Sky `/alerts` response, captured
+  2026-09-25 with the exact `ALERTS_URL` from `main/weather.c`: no warnings
+  out (none anywhere in Germany that day).
+- `alerts_warnings.json`: **hand-written** from the Bright Sky schema
+  (`api.brightsky.dev/openapi.json`) and the English DWD labels in
+  dwdparse's CAP test data (`heavy rain`, `wind gusts`): two started
+  warnings, an upcoming severe one and a `status: test` message. Replace
+  with a real capture the next time Berlin has a warning.
 - `bvg_real.json`: real transport.rest response, captured 2026-09-25 10:29
   with the URL from `main/bvg.c` (U Cottbusser Platz, U5 towards Hbf):
   6 departures every 10 min, no delays or cancellations.

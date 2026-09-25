@@ -7,6 +7,7 @@
 #include <stdbool.h>
 #include "weather_parse.h"
 #include "air_parse.h"
+#include "alerts_parse.h"
 #include "bme280_reading.h"
 #include "bvg_parse.h"
 
@@ -19,6 +20,8 @@ typedef struct {
     weather_t weather;
     bool air_ok; // false until the first air-quality fetch succeeds
     air_t air;
+    bool alerts_ok; // false until the first warnings fetch succeeds, or after one fails
+    alerts_t alerts;
     bool indoor_ok; // false until the first BME280 read succeeds
     bme280_reading_t indoor;
     bool bvg_ok;     // false until the first departures fetch succeeds
@@ -31,6 +34,7 @@ typedef struct {
 // Pages 1-7 of the panel, each a left and right text column. A page with an
 // empty right column is drawn centred; an empty page is blanked. Rows longer
 // than the panel's 21 characters just clip at the edge.
+#define SCREEN_COLUMNS  21
 #define SCREEN_TEXT_LEN 28
 typedef struct {
     char text[8][2][SCREEN_TEXT_LEN];

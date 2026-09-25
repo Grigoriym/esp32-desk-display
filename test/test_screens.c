@@ -125,6 +125,33 @@ static void test_home(void)
     TEST_ASSERT_EQUAL_STRING("IN 23C 43H", LEFT(5));
 }
 
+static void test_home_alert(void)
+{
+    data.weather_ok = true;
+    data.weather = (weather_t){.rain_in_h = -1};
+    data.alerts_ok = true; // but none out
+    screen_layout(SCREEN_HOME, &data, 0, &rows);
+    TEST_ASSERT_EQUAL_STRING("NO RAIN 12H", LEFT(7));
+
+    // A warning in effect replaces the rain hint.
+    data.alerts = (alerts_t){.count = 2, .started = true, .event = "HEAVY RAIN", .onset = "14:00"};
+    screen_layout(SCREEN_HOME, &data, 0, &rows);
+    TEST_ASSERT_EQUAL_STRING("HEAVY RAIN", LEFT(7));
+    TEST_ASSERT_EQUAL_STRING("", RIGHT(7));
+
+    // Upcoming: start time on the right, event clipped to leave a gap.
+    data.alerts = (alerts_t){.count = 1, .event = "HEAVY THUNDERSTORMS", .onset = "18:00"};
+    screen_layout(SCREEN_HOME, &data, 0, &rows);
+    TEST_ASSERT_EQUAL_STRING("HEAVY THUNDERST", LEFT(7));
+    TEST_ASSERT_EQUAL_STRING("18:00", RIGHT(7));
+    TEST_ASSERT_EQUAL_INT(SCREEN_COLUMNS, strlen(LEFT(7)) + 1 + strlen(RIGHT(7)));
+
+    // A failed warnings fetch falls back to the rain hint, not a stale warning.
+    data.alerts_ok = false;
+    screen_layout(SCREEN_HOME, &data, 0, &rows);
+    TEST_ASSERT_EQUAL_STRING("NO RAIN 12H", LEFT(7));
+}
+
 static void test_home_rain(void)
 {
     screen_layout(SCREEN_HOME, &data, 0, &rows);
@@ -222,6 +249,7 @@ int main(void)
     RUN_TEST(test_bvg_no_trains);
     RUN_TEST(test_home);
     RUN_TEST(test_home_rain);
+    RUN_TEST(test_home_alert);
     RUN_TEST(test_outdoor_and_indoor);
     RUN_TEST(test_air);
     RUN_TEST(test_previous_screen_leaves_nothing_behind);

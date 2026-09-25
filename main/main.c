@@ -224,7 +224,8 @@ static void boot_local(i2c_master_bus_handle_t bus, app_state_t *st)
     st->indoor_present = (berr == ESP_OK);
 }
 
-// Fetches the weather and air quality into s_data; returns whether both worked.
+// Fetches the weather, air quality and DWD warnings into s_data; returns
+// whether all three worked.
 static bool fetch_weather(const char *what)
 {
     weather_t weather;
@@ -252,6 +253,28 @@ static bool fetch_weather(const char *what)
              air.pollen[POLLEN_MUGWORT], air.pollen[POLLEN_RAGWEED]);
     s_data.air = air;
     s_data.air_ok = true;
+
+    // Warnings too, but a failure drops them instead of keeping the last
+    // ones: a stale warning on screen is worse than the rain hint.
+    char now_local[17];
+    time_t now = time(NULL);
+    struct tm now_tm;
+    localtime_r(&now, &now_tm);
+    strftime(now_local, sizeof(now_local), "%Y-%m-%dT%H:%M", &now_tm);
+    alerts_t alerts;
+    err = alerts_fetch(now_local, &alerts);
+    s_data.alerts_ok = (err == ESP_OK);
+    if (err != ESP_OK) {
+        ESP_LOGW(TAG, "alerts %s failed: %s", what, esp_err_to_name(err));
+        return false;
+    }
+    if (alerts.count > 0) {
+        ESP_LOGI(TAG, "alerts %s (%d, showing %s, severity %d, %s %s)", what, alerts.count, alerts.event,
+                 (int)alerts.severity, alerts.started ? "since" : "from", alerts.onset);
+    } else {
+        ESP_LOGI(TAG, "alerts %s (none)", what);
+    }
+    s_data.alerts = alerts;
     return true;
 }
 

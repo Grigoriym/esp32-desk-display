@@ -122,17 +122,19 @@ on the physical display, and note anything the next task needs to know.
   and token (`upload OK` in the boot log), dev-machine stack and volumes
   removed.
 
-- [ ] **9. DWD weather warnings on HOME**: official German Weather Service
-  warnings via Bright Sky, `https://api.brightsky.dev/alerts?lat=52.52&lon=13.405`
-  (free, no key; resolves to warn cell 711000101 "Berl. - Mitte").
-  Response: `{"alerts":[...], "location":{...}}`, empty list when nothing
-  is active. Fetch with the weather (same `http_get()`, 15-min cadence),
-  parse in a pure `alerts_parse.c` (host test + fixture: an empty and a
-  hand-written active alert, since there may be none live to copy). Show
-  the most severe active warning on HOME in place of the rain hint, e.g.
-  `STORM WARN` / `FROST WARN` / `HEAT WARN`, using only the font's
-  A-Z 0-9 `:` `-` `/`. Check what the `event_en` / `severity` fields look
-  like on a real alert before mapping them.
+- [x] **9. DWD weather warnings on HOME** (2026-09-25; the fetch runs on
+  the device, `alerts fetched (none)`, but Berlin had no warning to see on
+  the panel yet): Bright Sky
+  `https://api.brightsky.dev/alerts?lat=52.52&lon=13.405&tz=Europe%2FBerlin`
+  (free, no key; warn cell 711000101 "Berl. - Mitte"), fetched after the
+  air quality every 15 min. While a warning is out, HOME page 7 shows it
+  instead of the rain hint: DWD's English label uppercased (`HEAVY RAIN`),
+  or for one that hasn't started yet the label plus its start, `18:00` today
+  or `26/09` later. Pick: started beats upcoming, then severity
+  (minor/moderate/severe/extreme = DWD yellow/orange/red/violet). Test
+  messages and all-clears are skipped. Heap low point 139 KB after it
+  (was 145). Still open: see a real warning on the panel, and replace the
+  hand-written fixture with a capture of it.
 
 - [ ] **10. Berlin public holidays**: Nager.Date,
   `https://date.nager.at/api/v3/PublicHolidays/<year>/DE` (free, no key).
