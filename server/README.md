@@ -28,7 +28,7 @@ version:
    `metrics: uploading to <ip>`, then `metrics: upload OK` about a minute
    later (or `upload failed: ...`, logged once until it recovers).
 
-3. Open `http://<machine>:3000`: the "Desk display" dashboard is the home
+3. Open `http://<machine>:34897`: the "Desk display" dashboard is the home
    page, no login needed (read-only). Log in as `admin` /
    `INFLUX_ADMIN_PASSWORD` to change things; the provisioned dashboard
    itself is read-only, edit `grafana/dashboards/desk.json` instead
@@ -52,5 +52,5 @@ all fields floats, tag `device=desk`:
 A measurement only appears once the display has data for it. Timestamps are
 set by InfluxDB on arrival.
 
-InfluxDB's own UI (`http://<machine>:8086`, `admin` / password) has a data
+InfluxDB's own UI (`http://<machine>:34898`, `admin` / password) has a data
 explorer for ad-hoc queries.

@@ -9,9 +9,11 @@
 
 static const char *TAG = "metrics";
 
-// Plain HTTP: InfluxDB on the home LAN, see server/README.md.
-#define METRICS_URL "http://" METRICS_HOST ":8086/api/v2/write?org=desk&bucket=desk&precision=s"
-#define BATCH_SIZE  512
+// Plain HTTP: InfluxDB on the home LAN, see server/README.md. The port is
+// the host port in server/docker-compose.yml.
+#define METRICS_PORT "34898"
+#define METRICS_URL  "http://" METRICS_HOST ":" METRICS_PORT "/api/v2/write?org=desk&bucket=desk&precision=s"
+#define BATCH_SIZE   512
 
 static TaskHandle_t s_task;
 static SemaphoreHandle_t s_lock; // guards s_pending

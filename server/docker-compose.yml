@@ -6,7 +6,9 @@ services:
     image: influxdb:2.9
     restart: unless-stopped
     ports:
-      - "8086:8086" # the ESP32 writes here
+      # Host ports are deliberately not the defaults; the firmware has the
+      # InfluxDB one in main/metrics.c (METRICS_PORT).
+      - "34898:8086" # the ESP32 writes here
     environment:
       # First start only: creates the org, bucket and the token the ESP32 and
       # Grafana use. Changing these later has no effect on an existing volume.
@@ -24,7 +26,7 @@ services:
     image: grafana/grafana:13.2
     restart: unless-stopped
     ports:
-      - "3000:3000" # the dashboard: http://<this machine>:3000
+      - "34897:3000" # the dashboard: http://<this machine>:34897
     environment:
       INFLUX_TOKEN: ${INFLUX_TOKEN:?set in .env}
       # Home LAN only: open the dashboard without logging in (read-only).
