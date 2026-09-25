@@ -60,10 +60,13 @@ on the physical display, and note anything the next task needs to know.
   detekt/lint, unit tests, GitHub Actions)
   - [x] clang-format (2026-09-25): `.clang-format` + `tools/format.sh
     [--check]`, whole codebase reformatted in one commit.
-  - [ ] Host unit tests (Unity/gcc on the PC): first split the JSON parsing
-    out of `weather.c`/`bvg.c` into `parse_*(const char *json, ...)` and test
-    against saved real responses; then `utc_to_epoch()`/DST dates, weather
-    code -> icon, BVG leave/hurry logic, encoder decode, glyphs as ASCII art.
+  - [x] Host unit tests (2026-09-25): `tools/test.sh`, Unity + gcc with
+    ASan/UBSan. JSON parsing split into `weather_parse.c` / `bvg_parse.c`;
+    12 tests (parsers, weather code -> icon, stop-name cleanup).
+  - [ ] More host tests: `utc_to_epoch()`/DST dates (needs the RTC code
+    split from I2C in `clock.c`), BVG leave/hurry logic (lives in
+    `draw_screen()`, needs pulling out), encoder decode, glyphs as ASCII art.
+    Replace the hand-written `bvg_ok.json` with a real capture.
   - [ ] clang-tidy (via `idf.py clang-check`) or cppcheck; maybe `-Wextra`
     for `main/` only.
   - [ ] GitHub Actions: firmware build (espressif/idf image), format check,

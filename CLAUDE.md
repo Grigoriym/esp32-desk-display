@@ -163,8 +163,9 @@ Rules:
   10 ms, so `pdMS_TO_TICKS(<10)` is 0 and `vTaskDelay(0)` busy-loops. That's
   why the KY-040 check decodes the quadrature in a GPIO any-edge ISR (10 ms
   polling would drop steps on a quick spin) and only polls the button.
-- **Pure logic can be checked on the host before flashing**: copy the function out
-  with `sed` and compile it with `gcc` against glibc (done for `utc_to_epoch()` and
+- **Pure logic can be checked on the host before flashing**: now done properly
+  by `tools/test.sh` (see Host unit tests). Before that: copied the function out
+  with `sed` and compiled it with `gcc` against glibc (done for `utc_to_epoch()` and
   the TZ rule's switch dates). The same trick would work for glyph bitmaps
   (print them as ASCII art) — the "no tooling" gap above is fixable this way.
 - Panel orientation: `0xA0`/`0xC0` (segment remap / COM scan) in the init sequence
@@ -220,6 +221,17 @@ clang-tidy) come from ESP-IDF's optional `esp-clang` tool, installed with
 `python $IDF_PATH/tools/idf_tools.py install esp-clang`. Hand-aligned
 tables that clang-format would flatten go between
 `// clang-format off` / `// clang-format on` (see `weather_icon_for_code()`).
+
+## Host unit tests (since 2026-09-25)
+`tools/test.sh` (after sourcing `export.sh`) builds `test/test_<name>.c`
+against `main/<name>.c` with the PC's gcc, ASan/UBSan on, and runs it:
+the `./gradlew test` here. Unity (the C test framework) comes from
+`$IDF_PATH`, cJSON from `managed_components/` (exists after one `idf.py
+build`). Only pure logic is testable this way, so code worth testing goes in
+files with **no ESP-IDF includes**: that's why JSON parsing lives in
+`weather_parse.c` / `bvg_parse.c`, split from the HTTP fetch in
+`weather.c` / `bvg.c`. Fixtures in `test/fixtures/` (see its README:
+`bvg_ok.json` is hand-written, the wrapper was down).
 
 ## Serial monitoring gotcha (this dev harness)
 `idf.py monitor` fails here with "Monitor requires standard input to be attached to

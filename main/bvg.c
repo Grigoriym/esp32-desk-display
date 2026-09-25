@@ -1,12 +1,9 @@
-#include <stdio.h>
 #include <string.h>
-#include <ctype.h>
 #include "bvg.h"
 #include "bvg_secrets.h"
 #include "esp_http_client.h"
 #include "esp_crt_bundle.h"
 #include "esp_log.h"
-#include "cJSON.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/semphr.h"
@@ -40,37 +37,6 @@ static esp_err_t http_event_handler(esp_http_client_event_t *evt)
     return ESP_OK;
 }
 
-// Makes a stop name drawable with the display font (A-Z, 0-9, space, '-',
-// '/'): uppercases, spells out German umlauts, drops the " (Berlin)" suffix
-// and anything else the font can't draw.
-static void to_display_name(const char *src, char *dst, size_t dst_size)
-{
-    size_t n = 0;
-    for (const unsigned char *p = (const unsigned char *)src; *p && n + 2 < dst_size; p++) {
-        if (*p == '(') break;
-        const char *sub = NULL;
-        char one[2] = {0};
-        if (*p == 0xC3 && p[1]) { // UTF-8 umlauts / sharp s
-            switch (p[1]) {
-                case 0xA4:
-                case 0x84: sub = "AE"; break;
-                case 0xB6:
-                case 0x96: sub = "OE"; break;
-                case 0xBC:
-                case 0x9C: sub = "UE"; break;
-                case 0x9F: sub = "SS"; break;
-            }
-            p++;
-        } else if (isalnum(*p) || *p == ' ' || *p == '-' || *p == '/') {
-            one[0] = (char)toupper(*p);
-            sub = one;
-        }
-        for (; sub && *sub && n + 1 < dst_size; sub++) dst[n++] = *sub;
-    }
-    while (n > 0 && dst[n - 1] == ' ') n--; // left over from " (Berlin)"
-    dst[n] = '\0';
-}
-
 static esp_err_t bvg_fetch(bvg_departures_t *out)
 {
     s_response_len = 0;
@@ -98,36 +64,7 @@ static esp_err_t bvg_fetch(bvg_departures_t *out)
         return ESP_ERR_NO_MEM;
     }
 
-    cJSON *root = cJSON_Parse(s_response);
-    if (!root) return ESP_FAIL;
-    cJSON *deps = cJSON_GetObjectItem(root, "departures");
-    if (!cJSON_IsArray(deps)) {
-        cJSON_Delete(root);
-        return ESP_FAIL;
-    }
-
-    bvg_departures_t result = {0};
-    cJSON *d;
-    cJSON_ArrayForEach(d, deps)
-    {
-        if (result.count >= BVG_MAX_DEPARTURES) break;
-        // "when" is the real time incl. delay, null when cancelled.
-        cJSON *when = cJSON_GetObjectItem(d, "when");
-        cJSON *line = cJSON_GetObjectItem(cJSON_GetObjectItem(d, "line"), "name");
-        cJSON *dir = cJSON_GetObjectItem(d, "direction");
-        if (!cJSON_IsString(when) || !cJSON_IsString(line) || !cJSON_IsString(dir)) continue;
-
-        // "2026-09-24T22:41:00+02:00" -- already local time, keep HH:MM.
-        bvg_departure_t *dep = &result.dep[result.count];
-        if (sscanf(when->valuestring, "%*d-%*d-%*dT%d:%d", &dep->hour, &dep->minute) != 2) continue;
-        to_display_name(line->valuestring, dep->line, sizeof(dep->line));
-        to_display_name(dir->valuestring, dep->direction, sizeof(dep->direction));
-        result.count++;
-    }
-
-    cJSON_Delete(root);
-    *out = result;
-    return ESP_OK;
+    return bvg_parse(s_response, out) ? ESP_OK : ESP_FAIL;
 }
 
 #define BVG_REFRESH_MS (60 * 1000)

@@ -2,19 +2,7 @@
 
 #include <stdbool.h>
 #include "esp_err.h"
-
-#define BVG_MAX_DEPARTURES 6
-
-typedef struct {
-    char line[6];       // e.g. "U5"
-    char direction[22]; // display-ready: uppercase, ASCII-only, e.g. "HAUPTBAHNHOF"
-    int hour, minute;   // real (delay included) local departure time
-} bvg_departure_t;
-
-typedef struct {
-    int count;
-    bvg_departure_t dep[BVG_MAX_DEPARTURES];
-} bvg_departures_t;
+#include "bvg_parse.h"
 
 // Starts the background fetch task. Fetching runs off the main loop, so a
 // slow or down API (it has outages; timeouts take ~15s) never freezes the

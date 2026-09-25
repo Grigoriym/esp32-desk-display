@@ -1,0 +1,6 @@
+{"departures":[
+{"tripId":"1|1|1","stop":{"type":"stop","id":"900175006","name":"U Cottbusser Platz (Berlin)"},"when":"2026-09-24T22:41:00+02:00","plannedWhen":"2026-09-24T22:40:00+02:00","delay":60,"platform":null,"direction":"S+U Hauptbahnhof","line":{"type":"line","id":"u5","name":"U5","mode":"train","product":"subway"}},
+{"tripId":"1|1|2","stop":{"type":"stop","id":"900175006","name":"U Cottbusser Platz (Berlin)"},"when":null,"plannedWhen":"2026-09-24T22:45:00+02:00","delay":null,"cancelled":true,"platform":null,"direction":"S+U Hauptbahnhof","line":{"type":"line","id":"u5","name":"U5","mode":"train","product":"subway"}},
+{"tripId":"1|1|3","stop":{"type":"stop","id":"900175006","name":"U Cottbusser Platz (Berlin)"},"when":"2026-09-24T22:50:00+02:00","plannedWhen":"2026-09-24T22:50:00+02:00","delay":0,"platform":null,"direction":"U Frankfurter Tor (Berlin)","line":{"type":"line","id":"u5","name":"U5","mode":"train","product":"subway"}},
+{"tripId":"1|1|4","stop":{"type":"stop","id":"900175006","name":"U Cottbusser Platz (Berlin)"},"when":"2026-09-25T00:05:00+02:00","plannedWhen":"2026-09-25T00:05:00+02:00","delay":0,"platform":null,"direction":"S+U Hauptbahnhof","line":{"type":"line","id":"u5","name":"U5","mode":"train","product":"subway"}}
+],"realtimeDataUpdatedAt":1790282460}
