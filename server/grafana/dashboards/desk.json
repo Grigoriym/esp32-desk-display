@@ -11,15 +11,17 @@
     "from": "now-24h",
     "to": "now"
   },
+  "editable": false,
   "panels": [
     {
       "id": 1,
       "type": "stat",
       "title": "Indoor",
+      "description": "Room temperature from the BME280 on the display. Comfortable: 20-24 °C (green). Below 18 blue, above 25 orange, above 28 red.",
       "gridPos": {
         "x": 0,
         "y": 0,
-        "w": 4,
+        "w": 3,
         "h": 4
       },
       "datasource": {
@@ -39,7 +41,31 @@
       "fieldConfig": {
         "defaults": {
           "unit": "celsius",
-          "decimals": 1
+          "decimals": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 18
+              },
+              {
+                "color": "orange",
+                "value": 25
+              },
+              {
+                "color": "red",
+                "value": 28
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
         },
         "overrides": [
           {
@@ -65,7 +91,7 @@
           "values": false
         },
         "graphMode": "area",
-        "colorMode": "none",
+        "colorMode": "value",
         "textMode": "value"
       }
     },
@@ -73,10 +99,11 @@
       "id": 2,
       "type": "stat",
       "title": "Humidity",
+      "description": "Indoor relative humidity. Comfortable: 40-60 % (green). Below 30 % dry air (orange): dry eyes/throat. Above 60 % yellow, above 70 % red: mould risk, time to air the room.",
       "gridPos": {
-        "x": 4,
+        "x": 3,
         "y": 0,
-        "w": 4,
+        "w": 3,
         "h": 4
       },
       "datasource": {
@@ -96,7 +123,35 @@
       "fieldConfig": {
         "defaults": {
           "unit": "percent",
-          "decimals": 0
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "orange",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 30
+              },
+              {
+                "color": "green",
+                "value": 40
+              },
+              {
+                "color": "yellow",
+                "value": 60
+              },
+              {
+                "color": "red",
+                "value": 70
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
         },
         "overrides": [
           {
@@ -122,7 +177,7 @@
           "values": false
         },
         "graphMode": "area",
-        "colorMode": "none",
+        "colorMode": "value",
         "textMode": "value"
       }
     },
@@ -130,10 +185,11 @@
       "id": 3,
       "type": "stat",
       "title": "Pressure",
+      "description": "Air pressure in hPa, measured in the room (same as outside). Reads about 4 hPa below weather reports: those are converted to sea level, Berlin is ~35 m up. Rough guide (weather-report values): under 1000 low, unsettled, rain and wind likely; 1010-1020 normal; above 1025 high, settled, dry. The trend matters more than the value: see Pressure 3h.",
       "gridPos": {
-        "x": 8,
+        "x": 6,
         "y": 0,
-        "w": 4,
+        "w": 3,
         "h": 4
       },
       "datasource": {
@@ -186,11 +242,102 @@
     {
       "id": 4,
       "type": "stat",
+      "title": "Pressure 3h",
+      "description": "Pressure change over the last 3 hours. Falling more than 3 hPa (orange/red): weather getting worse, rain or wind coming. Rising more than 3 hPa (blue): clearing up. Within ±1: no change.",
+      "gridPos": {
+        "x": 9,
+        "y": 0,
+        "w": 3,
+        "h": 4
+      },
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb"
+          },
+          "query": "data = from(bucket: \"desk\")\n  |> range(start: -3h)\n  |> filter(fn: (r) => r._measurement == \"indoor\" and r._field == \"pressure_hpa\")\nunion(tables: [data |> first(), data |> last()])\n  |> sort(columns: [\"_time\"])\n  |> difference()"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "pressurehpa",
+          "decimals": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": -6
+              },
+              {
+                "color": "yellow",
+                "value": -3
+              },
+              {
+                "color": "green",
+                "value": -1
+              },
+              {
+                "color": "text",
+                "value": 1
+              },
+              {
+                "color": "blue",
+                "value": 3
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "A"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Change"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "graphMode": "area",
+        "colorMode": "value",
+        "textMode": "value"
+      }
+    },
+    {
+      "id": 5,
+      "type": "stat",
       "title": "Outdoor",
+      "description": "Current outdoor temperature in central Berlin (Open-Meteo), refreshed every 15 min.",
       "gridPos": {
         "x": 12,
         "y": 0,
-        "w": 4,
+        "w": 3,
         "h": 4
       },
       "datasource": {
@@ -241,13 +388,14 @@
       }
     },
     {
-      "id": 5,
+      "id": 6,
       "type": "stat",
       "title": "AQI",
+      "description": "European Air Quality Index for Berlin (Open-Meteo, refreshed every 15 min). 0-20 good, 20-40 fair (green), 40-60 moderate (yellow), 60-80 poor (orange), 80-100 very poor (red), above 100 extremely poor (purple).",
       "gridPos": {
-        "x": 16,
+        "x": 15,
         "y": 0,
-        "w": 4,
+        "w": 3,
         "h": 4
       },
       "datasource": {
@@ -267,7 +415,35 @@
       "fieldConfig": {
         "defaults": {
           "unit": "none",
-          "decimals": 0
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 40
+              },
+              {
+                "color": "orange",
+                "value": 60
+              },
+              {
+                "color": "red",
+                "value": 80
+              },
+              {
+                "color": "purple",
+                "value": 100
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
         },
         "overrides": [
           {
@@ -293,18 +469,19 @@
           "values": false
         },
         "graphMode": "area",
-        "colorMode": "none",
+        "colorMode": "value",
         "textMode": "value"
       }
     },
     {
-      "id": 6,
+      "id": 7,
       "type": "stat",
       "title": "WiFi signal",
+      "description": "WiFi signal strength at the display, in dBm: closer to 0 is stronger. -30 to -50 excellent, -50 to -67 good (green); -67 to -80 weak, occasional slow requests (orange); below -80 poor, dropouts (red). Useful when fetches fail or after moving the display.",
       "gridPos": {
-        "x": 20,
+        "x": 18,
         "y": 0,
-        "w": 4,
+        "w": 3,
         "h": 4
       },
       "datasource": {
@@ -324,7 +501,27 @@
       "fieldConfig": {
         "defaults": {
           "unit": "dBm",
-          "decimals": 0
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": -80
+              },
+              {
+                "color": "green",
+                "value": -67
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
         },
         "overrides": [
           {
@@ -335,7 +532,65 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "WiFi signal"
+                "value": "WiFi"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "graphMode": "area",
+        "colorMode": "value",
+        "textMode": "value"
+      }
+    },
+    {
+      "id": 8,
+      "type": "stat",
+      "title": "Uptime",
+      "description": "Time since the display last restarted. Drops to zero after a reset: normal after flashing or unplugging, otherwise a crash or a power problem (check the boot log for BROWNOUT).",
+      "gridPos": {
+        "x": 21,
+        "y": 0,
+        "w": 3,
+        "h": 4
+      },
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb"
+          },
+          "query": "from(bucket: \"desk\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"device\" and r._field == \"uptime_s\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "decimals": 1
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "A"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Uptime"
               }
             ]
           }
@@ -355,9 +610,10 @@
       }
     },
     {
-      "id": 7,
+      "id": 9,
       "type": "timeseries",
       "title": "Temperature",
+      "description": "Room temperature from the BME280 on the display. Comfortable: 20-24 °C (green). Below 18 blue, above 25 orange, above 28 red. Current outdoor temperature in central Berlin (Open-Meteo), refreshed every 15 min.",
       "gridPos": {
         "x": 0,
         "y": 4,
@@ -437,9 +693,10 @@
       }
     },
     {
-      "id": 8,
+      "id": 10,
       "type": "timeseries",
       "title": "Indoor humidity",
+      "description": "Indoor relative humidity. Comfortable: 40-60 % (green). Below 30 % dry air (orange): dry eyes/throat. Above 60 % yellow, above 70 % red: mould risk, time to air the room.",
       "gridPos": {
         "x": 12,
         "y": 4,
@@ -464,11 +721,42 @@
         "defaults": {
           "unit": "percent",
           "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "orange",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 30
+              },
+              {
+                "color": "green",
+                "value": 40
+              },
+              {
+                "color": "yellow",
+                "value": 60
+              },
+              {
+                "color": "red",
+                "value": 70
+              }
+            ]
+          },
+          "color": {
+            "mode": "palette-classic"
+          },
           "custom": {
             "lineWidth": 2,
             "fillOpacity": 0,
             "showPoints": "never",
-            "spanNulls": 300000
+            "spanNulls": 300000,
+            "thresholdsStyle": {
+              "mode": "area"
+            }
           }
         },
         "overrides": [
@@ -499,9 +787,10 @@
       }
     },
     {
-      "id": 9,
+      "id": 11,
       "type": "timeseries",
       "title": "Pressure",
+      "description": "Air pressure in hPa, measured in the room (same as outside). Reads about 4 hPa below weather reports: those are converted to sea level, Berlin is ~35 m up. Rough guide (weather-report values): under 1000 low, unsettled, rain and wind likely; 1010-1020 normal; above 1025 high, settled, dry. The trend matters more than the value: see Pressure 3h.",
       "gridPos": {
         "x": 0,
         "y": 13,
@@ -561,9 +850,10 @@
       }
     },
     {
-      "id": 10,
+      "id": 12,
       "type": "timeseries",
       "title": "Air quality (European AQI)",
+      "description": "European Air Quality Index for Berlin (Open-Meteo, refreshed every 15 min). 0-20 good, 20-40 fair (green), 40-60 moderate (yellow), 60-80 poor (orange), 80-100 very poor (red), above 100 extremely poor (purple).",
       "gridPos": {
         "x": 12,
         "y": 13,
@@ -588,11 +878,42 @@
         "defaults": {
           "unit": "none",
           "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 40
+              },
+              {
+                "color": "orange",
+                "value": 60
+              },
+              {
+                "color": "red",
+                "value": 80
+              },
+              {
+                "color": "purple",
+                "value": 100
+              }
+            ]
+          },
+          "color": {
+            "mode": "palette-classic"
+          },
           "custom": {
             "lineWidth": 2,
             "fillOpacity": 0,
             "showPoints": "never",
-            "spanNulls": 300000
+            "spanNulls": 300000,
+            "thresholdsStyle": {
+              "mode": "area"
+            }
           }
         },
         "overrides": [
@@ -623,9 +944,10 @@
       }
     },
     {
-      "id": 11,
+      "id": 13,
       "type": "timeseries",
       "title": "Pollen (grains/m³)",
+      "description": "Pollen in the air, grains per m³ (Open-Meteo, Europe only). Rough guide: 1-10 low, 11-50 medium, above 50 high. Zero outside the season (about Oct-Jan).",
       "gridPos": {
         "x": 0,
         "y": 22,
@@ -765,9 +1087,10 @@
       }
     },
     {
-      "id": 12,
+      "id": 14,
       "type": "timeseries",
       "title": "Outdoor wind and UV",
+      "description": "Outdoor wind speed (km/h) and today's maximum UV index. UV: 0-2 low, 3-5 moderate, 6-7 high, 8+ very high.",
       "gridPos": {
         "x": 12,
         "y": 22,
@@ -847,9 +1170,10 @@
       }
     },
     {
-      "id": 13,
+      "id": 15,
       "type": "timeseries",
       "title": "Device",
+      "description": "Display health. WiFi dBm: see the WiFi tile. Free heap: memory left on the ESP32; ~150-190 KB is normal, a steady decline over days would mean a memory leak.",
       "gridPos": {
         "x": 0,
         "y": 31,
@@ -929,5 +1253,5 @@
       }
     }
   ],
-  "editable": false
+  "description": "Hover the (i) next to a panel title for what its numbers mean."
 }

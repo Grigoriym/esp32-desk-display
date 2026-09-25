@@ -31,8 +31,10 @@ version:
 3. Open `http://<machine>:34897`: the "Desk display" dashboard is the home
    page, no login needed (read-only). Log in as `admin` /
    `INFLUX_ADMIN_PASSWORD` to change things; the provisioned dashboard
-   itself is read-only, edit `grafana/dashboards/desk.json` instead
-   (Grafana reloads it).
+   itself is read-only: edit `grafana/make_dashboard.py` and run it
+   (`python3 grafana/make_dashboard.py` regenerates
+   `grafana/dashboards/desk.json`; Grafana reloads it). Every panel has an
+   (i) tooltip saying what its numbers mean; keep that when adding one.
 
 Give the machine a fixed LAN IP (DHCP reservation in the router), or the
 display loses it after a router restart.

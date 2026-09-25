@@ -125,6 +125,8 @@ display silently stops uploading.
   (versions are pinned to `influxdb:2.9` and `grafana/grafana:13.2` in
   `docker-compose.yml`; data survives in named volumes).
 - Logs: `docker compose logs -f grafana` / `influxdb`.
-- Dashboard changes: edit `grafana/dashboards/desk.json` (Grafana reloads
-  it); edits made in the Grafana UI are not saved for this dashboard.
+- Dashboard changes: edit `grafana/make_dashboard.py` and run it
+  (`python3 grafana/make_dashboard.py`, regenerates
+  `grafana/dashboards/desk.json`, Grafana reloads it within ~10 s); edits
+  made in the Grafana UI are not saved for this dashboard.
 - Stop: `docker compose down` (keeps data); `down -v` wipes it.
