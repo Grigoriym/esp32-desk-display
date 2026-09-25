@@ -25,7 +25,7 @@ on the physical display, and note anything the next task needs to know.
     `draw_screen()`): HOME (icon+outdoor temp, `IN 25C 43H`), OUTDOOR
     (sunrise/sunset, wind/UV), INDOOR (temp, humidity, pressure). Clock row
     on page 0 of all of them. Turn = next/previous (wraps), press = HOME
-    (press = panel off/on since 2026-09-25).
+    (press = panel off/on since 2026-09-25, verified on the panel).
     New screens (BVG, task 4): add a `screen_t` value and a `case`.
     Auto-return to HOME after idle and a screen-position indicator were
     considered and dropped (2026-09-25): not wanted.
