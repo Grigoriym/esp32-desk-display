@@ -136,7 +136,8 @@ on the physical display, and note anything the next task needs to know.
   (was 145). Still open: see a real warning on the panel, and replace the
   hand-written fixture with a capture of it.
 
-- [x] **10. Berlin public holidays** (2026-09-25; the fetch runs on the
+- [x] **10. Berlin public holidays** (2026-09-25; `NEXT HOLIDAY 03/10` seen
+  on the panel; the fetch runs on the
   device, `holidays 2026 fetched (10 in Berlin, next 20261003 GERMAN UNITY
   DAY)`): Nager.Date `https://date.nager.at/api/v3/PublicHolidays/<year>/DE`
   (free, no key), keeping `global: true` or `DE-BE` in `counties`. Fetched
