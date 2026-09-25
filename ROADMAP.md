@@ -114,15 +114,32 @@ on the physical display, and note anything the next task needs to know.
   fetch retry with the weather backoff. Pollen is 0 off season (Sep-Jan),
   so the pollen rows only get real data from spring.
 
-- [ ] **8. Dashboard** (2026-09-25, built, awaiting a look in the browser
-  on the always-on machine): the display POSTs its readings every minute to
-  InfluxDB, Grafana shows them (`server/`, Docker Compose, setup in
-  `server/README.md`). Tested end to end with the stack on the dev machine
-  (192.168.0.241): all four measurements arrive, every dashboard query
-  returns data. Still to do: run `server/` on the always-on home machine
-  (`server/INSTALL.md`),
-  put its LAN IP into `main/metrics_secrets.h`, reflash, then stop the
-  dev-machine stack (`docker compose down` in `server/`).
+- [x] **8. Dashboard** (2026-09-25): the display POSTs its readings every
+  minute to InfluxDB, Grafana shows them (`server/`, Docker Compose, setup
+  in `server/README.md` / `server/INSTALL.md`). First tested with the stack
+  on the dev machine; since 2026-09-25 it runs on the always-on home box,
+  Grafana at `http://192.168.0.139:34897/`, firmware reflashed with its IP
+  and token (`upload OK` in the boot log), dev-machine stack and volumes
+  removed.
+
+- [ ] **9. DWD weather warnings on HOME**: official German Weather Service
+  warnings via Bright Sky, `https://api.brightsky.dev/alerts?lat=52.52&lon=13.405`
+  (free, no key; resolves to warn cell 711000101 "Berl. - Mitte").
+  Response: `{"alerts":[...], "location":{...}}`, empty list when nothing
+  is active. Fetch with the weather (same `http_get()`, 15-min cadence),
+  parse in a pure `alerts_parse.c` (host test + fixture: an empty and a
+  hand-written active alert, since there may be none live to copy). Show
+  the most severe active warning on HOME in place of the rain hint, e.g.
+  `STORM WARN` / `FROST WARN` / `HEAT WARN`, using only the font's
+  A-Z 0-9 `:` `-` `/`. Check what the `event_en` / `severity` fields look
+  like on a real alert before mapping them.
+
+- [ ] **10. Berlin public holidays**: Nager.Date,
+  `https://date.nager.at/api/v3/PublicHolidays/<year>/DE` (free, no key).
+  Keep entries with `global: true` or `DE-BE` in `counties` (10 in 2026,
+  incl. Frauentag 8 March). Fetch once a day / at boot (and the next year's
+  list in December), parse in a pure `holidays_parse.c` with a test. Show
+  `HOLIDAY` on the day, else the next one (e.g. `NEXT HOL 03/10`) on HOME.
 
 WiFi connect timeout: done 2026-09-25, see Open questions in `CLAUDE.md`.
 
