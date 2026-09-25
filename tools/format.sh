@@ -7,7 +7,8 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-CF=${CLANG_FORMAT:-$(command -v clang-format || ls ~/.espressif/tools/esp-clang/*/esp-clang/bin/clang-format 2>/dev/null | tail -1)}
+# esp-clang first: a different clang-format version can format differently.
+CF=${CLANG_FORMAT:-$(ls "${IDF_TOOLS_PATH:-$HOME/.espressif}"/tools/esp-clang/*/esp-clang/bin/clang-format 2>/dev/null | tail -1)}
 if [ -z "$CF" ]; then
     echo "clang-format not found (install esp-clang, or set CLANG_FORMAT)" >&2
     exit 2

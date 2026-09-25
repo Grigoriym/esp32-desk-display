@@ -11,7 +11,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 : "${IDF_PATH:?source ~/esp/esp-idf/export.sh first}"
-CT=${CLANG_TIDY:-$(ls ~/.espressif/tools/esp-clang/*/esp-clang/bin/clang-tidy 2>/dev/null | tail -1)}
+CT=${CLANG_TIDY:-$(ls "${IDF_TOOLS_PATH:-$HOME/.espressif}"/tools/esp-clang/*/esp-clang/bin/clang-tidy 2>/dev/null | tail -1)}
 [ -n "$CT" ] || { echo "clang-tidy not found: python \$IDF_PATH/tools/idf_tools.py install esp-clang" >&2; exit 2; }
 
 # Its own copy of sdkconfig: configuring with clang rewrites the toolchain
