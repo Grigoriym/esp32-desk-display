@@ -8,6 +8,7 @@
 #include "weather_parse.h"
 #include "air_parse.h"
 #include "alerts_parse.h"
+#include "holidays_parse.h"
 #include "bme280_reading.h"
 #include "bvg_parse.h"
 
@@ -22,7 +23,9 @@ typedef struct {
     air_t air;
     bool alerts_ok; // false until the first warnings fetch succeeds, or after one fails
     alerts_t alerts;
-    bool indoor_ok; // false until the first BME280 read succeeds
+    int today_ymd;       // local date as YYYYMMDD; 0 while the clock isn't set
+    holidays_t holidays; // Berlin's; .year 0 until the first fetch succeeds
+    bool indoor_ok;      // false until the first BME280 read succeeds
     bme280_reading_t indoor;
     bool bvg_ok;     // false until the first departures fetch succeeds
     bool bvg_failed; // last fetch failed (shown only while there's no data)

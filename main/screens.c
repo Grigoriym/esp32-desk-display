@@ -39,6 +39,22 @@ static void alert_hint(const alerts_t *a, screen_rows_t *out)
     snprintf(ROW(1, 1), "%s", a->onset);
 }
 
+// Page 1 of HOME otherwise: the holiday's name on the day, else the date of
+// the next one.
+static void holiday_hint(const screen_data_t *d, screen_rows_t *out)
+{
+    if (d->today_ymd == 0) return;
+    int i = holidays_next(&d->holidays, d->today_ymd);
+    if (i < 0) return;
+    const holiday_t *h = &d->holidays.day[i];
+    if (h->ymd == d->today_ymd) {
+        snprintf(ROW(1, 0), "%s", h->name);
+        return;
+    }
+    snprintf(ROW(1, 0), "NEXT HOLIDAY");
+    snprintf(ROW(1, 1), "%02d/%02d", h->ymd % 100, h->ymd / 100 % 100);
+}
+
 static void layout_home(const screen_data_t *d, screen_rows_t *out)
 {
     // Page 3 is drawn with the weather icon in front (main.c).
@@ -49,6 +65,7 @@ static void layout_home(const screen_data_t *d, screen_rows_t *out)
                  (int)lroundf(d->indoor.humidity_pct));
     }
     if (d->alerts_ok && d->alerts.count > 0) alert_hint(&d->alerts, out);
+    else holiday_hint(d, out);
     if (d->weather_ok) rain_hint(&d->weather, out);
 }
 

@@ -10,6 +10,7 @@
 #include "wifi.h"
 #include "clock.h"
 #include "weather.h"
+#include "holidays.h"
 #include "bme280.h"
 #include "encoder.h"
 #include "bvg.h"
@@ -154,6 +155,7 @@ static esp_err_t ntp_sync_with_retry(void)
 #define INDOOR_REFRESH_SECONDS      10
 #define HEALTH_LOG_SECONDS          (5 * 60)
 #define METRICS_SECONDS             60
+#define HOLIDAYS_RETRY_SECONDS      (30 * 60)
 
 // What the boot sequence found out, and the main loop's timers.
 typedef struct {
@@ -165,6 +167,7 @@ typedef struct {
     int seconds_since_ntp;
     int seconds_since_health;
     int seconds_since_metrics;
+    int seconds_since_holidays;
     int last_minute;
 } app_state_t;
 
@@ -325,6 +328,10 @@ static bool tick_minute(app_state_t *st)
     localtime_r(&now, &now_tm);
     if (now_tm.tm_min == st->last_minute) return false;
     st->last_minute = now_tm.tm_min;
+    // Before NTP/RTC the clock says 1970: no date to match holidays against.
+    s_data.today_ymd = now_tm.tm_year + 1900 >= 2025
+                           ? (now_tm.tm_year + 1900) * 10000 + (now_tm.tm_mon + 1) * 100 + now_tm.tm_mday
+                           : 0;
     return true;
 }
 
@@ -374,6 +381,28 @@ static bool tick_weather(app_state_t *st)
     if (st->next_weather_interval > WEATHER_REFRESH_SECONDS)
         st->next_weather_interval = WEATHER_REFRESH_SECONDS;
     return false;
+}
+
+// Holidays change once a year: fetched at the first chance, again for the
+// next year once this year's are all past; a failure retries in 30 min.
+static bool tick_holidays(app_state_t *st)
+{
+    if (++st->seconds_since_holidays < HOLIDAYS_RETRY_SECONDS) return false;
+    if (s_data.today_ymd == 0 || !wifi_is_connected()) return false;
+    int year = holidays_wanted_year(&s_data.holidays, s_data.today_ymd);
+    if (year == 0) return false;
+    st->seconds_since_holidays = 0;
+    holidays_t h;
+    esp_err_t err = holidays_fetch(year, &h);
+    if (err != ESP_OK) {
+        ESP_LOGW(TAG, "holidays %d failed: %s", year, esp_err_to_name(err));
+        return false;
+    }
+    int next = holidays_next(&h, s_data.today_ymd);
+    ESP_LOGI(TAG, "holidays %d fetched (%d in Berlin, next %d %s)", year, h.count,
+             next >= 0 ? h.day[next].ymd : 0, next >= 0 ? h.day[next].name : "-");
+    s_data.holidays = h;
+    return true;
 }
 
 // Heap and stack headroom, every few minutes and once a minute after boot
@@ -437,6 +466,7 @@ void app_main(void)
     app_state_t st = {
         .seconds_since_indoor = INDOOR_REFRESH_SECONDS,
         .seconds_since_health = HEALTH_LOG_SECONDS - 60,
+        .seconds_since_holidays = HOLIDAYS_RETRY_SECONDS,
         .last_minute = -1,
     };
 
@@ -467,6 +497,7 @@ void app_main(void)
         changed |= tick_indoor(&st);
         tick_ntp(&st);
         changed |= tick_weather(&st);
+        changed |= tick_holidays(&st);
         tick_health(&st);
         tick_metrics(&st);
         if (changed) draw_screen();

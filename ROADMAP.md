@@ -136,12 +136,18 @@ on the physical display, and note anything the next task needs to know.
   (was 145). Still open: see a real warning on the panel, and replace the
   hand-written fixture with a capture of it.
 
-- [ ] **10. Berlin public holidays**: Nager.Date,
-  `https://date.nager.at/api/v3/PublicHolidays/<year>/DE` (free, no key).
-  Keep entries with `global: true` or `DE-BE` in `counties` (10 in 2026,
-  incl. Frauentag 8 March). Fetch once a day / at boot (and the next year's
-  list in December), parse in a pure `holidays_parse.c` with a test. Show
-  `HOLIDAY` on the day, else the next one (e.g. `NEXT HOL 03/10`) on HOME.
+- [x] **10. Berlin public holidays** (2026-09-25; the fetch runs on the
+  device, `holidays 2026 fetched (10 in Berlin, next 20261003 GERMAN UNITY
+  DAY)`): Nager.Date `https://date.nager.at/api/v3/PublicHolidays/<year>/DE`
+  (free, no key), keeping `global: true` or `DE-BE` in `counties`. Fetched
+  at the first chance after boot (clock set + WiFi), then only when the
+  next year's list is needed (after 26 Dec); a failure retries in 30 min.
+  HOME page 1 (under the clock) shows `NEXT HOLIDAY` + `DD/MM`, or the
+  holiday's English name on the day (`GERMAN UNITY DAY`, `.`/`'` dropped:
+  `ST STEPHENS DAY`); a DWD warning takes that row. Each holiday is one day
+  in the API, so back-to-back ones (25/26 Dec) just change the line.
+  School holidays (multi-day) are a different source, not covered. Needed
+  `CONFIG_MBEDTLS_CERTIFICATE_BUNDLE_CROSS_SIGNED_VERIFY` (see CLAUDE.md).
 
 WiFi connect timeout: done 2026-09-25, see Open questions in `CLAUDE.md`.
 

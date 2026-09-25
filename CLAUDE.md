@@ -127,7 +127,9 @@ Rules:
 | Clock sync | SNTP (`esp_netif_sntp`) |
 | Weather fetch | `esp_http_client` + `mbedtls` (`esp_crt_bundle_attach` for TLS, Open-Meteo is HTTPS-only) |
 | Air quality + pollen | Open-Meteo air-quality API (free, no key), fetched right after the weather on the same 15-min cadence, same `http_get()` in `main/weather.c`; parsed in `main/air_parse.c` |
-| DWD weather warnings | Bright Sky `/alerts` (free, no key, `tz=Europe/Berlin`), fetched after the air quality on the same cadence via `http_get()` in `main/weather.c` into a 16 KB heap buffer (each warning is ~1 KB of German + English text); parsed in `main/alerts_parse.c`. Shown on HOME page 1, under the clock. A failed fetch blanks it rather than keep a stale one |
+| DWD weather warnings | Bright Sky `/alerts` (free, no key, `tz=Europe/Berlin`), fetched after the air quality on the same cadence via `http_get()` into a 16 KB heap buffer (each warning is ~1 KB of German + English text); parsed in `main/alerts_parse.c`. Shown on HOME page 1, under the clock. A failed fetch blanks it rather than keep a stale one |
+| Public holidays | Nager.Date (free, no key), `main/holidays.c` + pure `main/holidays_parse.c`: Berlin's (`DE-BE` + nationwide), fetched once a year (and the next year's after 26 Dec), shown on HOME page 1 unless a DWD warning is out. Its TLS chain is GTS Root R4 cross-signed by the old GlobalSign Root CA (not in the bundle), so `CONFIG_MBEDTLS_CERTIFICATE_BUNDLE_CROSS_SIGNED_VERIFY=y` (`sdkconfig.defaults`, ~700 B heap); symptom without it: `No matching trusted root certificate found` / `ESP_ERR_HTTP_CONNECT`. A new HTTPS host failing that way → check its chain with `openssl s_client -showcerts` |
+| HTTP GET | `main/http.c` `http_get(url, buf, size)`, shared by weather/air/alerts/holidays; big responses (alerts 16 KB, holidays 8 KB) get a heap buffer for the fetch only |
 | BVG departures | `esp_http_client` against `v6.bvg.transport.rest` (community-run, no key, **has outages**: 503 after 10s or no answer, the `v6.vbb` mirror too, seen 2026-09-24), in its own FreeRTOS task (`main/bvg.c`) so a slow/down API never blocks the main loop |
 | Dashboard upload | `esp_http_client` plain-HTTP POST of InfluxDB line protocol every 60 s, in its own task (`main/metrics.c`, 4 KB stack) so a down server never blocks the main loop; lines built by the pure `main/metrics_format.c` (host-tested). Server side (InfluxDB 2 + Grafana, Docker Compose) in `server/`, see `server/README.md` |
 | JSON parsing | `cJSON` — **not bundled** in this ESP-IDF version (v6.1-dev); pulled via the component manager (`main/idf_component.yml` → `espressif/cjson`), lands in gitignored `managed_components/` |
@@ -360,7 +362,7 @@ first time for both encoder tests on 2026-09-24.
    last step (the 3s hold was dropped 2026-09-25). Since 2026-09-24 there are
    three, switched with the KY-040 (turn = next/prev, wraps; press = HOME):
    page 0 of every screen is time flush left + date `DD/MM/YYYY` flush right;
-   HOME has the DWD warning if any (p1, ROADMAP task 9), icon+outdoor temp
+   HOME has the DWD warning if any, else the next holiday (p1, ROADMAP tasks 9/10), icon+outdoor temp
    (p3), `IN 25C 43H` (p5) and the rain hint (p7, see ROADMAP task 6), OUTDOOR has
    sunrise/sunset and wind/today's max UV, AIR (since 2026-09-25) has the
    European AQI and the two strongest pollen types, INDOOR has temp/humidity and whole

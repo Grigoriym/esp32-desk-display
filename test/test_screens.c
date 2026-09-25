@@ -153,6 +153,38 @@ static void test_home_alert(void)
     TEST_ASSERT_EQUAL_STRING("", LEFT(1));
 }
 
+static void test_home_holiday(void)
+{
+    data.holidays = (holidays_t){
+        .year = 2026,
+        .count = 2,
+        .day = {{.ymd = 20261003, .name = "GERMAN UNITY DAY"}, {.ymd = 20261225, .name = "CHRISTMAS DAY"}},
+    };
+    screen_layout(SCREEN_HOME, &data, 0, &rows);
+    TEST_ASSERT_EQUAL_STRING("", LEFT(1)); // clock not set yet
+
+    data.today_ymd = 20260925;
+    screen_layout(SCREEN_HOME, &data, 0, &rows);
+    TEST_ASSERT_EQUAL_STRING("NEXT HOLIDAY", LEFT(1));
+    TEST_ASSERT_EQUAL_STRING("03/10", RIGHT(1));
+
+    data.today_ymd = 20261003;
+    screen_layout(SCREEN_HOME, &data, 0, &rows);
+    TEST_ASSERT_EQUAL_STRING("GERMAN UNITY DAY", LEFT(1));
+    TEST_ASSERT_EQUAL_STRING("", RIGHT(1));
+
+    data.today_ymd = 20261227; // this year's all past, next year's not loaded yet
+    screen_layout(SCREEN_HOME, &data, 0, &rows);
+    TEST_ASSERT_EQUAL_STRING("", LEFT(1));
+
+    // A DWD warning takes the row.
+    data.today_ymd = 20261003;
+    data.alerts_ok = true;
+    data.alerts = (alerts_t){.count = 1, .started = true, .event = "FROST"};
+    screen_layout(SCREEN_HOME, &data, 0, &rows);
+    TEST_ASSERT_EQUAL_STRING("FROST", LEFT(1));
+}
+
 static void test_home_rain(void)
 {
     screen_layout(SCREEN_HOME, &data, 0, &rows);
@@ -251,6 +283,7 @@ int main(void)
     RUN_TEST(test_home);
     RUN_TEST(test_home_rain);
     RUN_TEST(test_home_alert);
+    RUN_TEST(test_home_holiday);
     RUN_TEST(test_outdoor_and_indoor);
     RUN_TEST(test_air);
     RUN_TEST(test_previous_screen_leaves_nothing_behind);

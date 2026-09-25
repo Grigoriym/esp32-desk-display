@@ -9,3 +9,9 @@ CONFIG_ESP_MAIN_TASK_STACK_SIZE=8192
 # app partition: 1.5 MB.
 CONFIG_ESPTOOLPY_FLASHSIZE_4MB=y
 CONFIG_PARTITION_TABLE_SINGLE_APP_LARGE=y
+
+# date.nager.at (holidays) sends GTS Root R4 cross-signed by the old
+# GlobalSign Root CA, which isn't in the bundle any more; without this the
+# bundle only checks that outer issuer and the handshake fails ("No matching
+# trusted root certificate found"). Costs ~700 bytes of heap (2026-09-25).
+CONFIG_MBEDTLS_CERTIFICATE_BUNDLE_CROSS_SIGNED_VERIFY=y

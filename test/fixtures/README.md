@@ -13,6 +13,8 @@
   dwdparse's CAP test data (`heavy rain`, `wind gusts`): two started
   warnings, an upcoming severe one and a `status: test` message. Replace
   with a real capture the next time Berlin has a warning.
+- `holidays_2026.json`: real Nager.Date response for 2026/DE, captured
+  2026-09-25 (19 entries, 10 apply in Berlin).
 - `bvg_real.json`: real transport.rest response, captured 2026-09-25 10:29
   with the URL from `main/bvg.c` (U Cottbusser Platz, U5 towards Hbf):
   6 departures every 10 min, no delays or cancellations.
