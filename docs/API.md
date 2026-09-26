@@ -66,6 +66,7 @@ Top level:
 | `panel_on` | bool | Whether the OLED is on (off = dark, the display still runs and fetches) |
 | `outdoor` | object or `null` | Weather outside, see below |
 | `indoor` | object or `null` | Room sensor (BME280), see below |
+| `co2` | object or `null` | Room CO2 (SCD41, a separate sensor), see below |
 | `air` | object or `null` | Air quality and pollen, see below |
 | `warning` | object or `null` | DWD weather warnings, see below |
 | `next_holiday` | object or `null` | Next Berlin public holiday, see below |
@@ -85,6 +86,7 @@ from the refresh cadence:
 |---|---|---|
 | `outdoor`, `air`, `warning` | Open-Meteo, Open-Meteo air quality, DWD via Bright Sky | every 15 min (sooner retries after a failure) |
 | `indoor` | BME280 on the device | every 10 s |
+| `co2` | SCD41 on the device | every 30 s (`null` for the first ~30 s after boot) |
 | `bvg` | BVG departures (community API, **often down**, see below) | every 60 s, but only while fetching is active (see `bvg`) |
 | `next_holiday` | Nager.Date | once a year |
 
@@ -112,6 +114,16 @@ The panel shows `rain` as `NO RAIN 12H` (`in_h` -1), `RAIN <from>` (`in_h`
 | `temp_c` | number, 1 decimal | Room temperature, °C |
 | `humidity_pct` | number, 1 decimal | Relative humidity, % (40-60 is comfortable indoors) |
 | `pressure_hpa` | number, 1 decimal | Air pressure at the sensor, hPa (not sea-level corrected) |
+
+#### `co2`
+
+| Field | Type | Meaning |
+|---|---|---|
+| `ppm` | int | CO2 in the room, ppm. Outdoor air is ~420. Below 800 fresh; 800-1000 fine; 1000-1400 stuffy, time to air the room; above 1400 open a window now |
+
+`null` also when the display has no SCD41 fitted. (The sensor measures
+temperature and humidity too, but reads a few °C high from self-heating,
+so those aren't exposed: use `indoor`.)
 
 #### `air`
 

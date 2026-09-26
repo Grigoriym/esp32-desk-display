@@ -49,7 +49,7 @@ static void test_sections_null_before_any_data(void)
     TEST_ASSERT_EQUAL_STRING("2026-09-26", get(j, "date")->valuestring);
     TEST_ASSERT_EQUAL_STRING("home", get(j, "screen")->valuestring);
     TEST_ASSERT_TRUE(cJSON_IsTrue(get(j, "panel_on")));
-    const char *sections[] = {"outdoor", "indoor", "air", "warning", "next_holiday", "bvg"};
+    const char *sections[] = {"outdoor", "indoor", "co2", "air", "warning", "next_holiday", "bvg"};
     for (size_t i = 0; i < sizeof(sections) / sizeof(sections[0]); i++) {
         TEST_ASSERT_TRUE_MESSAGE(cJSON_IsNull(get(j, sections[i])), sections[i]);
     }
@@ -78,9 +78,12 @@ static void test_outdoor_indoor_air(void)
                                .rain_until = "16:00"};
     data.indoor_ok = true;
     data.indoor = (bme280_reading_t){.temp_c = 22.44f, .humidity_pct = 43.06f, .pressure_hpa = 1012.25f};
+    data.co2_ok = true;
+    data.co2.co2_ppm = 812;
     data.air_ok = true;
     data.air = (air_t){.aqi = 23, .pollen = {[POLLEN_GRASS] = 12}};
     cJSON *j = status();
+    TEST_ASSERT_EQUAL_INT(812, get(get(j, "co2"), "ppm")->valueint);
 
     cJSON *o = get(j, "outdoor");
     TEST_ASSERT_EQUAL_INT(15, get(o, "temp_c")->valueint);
@@ -155,7 +158,8 @@ static void test_bvg_skips_departed(void)
 // The firmware's WEB_STATUS_MAX buffer must hold every section at its longest.
 static void test_worst_case_fits(void)
 {
-    data.weather_ok = data.indoor_ok = data.air_ok = data.alerts_ok = data.bvg_ok = true;
+    data.weather_ok = data.indoor_ok = data.co2_ok = data.air_ok = data.alerts_ok = data.bvg_ok = true;
+    data.co2.co2_ppm = -2147483647;
     data.weather = (weather_t){.temp_c = -2147483647,
                                .weather_code = -2147483647,
                                .wind_kmh = -2147483647,
@@ -207,6 +211,8 @@ static void test_matches_documented_example(void)
                                .rain_until = "20:00"};
     data.indoor_ok = true;
     data.indoor = (bme280_reading_t){.temp_c = 23.08f, .humidity_pct = 44.93f, .pressure_hpa = 1014.21f};
+    data.co2_ok = true;
+    data.co2.co2_ppm = 863;
     data.air_ok = true;
     data.air = (air_t){.aqi = 31, .pollen = {[POLLEN_GRASS] = 12, [POLLEN_MUGWORT] = 3}};
     data.alerts_ok = true;

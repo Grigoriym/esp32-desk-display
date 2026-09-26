@@ -21,6 +21,9 @@
     "humidity_pct": 44.9,
     "pressure_hpa": 1014.2
   },
+  "co2": {
+    "ppm": 863
+  },
   "air": {
     "aqi": 31,
     "aqi_label": "FAIR",

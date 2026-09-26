@@ -51,6 +51,9 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', 
 // Pollen levels (grains/m3), the same rough scale as the panel.
 const POLLEN = g => g < 1 ? null : g <= 10 ? 'low' : g <= 50 ? 'medium' : 'high';
 
+// CO2 levels, the same bands as the Grafana dashboard.
+const CO2 = p => p < 800 ? 'fresh' : p <= 1000 ? 'fine' : p <= 1400 ? 'stuffy, air the room' : 'open a window';
+
 $('screens').innerHTML = SCREENS.map(s => `<button id="s-${s}" onclick="cmd('screen','${s}')">${s}</button>`).join('');
 
 function render(d) {
@@ -62,9 +65,11 @@ function render(d) {
     <div class="row"><span>sunrise ${o.sunrise}</span><span>sunset ${o.sunset}</span></div>
     <div class="dim">${o.rain.in_h < 0 ? 'no rain in the next 12 h' : o.rain.in_h > 0 ? 'rain from ' + o.rain.from
       : o.rain.until ? 'raining until ' + o.rain.until : 'raining'}</div>` : '--';
-  const i = d.indoor;
-  $('indoor').innerHTML = i ? `<div class="big">${i.temp_c.toFixed(1)}&deg;C</div>
-    <div class="row"><span>humidity ${Math.round(i.humidity_pct)}%</span><span>${Math.round(i.pressure_hpa)} hPa</span></div>` : '--';
+  const i = d.indoor, c = d.co2;
+  $('indoor').innerHTML = (i ? `<div class="big">${i.temp_c.toFixed(1)}&deg;C</div>
+    <div class="row"><span>humidity ${Math.round(i.humidity_pct)}%</span><span>${Math.round(i.pressure_hpa)} hPa</span></div>` : '--')
+    + (c ? `<div class="row"><span>CO<sub>2</sub> ${c.ppm} ppm</span>
+      <span class="${c.ppm > 1000 ? 'warn' : 'dim'}">${CO2(c.ppm)}</span></div>` : '');
   const a = d.air;
   if (a) {
     const pollen = Object.entries(a.pollen).filter(([, g]) => POLLEN(g)).map(([k, g]) => `${k} ${POLLEN(g)}`);

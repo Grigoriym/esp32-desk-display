@@ -181,7 +181,7 @@ on the physical display, and note anything the next task needs to know.
 
 WiFi connect timeout: done 2026-09-25, see Open questions in `CLAUDE.md`.
 
-- [ ] **13. CO2 sensor: SCD41** (on hand, model confirmed by the user
+- [x] **13. CO2 sensor: SCD41** (done 2026-09-26) (on hand, model confirmed by the user
   2026-09-26). Step by step, as
   with the other modules: power budget first, then a bring-up check in
   `../esp32-hw-checks`, then solder its own socket, then the firmware.
@@ -201,7 +201,9 @@ WiFi connect timeout: done 2026-09-25, see Open questions in `CLAUDE.md`.
   shows `0x62: SCD41 CO2`, reset reason power-on (no brownout). Firmware reads it and shows `CO2 <ppm>`
   on INDOOR (first readings 1037 / 863 ppm, 2026-09-26). Metrics upload: `co2,device=desk ppm=<n>`
   line, arriving in InfluxDB (899 ppm, 2026-09-26); Grafana CO2 tile + graph
-  (row under the tiles). Next: `/api/status`.
+  (row under the tiles). `/api/status` has `"co2": {"ppm": <n>}` (own
+  section, `null` without the sensor; `docs/API.md` + example updated), the
+  phone page shows it in the Indoor card (622 ppm live, 2026-09-26).
 
 Other open items (not scheduled): battery backup — see Open questions in
 `CLAUDE.md`.

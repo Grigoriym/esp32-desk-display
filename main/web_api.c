@@ -46,6 +46,17 @@ static void add_indoor(cJSON *root, const screen_data_t *d)
     cJSON_AddNumberToObject(o, "pressure_hpa", one_decimal(d->indoor.pressure_hpa));
 }
 
+// Separate sensor (SCD41) from indoor's BME280, so its own null.
+static void add_co2(cJSON *root, const screen_data_t *d)
+{
+    if (!d->co2_ok) {
+        cJSON_AddNullToObject(root, "co2");
+        return;
+    }
+    cJSON *o = cJSON_AddObjectToObject(root, "co2");
+    cJSON_AddNumberToObject(o, "ppm", d->co2.co2_ppm);
+}
+
 static void add_air(cJSON *root, const screen_data_t *d)
 {
     if (!d->air_ok) {
@@ -129,6 +140,7 @@ int web_status_json(const screen_data_t *d, const web_view_t *v, char *buf, size
     cJSON_AddBoolToObject(root, "panel_on", v->panel_on);
     add_outdoor(root, d);
     add_indoor(root, d);
+    add_co2(root, d);
     add_air(root, d);
     add_warning(root, d);
     add_holiday(root, d);
