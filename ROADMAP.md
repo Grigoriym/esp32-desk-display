@@ -176,6 +176,8 @@ on the physical display, and note anything the next task needs to know.
   the display via NSD (`_http._tcp`, mDNS name from 11), reads
   `/api/status`, one card per screen + panel/screen buttons, and a Glance
   home-screen widget (outdoor/indoor temp, next departure).
+  Repo: `../deskmate` ([github.com/Grigoriym/Deskmate](https://github.com/Grigoriym/Deskmate)),
+  started 2026-09-26; its progress is the `docs/CHECKLIST.md` banner there.
 
 WiFi connect timeout: done 2026-09-25, see Open questions in `CLAUDE.md`.
 
