@@ -1,6 +1,7 @@
 #include <string.h>
 #include "unity.h"
 #include "cJSON.h"
+#include "fixtures.h"
 #include "web_api.h"
 
 static screen_data_t data;
@@ -185,6 +186,52 @@ static void test_worst_case_fits(void)
     TEST_ASSERT_LESS_THAN_INT(WEB_STATUS_MAX, (int)strlen(buf));
 }
 
+// docs/api/status.example.json is the API contract the phone app is built
+// against (docs/API.md): the firmware must produce exactly that for this data.
+static void test_matches_documented_example(void)
+{
+    view = (web_view_t){.screen = SCREEN_HOME,
+                        .panel_on = true,
+                        .time = "17:42",
+                        .date = "2026-09-26",
+                        .now_min = 17 * 60 + 42};
+    data.weather_ok = true;
+    data.weather = (weather_t){.temp_c = 14,
+                               .weather_code = 61,
+                               .wind_kmh = 18,
+                               .uv_max = 3,
+                               .sunrise = "06:58",
+                               .sunset = "18:55",
+                               .rain_in_h = 0,
+                               .rain_from = "17:00",
+                               .rain_until = "20:00"};
+    data.indoor_ok = true;
+    data.indoor = (bme280_reading_t){.temp_c = 23.08f, .humidity_pct = 44.93f, .pressure_hpa = 1014.21f};
+    data.air_ok = true;
+    data.air = (air_t){.aqi = 31, .pollen = {[POLLEN_GRASS] = 12, [POLLEN_MUGWORT] = 3}};
+    data.alerts_ok = true;
+    data.alerts = (alerts_t){
+        .count = 1, .started = false, .severity = ALERT_MODERATE, .event = "HEAVY RAIN", .onset = "19:00"};
+    data.today_ymd = 20260926;
+    data.holidays = (holidays_t){.year = 2026, .count = 1, .day = {{20261003, "GERMAN UNITY DAY"}}};
+    data.bvg_ok = true;
+    data.bvg_walk_min = 6;
+    data.bvg_walk_comfort = 11;
+    data.bvg = (bvg_departures_t){.count = 3,
+                                  .dep = {{"U5", "HAUPTBAHNHOF", 17, 35},
+                                          {"U5", "HAUPTBAHNHOF", 17, 45},
+                                          {"U5", "HAUPTBAHNHOF", 17, 55}}};
+    cJSON *actual = status();
+
+    char *text = fixture_read("../../docs/api/status.example.json");
+    cJSON *expected = cJSON_Parse(text);
+    free(text);
+    TEST_ASSERT_NOT_NULL(expected);
+    bool same = cJSON_Compare(expected, actual, true);
+    cJSON_Delete(expected);
+    TEST_ASSERT_TRUE_MESSAGE(same, buf); // prints what the firmware produced
+}
+
 static void test_too_small_buffer_fails(void)
 {
     char small[32];
@@ -239,6 +286,7 @@ int main(void)
     RUN_TEST(test_next_holiday);
     RUN_TEST(test_bvg_skips_departed);
     RUN_TEST(test_worst_case_fits);
+    RUN_TEST(test_matches_documented_example);
     RUN_TEST(test_too_small_buffer_fails);
     RUN_TEST(test_panel_command);
     RUN_TEST(test_screen_command);

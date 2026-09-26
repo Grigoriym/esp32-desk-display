@@ -170,7 +170,9 @@ on the physical display, and note anything the next task needs to know.
   left httpd 2.4 KB / mdns 2.2 KB. A command sent during a boot fetch waits
   until the fetch ends (seen: ~10 s).
 
-- [ ] **12. Android app** (Kotlin/Compose, separate repo; needs 11): finds
+- [ ] **12. Android app** (Kotlin/Compose, separate repo, built by a
+  separate agent from the user's app template; everything it needs about
+  the device is in `docs/API.md` + `docs/api/status.example.json`): finds
   the display via NSD (`_http._tcp`, mDNS name from 11), reads
   `/api/status`, one card per screen + panel/screen buttons, and a Glance
   home-screen widget (outdoor/indoor temp, next departure).

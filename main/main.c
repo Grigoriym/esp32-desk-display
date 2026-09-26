@@ -507,6 +507,9 @@ void app_main(void)
     ESP_ERROR_CHECK(display_clear());
     s_screen = SCREEN_HOME;
     draw_screen();
+    // Before the first tick, whose fetches (holidays) can block for seconds:
+    // the web server is already answering.
+    web_publish(&s_data, s_screen, s_panel_on);
 
     TickType_t next_second = xTaskGetTickCount();
     for (;;) {

@@ -122,7 +122,8 @@ Commands answer `{"ok":true}` (`400` for a bad value) and apply within a
 few hundred ms, or once a running fetch finishes. While `/api/status` is
 being read (the last 2 minutes), departures are fetched even if the BVG
 screen isn't up. The server also announces itself as `_http._tcp` for
-discovery (Android NSD).
+discovery (Android NSD). Full contract (every field, discovery, errors,
+polling): [`docs/API.md`](docs/API.md).
 
 ## Configuration
 

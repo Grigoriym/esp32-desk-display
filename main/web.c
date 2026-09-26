@@ -101,7 +101,7 @@ static esp_err_t command_post(httpd_req_t *req)
     if (httpd_req_get_url_query_str(req, query, sizeof(query)) != ESP_OK
         || httpd_query_key_value(query, route->key, value, sizeof(value)) != ESP_OK
         || !route->parse(value, &ev)) {
-        return httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "bad or missing value, see README");
+        return httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "bad or missing value, see docs/API.md");
     }
     if (!encoder_post(ev)) return httpd_resp_send_500(req);
     ESP_LOGI(TAG, "%s %s=%s", req->uri, route->key, value);
