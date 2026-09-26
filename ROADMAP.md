@@ -179,18 +179,17 @@ on the physical display, and note anything the next task needs to know.
 
 WiFi connect timeout: done 2026-09-25, see Open questions in `CLAUDE.md`.
 
-- [ ] **13. CO2 sensor** (the user has it on hand, 2026-09-26; exact
-  module not logged yet: check the board marking first). Step by step, as
+- [ ] **13. CO2 sensor: SCD41** (on hand, model confirmed by the user
+  2026-09-26). Step by step, as
   with the other modules: power budget first, then a bring-up check in
   `../esp32-hw-checks`, then solder its own socket, then the firmware.
-  If it's an **SCD41** (the earlier pick): I2C at **0x62** (no clash, add to
+  SCD41: I2C at **0x62** (no clash, add to
   `KNOWN_I2C`), 2.4-5.5 V so power it from 3V3; averages ~15 mA in periodic
   mode but its datasheet peak is ~175-205 mA in short pulses, which on top
   of the WiFi TX peak goes past the ~450 mA guardrail in CLAUDE.md: add
   its row to the power table and watch for `PWR NO` / brownout (low-power
   periodic mode, 30 s interval, cuts the average to ~3 mA). First reading
-  ~5 s after start, then every 5 s. If it's a UART one (MH-Z19 etc.), it
-  needs 5 V on VIN and two free GPIOs instead. Then: its value on the
+  ~5 s after start, then every 5 s. Then: its value on the
   INDOOR screen (a free row), in the metrics upload and in `/api/status`
   (update `docs/API.md` + `docs/api/status.example.json`).
 
