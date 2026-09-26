@@ -151,6 +151,22 @@ on the physical display, and note anything the next task needs to know.
   School holidays (multi-day) are a different source, not covered. Needed
   `CONFIG_MBEDTLS_CERTIFICATE_BUNDLE_CROSS_SIGNED_VERIFY` (see CLAUDE.md).
 
+- [ ] **11. Web page + JSON API on the display** (phone access, home WiFi
+  only): `esp_http_server` + mDNS so it answers at `http://desk.local`.
+  `GET /api/status` = the current `screen_data_t` as JSON (time, outdoor/
+  indoor, AQI/pollen, BVG, warning/holiday); `POST /api/panel` (off/on) and
+  `/api/screen` (next/prev/by name), same effect as the knob, handed to the
+  main loop through the encoder event queue rather than touching the display
+  from the server task. A tiny HTML page at `/` for any phone browser. JSON
+  building pure + host-tested (like `metrics_format.c`); the server task
+  goes in `TASKS[]` in `health.c`. Budget: ~30-50 KB flash (35% free), check
+  heap after. No auth (LAN only), note it in the README.
+
+- [ ] **12. Android app** (Kotlin/Compose, separate repo; needs 11): finds
+  the display via NSD (`_http._tcp`, mDNS name from 11), reads
+  `/api/status`, one card per screen + panel/screen buttons, and a Glance
+  home-screen widget (outdoor/indoor temp, next departure).
+
 WiFi connect timeout: done 2026-09-25, see Open questions in `CLAUDE.md`.
 
 Other open items (not scheduled): battery backup, CO2
