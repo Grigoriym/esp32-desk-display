@@ -205,24 +205,18 @@ WiFi connect timeout: done 2026-09-25, see Open questions in `CLAUDE.md`.
   section, `null` without the sensor; `docs/API.md` + example updated), the
   phone page shows it in the Indoor card (622 ppm live, 2026-09-26).
 
-- [ ] **14. SCD41 self-calibration (ASC): check and decide** (next session,
-  firmware + docs, no hardware work). The SCD41 has automatic
-  self-calibration on by default: it assumes the lowest CO2 it sees over
-  its ASC period (about a week) is fresh outdoor air (~400-420 ppm) and
-  shifts its baseline to match. Fine if the room gets properly aired at
-  least once a week, drifts (reads low) if it never does. To do:
-  1. Read the ASC setting from the device (`get_automatic_self_calibration_enabled`,
-     0x2313; sensor must be idle: stop periodic first, as `scd41_init()`
-     does) and log it at boot. Verify command codes, the ASC period, and
-     how it behaves in **low-power periodic mode** (what `scd41.c` uses)
-     against the Sensirion SCD4x datasheet rather than from memory.
-  2. Decide with the user: keep ASC (room aired weekly), or turn it off
-     and do a one-off forced recalibration (FRC, outdoor air, ~420 ppm)
-     instead. Settings only survive a power cycle after `persist_settings`,
-     which writes the sensor's EEPROM (limited write cycles): never call
-     it on every boot.
-  3. Document the choice in CLAUDE.md (SCD41 row) and, if it changes
-     behaviour, `docs/API.md` (`co2` section).
+- [x] **14. SCD41 self-calibration (ASC): check and decide** (2026-09-26):
+  boot log now reads the settings while the sensor is idle:
+  `ASC enabled 1, target 400 ppm, initial period 44 h, standard period
+  156 h` (factory defaults; commands checked against the SCD4x datasheet
+  v1.7). Datasheet: ASC counts only unbroken stretches of >= 4 h of
+  measuring (low-power periodic included) and wants >3 min of ~400 ppm air
+  per period. **Decision: keep ASC on**, nothing written to the sensor: the
+  display runs overnight (stretches count) and the window is usually open
+  at the desk. No API change. Fallback if readings drift low (winter): ASC
+  off + one-off FRC outdoors, see the SCD41 row in CLAUDE.md. An "air the
+  room" hint on screen was considered and not built: not needed while
+  the window is open anyway.
 
 Other open items (not scheduled): battery backup — see Open questions in
 `CLAUDE.md`.
