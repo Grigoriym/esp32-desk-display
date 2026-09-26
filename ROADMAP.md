@@ -199,8 +199,9 @@ WiFi connect timeout: done 2026-09-25, see Open questions in `CLAUDE.md`.
   813 ppm, 1506 after breathing on it). No extra cap: the module has its own;
   a tested 47 µF / 25 V is on hand if `PWR NO` ever shows. Soldered on the board 2026-09-26, boot scan
   shows `0x62: SCD41 CO2`, reset reason power-on (no brownout). Firmware reads it and shows `CO2 <ppm>`
-  on INDOOR (first readings 1037 / 863 ppm, 2026-09-26). Next: metrics upload,
-  then `/api/status`.
+  on INDOOR (first readings 1037 / 863 ppm, 2026-09-26). Metrics upload: `co2,device=desk ppm=<n>`
+  line, arriving in InfluxDB (899 ppm, 2026-09-26); Grafana CO2 tile + graph
+  (row under the tiles). Next: `/api/status`.
 
 Other open items (not scheduled): battery backup — see Open questions in
 `CLAUDE.md`.
