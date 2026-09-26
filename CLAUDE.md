@@ -97,7 +97,8 @@ Everything runs from the DevKit's 3V3 pin (onboard regulator, likely AMS1117 —
 | DS3231 module | 1-2 mA | ~3 mA | mostly the power LED |
 | BME280 | 1-2 mA | ~3 mA | LDO + LED; sensor itself is µA |
 | KY-040 | ~0.3 mA | ~1 mA | pull-ups only |
-| **Total** | **~130-170 mA** | **~380 mA** | ~100+ mA headroom left |
+| SCD41 (CO2) | ~3 mA | ~205 mA | low-power periodic mode (30 s); peak is a short pulse, buffered by a 47 µF cap at its socket |
+| **Total** | **~135-175 mA** | **~585 mA** | worst case only if an SCD41 pulse lands on a WiFi TX burst: brief, cap-buffered; watch for `PWR NO` / brownout |
 
 Rules:
 - New module → add a row above, re-check the total stays under ~450 mA peak.

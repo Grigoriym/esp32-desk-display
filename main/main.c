@@ -63,6 +63,7 @@ static const struct {
     {0x3D, "OLED (alt addr)"},
     {0x57, "DS3231 EEPROM (AT24C32)"},
     {0x5F, "DS3231 module extra addr"},
+    {0x62, "SCD41 CO2"},
     {0x68, "DS3231 RTC"},
     {0x76, "BME280"},
     {0x77, "BME280 (alt addr)"},
