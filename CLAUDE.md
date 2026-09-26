@@ -415,7 +415,8 @@ Sibling folder (`../esp32-hw-checks`, not a subfolder), created 2026-09-19. Hold
 standalone bring-up/test firmware for verifying ESP32 boards and modules/sensors in
 isolation (LED blink + I2C scan + OLED fill/text test + BME280 chip-ID check
 (0x60 BME280 vs 0x58 BMP280, added 2026-09-23) + KY-040 encoder on D25/D26/D27
-(passed 2026-09-24) + LDR raw ADC readout on D34 (added 2026-09-25; the LDR is no longer on the
+(passed 2026-09-24) + SCD41 CO2 serial number + readings every 5 s
+(passed 2026-09-26: 813 ppm in the room, 1506 after breathing on it) + LDR raw ADC readout on D34 (added 2026-09-25; the LDR is no longer on the
 desk-display board); add a check there for each new sensor as it gets wired up) before that hardware is trusted
 enough to use in this project's real firmware. **It is not a git repo** — its
 changes exist only on disk, so there's nothing to commit there.

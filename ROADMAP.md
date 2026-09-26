@@ -192,6 +192,10 @@ WiFi connect timeout: done 2026-09-25, see Open questions in `CLAUDE.md`.
   ~5 s after start, then every 5 s. Then: its value on the
   INDOOR screen (a free row), in the metrics upload and in `/api/status`
   (update `docs/API.md` + `docs/api/status.example.json`).
+  Progress: power row + `0x62` in `KNOWN_I2C` done; breadboard check in
+  `esp32-hw-checks` passed 2026-09-26 (serial C2B4A5073B77, CRC OK, CO2
+  813 ppm, 1506 after breathing on it). A 47 µF / 25 V cap (tested OK) is
+  set aside for its socket. Next: solder the socket.
 
 Other open items (not scheduled): battery backup — see Open questions in
 `CLAUDE.md`.
