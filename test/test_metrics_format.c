@@ -27,6 +27,8 @@ static void test_all_measurements(void)
 {
     data.indoor_ok = true;
     data.indoor = (bme280_reading_t){.temp_c = 23.456f, .humidity_pct = 45.25f, .pressure_hpa = 1013.2f};
+    data.co2_ok = true;
+    data.co2.co2_ppm = 812;
     data.weather_ok = true;
     data.weather = (weather_t){.temp_c = -4, .wind_kmh = 9, .uv_max = 3, .weather_code = 61};
     data.air_ok = true;
@@ -35,6 +37,7 @@ static void test_all_measurements(void)
     dev.rssi = -61;
     metrics_format(&data, &dev, buf, sizeof(buf));
     TEST_ASSERT_EQUAL_STRING("indoor,device=desk temp_c=23.46,humidity=45.2,pressure_hpa=1013.20\n"
+                             "co2,device=desk ppm=812\n"
                              "outdoor,device=desk temp_c=-4,wind_kmh=9,uv=3,weather_code=61\n"
                              "air,device=desk aqi=23,alder=0,birch=120,grass=0,mugwort=0,ragweed=1\n"
                              "device,device=desk uptime_s=3600,heap_free_kb=150,rssi=-61\n",
@@ -52,7 +55,8 @@ static void test_too_small_buffer_fails(void)
 // The firmware's 512-byte batch must hold the longest possible values.
 static void test_worst_case_fits_512(void)
 {
-    data.indoor_ok = data.weather_ok = data.air_ok = true;
+    data.indoor_ok = data.co2_ok = data.weather_ok = data.air_ok = true;
+    data.co2.co2_ppm = -2147483647;
     data.indoor = (bme280_reading_t){.temp_c = -40.0f, .humidity_pct = 100.0f, .pressure_hpa = 1100.0f};
     data.weather = (weather_t){
         .temp_c = -2147483647, .wind_kmh = -2147483647, .uv_max = -2147483647, .weather_code = -2147483647};

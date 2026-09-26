@@ -84,6 +84,10 @@ D_PRESSURE = ("Air pressure in hPa, measured in the room (same as outside). "
 D_PRESSURE_3H = ("Pressure change over the last 3 hours. "
                  "Falling more than 3 hPa (orange/red): weather getting worse, rain or wind coming. "
                  "Rising more than 3 hPa (blue): clearing up. Within ±1: no change.")
+D_CO2 = ("CO2 in the room, in ppm, from the SCD41 on the display (one reading per 30 s). "
+         "Outdoor air is about 420. Below 800 fresh (green); 800-1000 fine (yellow); "
+         "1000-1400 stuffy, concentration drops, time to air the room (orange); "
+         "above 1400 open a window now (red). Breathing on the sensor makes it jump.")
 D_OUTDOOR = "Current outdoor temperature in central Berlin (Open-Meteo), refreshed every 15 min."
 D_AQI = ("European Air Quality Index for Berlin (Open-Meteo, refreshed every 15 min). "
          "0-20 good, 20-40 fair (green), 40-60 moderate (yellow), 60-80 poor (orange), "
@@ -107,6 +111,7 @@ D_DEVICE = ("Display health. WiFi dBm: see the WiFi tile. "
 T_INDOOR = steps("blue", (18, "green"), (25, "orange"), (28, "red"))
 T_HUMIDITY = steps("orange", (30, "yellow"), (40, "green"), (60, "yellow"), (70, "red"))
 T_PRESSURE_3H = steps("red", (-6, "orange"), (-3, "yellow"), (-1, "green"), (1, "text"), (3, "blue"))
+T_CO2 = steps("green", (800, "yellow"), (1000, "orange"), (1400, "red"))
 T_AQI = steps("green", (40, "yellow"), (60, "orange"), (80, "red"), (100, "purple"))
 T_WIFI = steps("red", (-80, "orange"), (-67, "green"))
 
@@ -128,21 +133,23 @@ panels = [
     panel("stat", "AQI", [("AQI", "air", "aqi")], "none", tile(5), D_AQI, 0, T_AQI),
     panel("stat", "WiFi signal", [("WiFi", "device", "rssi")], "dBm", tile(6), D_WIFI, 0, T_WIFI),
     panel("stat", "Uptime", [("Uptime", "device", "uptime_s")], "s", tile(7), D_UPTIME, 1),
+    panel("stat", "CO2", [("CO2", "co2", "ppm")], "ppm", {"x": 0, "y": 4, "w": 4, "h": 8}, D_CO2, 0, T_CO2),
+    panel("timeseries", "CO2", [("CO2", "co2", "ppm")], "ppm", {"x": 4, "y": 4, "w": 20, "h": 8}, D_CO2, 0, T_CO2),
     panel("timeseries", "Temperature", [("Indoor", "indoor", "temp_c"), ("Outdoor", "outdoor", "temp_c")],
-          "celsius", {"x": 0, "y": 4, "w": 12, "h": 9}, D_INDOOR_T + " " + D_OUTDOOR, 1),
+          "celsius", {"x": 0, "y": 12, "w": 12, "h": 9}, D_INDOOR_T + " " + D_OUTDOOR, 1),
     panel("timeseries", "Indoor humidity", [("Humidity", "indoor", "humidity")], "percent",
-          {"x": 12, "y": 4, "w": 12, "h": 9}, D_HUMIDITY, 0, T_HUMIDITY),
+          {"x": 12, "y": 12, "w": 12, "h": 9}, D_HUMIDITY, 0, T_HUMIDITY),
     panel("timeseries", "Pressure", [("Pressure", "indoor", "pressure_hpa")], "pressurehpa",
-          {"x": 0, "y": 13, "w": 12, "h": 9}, D_PRESSURE, 1),
+          {"x": 0, "y": 21, "w": 12, "h": 9}, D_PRESSURE, 1),
     panel("timeseries", "Air quality (European AQI)", [("AQI", "air", "aqi")], "none",
-          {"x": 12, "y": 13, "w": 12, "h": 9}, D_AQI, 0, T_AQI),
+          {"x": 12, "y": 21, "w": 12, "h": 9}, D_AQI, 0, T_AQI),
     panel("timeseries", "Pollen (grains/m³)",
           [(n.capitalize(), "air", n) for n in ("alder", "birch", "grass", "mugwort", "ragweed")], "none",
-          {"x": 0, "y": 22, "w": 12, "h": 9}, D_POLLEN),
+          {"x": 0, "y": 30, "w": 12, "h": 9}, D_POLLEN),
     panel("timeseries", "Outdoor wind and UV", [("Wind km/h", "outdoor", "wind_kmh"), ("UV max", "outdoor", "uv")],
-          "none", {"x": 12, "y": 22, "w": 12, "h": 9}, D_WIND_UV),
+          "none", {"x": 12, "y": 30, "w": 12, "h": 9}, D_WIND_UV),
     panel("timeseries", "Device", [("WiFi dBm", "device", "rssi"), ("Free heap KB", "device", "heap_free_kb")],
-          "none", {"x": 0, "y": 31, "w": 24, "h": 7}, D_DEVICE),
+          "none", {"x": 0, "y": 39, "w": 24, "h": 7}, D_DEVICE),
 ]
 
 dashboard = {

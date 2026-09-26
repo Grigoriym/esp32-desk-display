@@ -22,6 +22,7 @@ int metrics_format(const screen_data_t *d, const metrics_device_t *dev, char *bu
         PUT("indoor" TAGS "temp_c=%.2f,humidity=%.1f,pressure_hpa=%.2f\n", (double)d->indoor.temp_c,
             (double)d->indoor.humidity_pct, (double)d->indoor.pressure_hpa);
     }
+    if (d->co2_ok) PUT("co2" TAGS "ppm=%d\n", d->co2.co2_ppm);
     if (d->weather_ok) {
         PUT("outdoor" TAGS "temp_c=%d,wind_kmh=%d,uv=%d,weather_code=%d\n", d->weather.temp_c,
             d->weather.wind_kmh, d->weather.uv_max, d->weather.weather_code);

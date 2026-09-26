@@ -14,7 +14,7 @@ typedef struct {
     int rssi;     // dBm
 } metrics_device_t;
 
-// One line per measurement (indoor, outdoor, air, device), each only once
+// One line per measurement (indoor, co2, outdoor, air, device), each only once
 // its data exists. All values are written as floats so a field never
 // changes type. No timestamps: the server stamps the write. Returns the
 // length, or -1 if buf is too small.
