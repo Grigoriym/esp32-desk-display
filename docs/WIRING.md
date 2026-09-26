@@ -21,6 +21,10 @@ Wire colours: 🟢 green = D21 (SDA), 🟡 yellow = D22 (SCL).
 | | GND | GND | |
 | | SDA | 🟢 D21 | I2C, addr 0x76 |
 | | SCL | 🟡 D22 | |
+| SCD41 CO2 | GND | GND | pin order on the module: GND, VDD, SCL, SDA |
+| | VDD | 3V3 | |
+| | SCL | 🟡 D22 | I2C, addr 0x62 |
+| | SDA | 🟢 D21 | |
 | KY-040 encoder | + | 3V3 | onboard 10k pull-ups go to this pin |
 | | GND | GND | |
 | | SW | D27 | button, active low |
