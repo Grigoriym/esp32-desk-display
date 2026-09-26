@@ -121,6 +121,12 @@ display silently stops uploading.
 
 ## Maintenance
 
+- **Take repo updates** (new dashboard panels etc.): `git pull` in the
+  clone. `grafana/dashboards/desk.json` is committed, so Grafana just
+  reloads it within ~10 s: no regenerating, no restart. Only if the pull
+  changed `docker-compose.yml`: `docker compose up -d`. Check: the
+  dashboard at `http://<LAN IP>:34897` shows the new panels.
+
 - Update the images: `docker compose pull && docker compose up -d`
   (versions are pinned to `influxdb:2.9` and `grafana/grafana:13.2` in
   `docker-compose.yml`; data survives in named volumes).
