@@ -53,6 +53,27 @@ static void test_data_ready(void)
     TEST_ASSERT_FALSE(scd41_parse_data_ready(buf, &ready));
 }
 
+static void test_word_datasheet_examples(void)
+{
+    // SCD4x datasheet get_automatic_self_calibration_* examples.
+    const uint8_t disabled[] = {0x00, 0x00, 0x81};
+    const uint8_t target_420[] = {0x01, 0xA4, 0x4D};
+    const uint8_t initial_76h[] = {0x00, 0x4C, 0xC1};
+    const uint8_t standard_156h[] = {0x00, 0x9C, 0xC5};
+    uint16_t v = 0xFFFF;
+    TEST_ASSERT_TRUE(scd41_parse_word(disabled, &v));
+    TEST_ASSERT_EQUAL_UINT16(0, v);
+    TEST_ASSERT_TRUE(scd41_parse_word(target_420, &v));
+    TEST_ASSERT_EQUAL_UINT16(420, v);
+    TEST_ASSERT_TRUE(scd41_parse_word(initial_76h, &v));
+    TEST_ASSERT_EQUAL_UINT16(76, v);
+    TEST_ASSERT_TRUE(scd41_parse_word(standard_156h, &v));
+    TEST_ASSERT_EQUAL_UINT16(156, v);
+
+    const uint8_t bad[] = {0x00, 0x9C, 0xC4};
+    TEST_ASSERT_FALSE(scd41_parse_word(bad, &v));
+}
+
 int main(void)
 {
     UNITY_BEGIN();
@@ -60,5 +81,6 @@ int main(void)
     RUN_TEST(test_measurement_datasheet_example);
     RUN_TEST(test_measurement_bad_crc_fails);
     RUN_TEST(test_data_ready);
+    RUN_TEST(test_word_datasheet_examples);
     return UNITY_END();
 }

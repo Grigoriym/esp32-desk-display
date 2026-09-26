@@ -21,6 +21,11 @@ static bool word_at(const uint8_t *buf, int n, uint16_t *out)
     return true;
 }
 
+bool scd41_parse_word(const uint8_t *buf, uint16_t *out)
+{
+    return word_at(buf, 0, out);
+}
+
 bool scd41_parse_data_ready(const uint8_t *buf, bool *ready)
 {
     uint16_t status;

@@ -16,6 +16,10 @@ typedef struct {
     float humidity_pct;
 } scd41_reading_t;
 
+// buf = a 3-byte one-word answer (e.g. the get_automatic_self_calibration_*
+// settings). False on a bad CRC.
+bool scd41_parse_word(const uint8_t *buf, uint16_t *out);
+
 // buf = the 3 bytes of the get_data_ready_status answer. False on a bad CRC.
 bool scd41_parse_data_ready(const uint8_t *buf, bool *ready);
 

@@ -12,6 +12,11 @@ static const char *TAG = "scd41";
 #define SCD41_CMD_START_LOW_POWER_PERIODIC 0x21AC // one reading every 30 s, ~3 mA average
 #define SCD41_CMD_DATA_READY               0xE4B8
 #define SCD41_CMD_READ_MEASUREMENT         0xEC05
+// Automatic self-calibration (ASC) settings; readable only while idle.
+#define SCD41_CMD_GET_ASC_ENABLED  0x2313
+#define SCD41_CMD_GET_ASC_TARGET   0x233F // ppm
+#define SCD41_CMD_GET_ASC_INITIAL  0x2340 // hours
+#define SCD41_CMD_GET_ASC_STANDARD 0x234B // hours
 
 static i2c_master_dev_handle_t s_dev; // NULL if no SCD41 on the bus
 
@@ -28,6 +33,24 @@ static esp_err_t read_cmd(uint16_t cmd, uint8_t *buf, size_t len)
     if (err != ESP_OK) return err;
     vTaskDelay(1);
     return i2c_master_receive(s_dev, buf, len, 1000);
+}
+
+// One-word setting, or -1 if it couldn't be read.
+static int read_setting(uint16_t cmd)
+{
+    uint8_t buf[3];
+    uint16_t v;
+    if (read_cmd(cmd, buf, sizeof(buf)) != ESP_OK || !scd41_parse_word(buf, &v)) return -1;
+    return v;
+}
+
+// Logs the ASC settings. ASC counts only stretches of >= 4 h of measuring,
+// and assumes the lowest CO2 seen in each period is the target (fresh air).
+static void log_asc(void)
+{
+    ESP_LOGI(TAG, "ASC enabled %d, target %d ppm, initial period %d h, standard period %d h",
+             read_setting(SCD41_CMD_GET_ASC_ENABLED), read_setting(SCD41_CMD_GET_ASC_TARGET),
+             read_setting(SCD41_CMD_GET_ASC_INITIAL), read_setting(SCD41_CMD_GET_ASC_STANDARD));
 }
 
 esp_err_t scd41_init(i2c_master_bus_handle_t bus)
@@ -50,6 +73,7 @@ esp_err_t scd41_init(i2c_master_bus_handle_t bus)
     err = send_cmd(SCD41_CMD_STOP_PERIODIC);
     if (err == ESP_OK) {
         vTaskDelay(pdMS_TO_TICKS(500));
+        log_asc();
         err = send_cmd(SCD41_CMD_START_LOW_POWER_PERIODIC);
     }
     if (err != ESP_OK) {
