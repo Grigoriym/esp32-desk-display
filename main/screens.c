@@ -129,6 +129,9 @@ static void layout_air(const screen_data_t *d, screen_rows_t *out)
 static void layout_indoor(const screen_data_t *d, screen_rows_t *out)
 {
     snprintf(ROW(2, 0), "INDOOR");
+    // CO2 is a separate sensor (SCD41), shown with or without the BME280.
+    if (d->co2_ok) snprintf(ROW(6, 1), "CO2 %d", d->co2.co2_ppm);
+    else snprintf(ROW(6, 1), "CO2 --");
     if (!d->indoor_ok) {
         snprintf(ROW(4, 0), "--");
         return;

@@ -12,6 +12,7 @@
 #include "weather.h"
 #include "holidays.h"
 #include "bme280.h"
+#include "scd41.h"
 #include "encoder.h"
 #include "bvg.h"
 #include "screens.h"
@@ -40,6 +41,7 @@ static const char *TAG = "desk_display";
 #define SPLASH_WIFI    5, 0
 #define SPLASH_NTP     5, 1
 #define SPLASH_WEATHER 6, 0
+#define SPLASH_CO2     6, 1
 
 // Main screens (see screens.h). The clock row sits on page 0 of every
 // screen; draw_screen() owns pages 1-7.
@@ -156,6 +158,7 @@ static esp_err_t ntp_sync_with_retry(void)
 #define WEATHER_REFRESH_SECONDS     (15 * 60)
 #define WEATHER_RETRY_START_SECONDS 30
 #define INDOOR_REFRESH_SECONDS      10
+#define CO2_POLL_SECONDS            5 // the sensor itself measures every 30 s
 #define HEALTH_LOG_SECONDS          (5 * 60)
 #define METRICS_SECONDS             60
 #define HOLIDAYS_RETRY_SECONDS      (30 * 60)
@@ -163,10 +166,12 @@ static esp_err_t ntp_sync_with_retry(void)
 // What the boot sequence found out, and the main loop's timers.
 typedef struct {
     bool indoor_present; // BME280 found at boot
+    bool co2_present;    // SCD41 found at boot
     bool ntp_ok;
     int seconds_since_weather;
     int next_weather_interval; // shortened after a failure, see tick_weather()
     int seconds_since_indoor;
+    int seconds_since_co2;
     int seconds_since_ntp;
     int seconds_since_health;
     int seconds_since_metrics;
@@ -214,10 +219,11 @@ static void splash_begin(bool brownout)
     splash_status(SPLASH_WIFI, "WIFI", "--");
     splash_status(SPLASH_NTP, "NTP", "--");
     splash_status(SPLASH_WEATHER, "WEATHER", "--");
+    splash_status(SPLASH_CO2, "CO2", "--");
 }
 
 // Local hardware: RTC first, so the clock is right even if NTP fails later.
-// The BME280 is optional; its screen rows just stay "--" without it.
+// The BME280 and SCD41 are optional; their screen rows just stay "--" without them.
 static void boot_local(i2c_master_bus_handle_t bus, app_state_t *st)
 {
     esp_err_t rerr = clock_rtc_init(bus);
@@ -228,6 +234,11 @@ static void boot_local(i2c_master_bus_handle_t bus, app_state_t *st)
     if (berr != ESP_OK) ESP_LOGW(TAG, "BME280 not used: %s", esp_err_to_name(berr));
     splash_status(SPLASH_BME, "BME", berr == ESP_OK ? "OK" : "NO");
     st->indoor_present = (berr == ESP_OK);
+
+    esp_err_t cerr = scd41_init(bus);
+    if (cerr != ESP_OK) ESP_LOGW(TAG, "SCD41 not used: %s", esp_err_to_name(cerr));
+    splash_status(SPLASH_CO2, "CO2", cerr == ESP_OK ? "OK" : "NO");
+    st->co2_present = (cerr == ESP_OK);
 }
 
 // Fetches the weather, air quality and DWD warnings into s_data; returns
@@ -361,6 +372,24 @@ static bool tick_indoor(app_state_t *st)
     ESP_LOGI(TAG, "indoor %.1fC %.0f%% %.1fhPa", r.temp_c, r.humidity_pct, r.pressure_hpa);
     s_data.indoor = r;
     s_data.indoor_ok = true;
+    return true;
+}
+
+// Asks the SCD41 for a new reading every few seconds; it has one every 30 s.
+static bool tick_co2(app_state_t *st)
+{
+    if (!st->co2_present || ++st->seconds_since_co2 < CO2_POLL_SECONDS) return false;
+    st->seconds_since_co2 = 0;
+    scd41_reading_t r;
+    esp_err_t err = scd41_read(&r);
+    if (err == ESP_ERR_NOT_FINISHED) return false;
+    if (err != ESP_OK) {
+        ESP_LOGW(TAG, "SCD41 read failed: %s", esp_err_to_name(err));
+        return false;
+    }
+    ESP_LOGI(TAG, "co2 %d ppm (sensor %.1fC %.0f%%)", r.co2_ppm, r.temp_c, r.humidity_pct);
+    s_data.co2 = r;
+    s_data.co2_ok = true;
     return true;
 }
 
@@ -518,6 +547,7 @@ void app_main(void)
         bool changed = tick_minute(&st);
         changed |= tick_bvg();
         changed |= tick_indoor(&st);
+        changed |= tick_co2(&st);
         tick_ntp(&st);
         changed |= tick_weather(&st);
         changed |= tick_holidays(&st);

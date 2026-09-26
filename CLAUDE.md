@@ -122,6 +122,7 @@ Rules:
 |---|---|
 | I2C bus | `esp_driver_i2c` |
 | BME280 | hand-rolled driver (`main/bme280.c`): chip-ID check, factory calibration, Bosch datasheet integer compensation, forced mode x1 oversampling |
+| SCD41 (CO2) | hand-rolled `main/scd41.c`: stop, then **low-power periodic mode** (one reading per 30 s, ~3 mA); the main loop polls data-ready every 5 s (`tick_co2()`), first reading ~20-30 s after boot. CRC + conversion pure in `main/scd41_parse.c` (host-tested against the datasheet's examples). Its own temp reads a few °C high (self-heating), so indoor temp stays the BME280's. Shown as `CO2 812` on INDOOR p6 right, `CO2 OK/NO` boot cell |
 | KY-040 encoder | hand-rolled `main/encoder.c`: rotation decoded in a GPIO any-edge ISR (4 steps/detent), button polled + debounced in its own task, both pushed to a FreeRTOS queue read by the main loop. The decode/debounce logic itself is pure, in `main/encoder_decode.c` (host-tested) |
 | OLED framebuffer + text rendering | hand-rolled minimal SSD1306 driver (`main/display.c`) — decided against a component-manager package |
 | WiFi station | `esp_wifi`, `esp_netif`, `nvs_flash` |

@@ -229,6 +229,18 @@ static void test_outdoor_and_indoor(void)
     TEST_ASSERT_EQUAL_STRING("TEMP 23C", LEFT(4));
     TEST_ASSERT_EQUAL_STRING("HUM 47H", RIGHT(4));
     TEST_ASSERT_EQUAL_STRING("1014 HPA", LEFT(6));
+    TEST_ASSERT_EQUAL_STRING("CO2 --", RIGHT(6)); // no SCD41 reading yet
+
+    data.co2_ok = true;
+    data.co2.co2_ppm = 812;
+    screen_layout(SCREEN_INDOOR, &data, 0, &rows);
+    TEST_ASSERT_EQUAL_STRING("CO2 812", RIGHT(6));
+
+    // CO2 still shows without a BME280.
+    data.indoor_ok = false;
+    screen_layout(SCREEN_INDOOR, &data, 0, &rows);
+    TEST_ASSERT_EQUAL_STRING("--", LEFT(4));
+    TEST_ASSERT_EQUAL_STRING("CO2 812", RIGHT(6));
 }
 
 static void test_air(void)

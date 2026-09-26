@@ -10,6 +10,7 @@
 #include "alerts_parse.h"
 #include "holidays_parse.h"
 #include "bme280_reading.h"
+#include "scd41_parse.h"
 #include "bvg_parse.h"
 
 // Cycled with the encoder; the web API picks one by name (screen_name()).
@@ -27,6 +28,8 @@ typedef struct {
     holidays_t holidays; // Berlin's; .year 0 until the first fetch succeeds
     bool indoor_ok;      // false until the first BME280 read succeeds
     bme280_reading_t indoor;
+    bool co2_ok; // false until the first SCD41 reading (~30 s after boot)
+    scd41_reading_t co2;
     bool bvg_ok;     // false until the first departures fetch succeeds
     bool bvg_failed; // last fetch failed (shown only while there's no data)
     bvg_departures_t bvg;
