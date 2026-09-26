@@ -1,8 +1,9 @@
 # Wiring
 
 All modules share the ESP32's 3V3 and GND. Never 5V/VIN (see "Power & bus
-budget" in `CLAUDE.md`). Each module sits in its own female socket on the
-perfboard, so it can be pulled out and swapped.
+budget" in `CLAUDE.md`). Everything is currently on a solderless
+breadboard; the soldered carrier board comes with the enclosure (ROADMAP
+task 15).
 
 Wire colours: 🟢 green = D21 (SDA), 🟡 yellow = D22 (SCL).
 
@@ -33,9 +34,8 @@ Wire colours: 🟢 green = D21 (SDA), 🟡 yellow = D22 (SCL).
 
 - I2C modules are wired **in parallel** straight to D21/D22, not daisy-chained
   through the DS3231's pass-through header (that setup failed, see `CLAUDE.md`).
-- KY-040: a 5-pin female socket on the perfboard in KY-040 pin order
-  (GND, +, SW, DT, CLK), then a male-female Dupont cable to the knob so it can
-  sit apart from the board. The encoder pins are only `#define`s, so they can
+- KY-040: male-female Dupont cable from the breadboard to the knob, in
+  KY-040 pin order (GND, +, SW, DT, CLK), so it can sit apart from the board. The encoder pins are only `#define`s, so they can
   move to D18/D19/D23 if a board redesign makes the right side more convenient.
 - Analog sensors must use **ADC1** pins (D32-D39): ADC2 is unusable while
   WiFi runs. (An LDR divider sat on D34 briefly on 2026-09-25; removed

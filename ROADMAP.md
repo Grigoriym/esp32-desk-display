@@ -218,5 +218,31 @@ WiFi connect timeout: done 2026-09-25, see Open questions in `CLAUDE.md`.
   room" hint on screen was considered and not built: not needed while
   the window is open anyway.
 
+- [ ] **15. Enclosure + soldered carrier board** (planned 2026-09-26).
+  Everything is on a solderless breadboard now (a first all-soldered
+  perfboard attempt was abandoned). The case comes first, the board is
+  designed to fit it. No 3D printer here: the case is an OpenSCAD model in
+  `enclosure/`, exported to STL and printed by someone who has a printer
+  (ask them about PLA vs PETG and their clearance, ~0.2-0.3 mm).
+  - **Heat is the main constraint**: ESP32 + regulator give off ~0.5-0.8 W,
+    enough to make the BME280 read 3-5 °C high in a closed box. Sensors
+    (BME280, SCD41) go in a walled-off, vented bay, low and at the front; the
+    ESP32 high and at the back with top vents, so its warm air rises away.
+    Keep the ESP32's PCB antenna end clear of wires/boards.
+  - Rough form: small wedge, OLED window (visible area ~22x11 mm, not the
+    full 27 mm board) on the tilted front, knob under it or on top, USB-C
+    out the back.
+  - Carrier board (Miuzei perfboard): ESP32 in two 15-pin female headers,
+    DS3231 on the board, **JST-XH 2.54 mm** keyed connectors out to the
+    OLED, BME280, SCD41 (4-pin) and KY-040 (5-pin). All I2C connectors in one
+    pin order, **GND, 3V3, SDA, SCL**; the cables do the per-module swap.
+    I2C cables < ~20 cm. Board outline and holes match the case's posts.
+    A KiCad/JLCPCB version only if the perfboard one proves the layout.
+  - Steps: [ ] measure every part (checklist in the session notes / reply
+    of 2026-09-26) -> [ ] OpenSCAD model + preview renders -> [ ] test
+    print of the front panel only (OLED window, knob hole) -> [ ] full print
+    -> [ ] perfboard layout on a grid, solder -> [ ] assemble, then compare
+    BME280 with a reference thermometer with the case open vs closed.
+
 Other open items (not scheduled): battery backup — see Open questions in
 `CLAUDE.md`.

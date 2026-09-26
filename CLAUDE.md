@@ -18,19 +18,20 @@ tutorial exercise, meant to actually sit on the desk.
   panels from the shopping list tested individually (LED blink, I2C scan, OLED
   fill/text) via the `esp32-hw-checks` sibling project (see below) — no DOA units,
   no substitutions needed. OLED always responds at I2C address 0x3C.
-- The final soldered board+OLED needed the panel mounted physically upside-down;
-  fixed in software, not wiring — see Display driver notes below.
+- The OLED is mounted physically upside-down (since the first soldered
+  attempt); fixed in software, not wiring — see Display driver notes below.
 - **As-built wiring (2026-09-23)**: OLED and DS3231 are each wired **directly** to
   the ESP32 in parallel (both on 3V3/GND/D21/D22), not daisy-chained. While chained
   through the DS3231's 4-pin pass-through, one module setup left the OLED answering
   but no 0x68, another took the whole bus down (nothing answered); root cause not
   pinned down (wiring/joints, not the modules), the parallel wiring just worked.
 - **Pin table for every module lives in `docs/WIRING.md`**; keep it updated
-  when wiring changes. Build principle: every module sits in its own female
-  socket on the perfboard so it can be pulled and swapped. The ESP32 itself
-  plugs *down* into sockets, so its pins aren't reachable from above for a
-  jumper: a new module means soldering a new socket. The board may get
-  redesigned (2026-09-23).
+  when wiring changes. **Current state (2026-09-26): everything is on a
+  solderless plastic breadboard.** A first all-soldered perfboard attempt
+  (modules in female sockets, ESP32 plugged down into sockets) was abandoned
+  and moved back to the breadboard. The final soldered board is designed
+  together with the enclosure (ROADMAP task 15): a carrier board sized to
+  the case, keyed connectors out to each module.
 - LEDs: the red LED on the ESP32 DevKit and the red LED on the DS3231 are both
   plain **power** indicators (not error/short signs). The blue LED is GPIO2 —
   blinked by `esp32-hw-checks`, off in this firmware.
@@ -209,8 +210,8 @@ Rules:
   only. Contrast is 0x40 (was 0xCF, no visible difference).
 - Panel orientation: `0xA0`/`0xC0` (segment remap / COM scan) in the init sequence
   is flipped 180° from the SSD1306 default, to match how the OLED ended up mounted
-  once soldered to the perfboard (upside-down relative to native wiring). If a new
-  panel is soldered in a different orientation, flip these two bytes, not the wiring.
+  (upside-down relative to native wiring). If a new panel is mounted in a
+  different orientation, flip these two bytes, not the wiring.
 
 ## Data source decisions (decided)
 - **Weather API**: Open-Meteo (free, no signup/API key), HTTPS.
