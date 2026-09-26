@@ -152,8 +152,8 @@ on the physical display, and note anything the next task needs to know.
   `CONFIG_MBEDTLS_CERTIFICATE_BUNDLE_CROSS_SIGNED_VERIFY` (see CLAUDE.md).
 
 - [x] **11. Web page + JSON API on the display** (2026-09-26; API checked
-  from the PC over `desk.local`, see README "Phone access and API"; phone
-  page + panel reaction to be seen by the user) (phone access, home WiFi
+  from the PC over `desk.local`, phone page and panel switching confirmed
+  by the user; see README "Phone access and API") (phone access, home WiFi
   only): `esp_http_server` + mDNS so it answers at `http://desk.local`.
   `GET /api/status` = the current `screen_data_t` as JSON (time, outdoor/
   indoor, AQI/pollen, BVG, warning/holiday); `POST /api/panel` (off/on) and
