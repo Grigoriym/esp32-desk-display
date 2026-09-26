@@ -7,6 +7,21 @@
 
 #define ROW(r, c) out->text[r][c], sizeof(out->text[r][c])
 
+static const char *const NAMES[SCREEN_COUNT] = {"home", "outdoor", "air", "indoor", "bvg"};
+
+const char *screen_name(screen_t screen)
+{
+    return (screen >= 0 && screen < SCREEN_COUNT) ? NAMES[screen] : NULL;
+}
+
+int screen_from_name(const char *name)
+{
+    for (int i = 0; i < SCREEN_COUNT; i++) {
+        if (strcmp(name, NAMES[i]) == 0) return i;
+    }
+    return -1;
+}
+
 int screen_minutes_until(int now_min, int hour, int minute)
 {
     int diff = (hour * 60 + minute) - now_min;

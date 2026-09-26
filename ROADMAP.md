@@ -151,7 +151,9 @@ on the physical display, and note anything the next task needs to know.
   School holidays (multi-day) are a different source, not covered. Needed
   `CONFIG_MBEDTLS_CERTIFICATE_BUNDLE_CROSS_SIGNED_VERIFY` (see CLAUDE.md).
 
-- [ ] **11. Web page + JSON API on the display** (phone access, home WiFi
+- [x] **11. Web page + JSON API on the display** (2026-09-26; API checked
+  from the PC over `desk.local`, see README "Phone access and API"; phone
+  page + panel reaction to be seen by the user) (phone access, home WiFi
   only): `esp_http_server` + mDNS so it answers at `http://desk.local`.
   `GET /api/status` = the current `screen_data_t` as JSON (time, outdoor/
   indoor, AQI/pollen, BVG, warning/holiday); `POST /api/panel` (off/on) and
@@ -161,6 +163,12 @@ on the physical display, and note anything the next task needs to know.
   building pure + host-tested (like `metrics_format.c`); the server task
   goes in `TASKS[]` in `health.c`. Budget: ~30-50 KB flash (35% free), check
   heap after. No auth (LAN only), note it in the README.
+  Done as planned, plus: web commands reuse the encoder queue with a new
+  `input_event_t` (`main/input.h`); reading `/api/status` keeps BVG fetching
+  for 2 min (else `bvg` would be stale off-screen). Cost: +74 KB flash (30%
+  free, was 35%; mDNS is most of it), heap lowest 116 KB (was 139), stack
+  left httpd 2.4 KB / mdns 2.2 KB. A command sent during a boot fetch waits
+  until the fetch ends (seen: ~10 s).
 
 - [ ] **12. Android app** (Kotlin/Compose, separate repo; needs 11): finds
   the display via NSD (`_http._tcp`, mDNS name from 11), reads

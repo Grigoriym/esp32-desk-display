@@ -27,7 +27,7 @@ static void IRAM_ATTR encoder_isr(void *arg)
 {
     int click = enc_rotation_update(&s_rotation, pin_state());
     if (click == 0) return;
-    encoder_event_t ev = (click > 0) ? ENCODER_EV_CW : ENCODER_EV_CCW;
+    input_event_t ev = {.type = (click > 0) ? INPUT_CW : INPUT_CCW};
     BaseType_t woken = pdFALSE;
     xQueueSendFromISR(s_events, &ev, &woken);
     portYIELD_FROM_ISR(woken);
@@ -39,7 +39,7 @@ static void button_task(void *arg)
     enc_button_init(&button);
     for (;;) {
         if (enc_button_update(&button, gpio_get_level(ENC_SW_GPIO), BTN_POLL_MS, BTN_DEBOUNCE_MS)) {
-            encoder_event_t ev = ENCODER_EV_PRESS;
+            input_event_t ev = {.type = INPUT_PRESS};
             xQueueSend(s_events, &ev, 0);
         }
         vTaskDelay(pdMS_TO_TICKS(BTN_POLL_MS));
@@ -48,6 +48,9 @@ static void button_task(void *arg)
 
 esp_err_t encoder_init(void)
 {
+    s_events = xQueueCreate(16, sizeof(input_event_t));
+    if (!s_events) return ESP_ERR_NO_MEM;
+
     gpio_config_t io_conf = {
         .pin_bit_mask = (1ULL << ENC_CLK_GPIO) | (1ULL << ENC_DT_GPIO) | (1ULL << ENC_SW_GPIO),
         .mode = GPIO_MODE_INPUT,
@@ -57,9 +60,6 @@ esp_err_t encoder_init(void)
     };
     esp_err_t err = gpio_config(&io_conf);
     if (err != ESP_OK) return err;
-
-    s_events = xQueueCreate(16, sizeof(encoder_event_t));
-    if (!s_events) return ESP_ERR_NO_MEM;
 
     enc_rotation_init(&s_rotation, pin_state());
     gpio_set_intr_type(ENC_CLK_GPIO, GPIO_INTR_ANYEDGE);
@@ -74,11 +74,16 @@ esp_err_t encoder_init(void)
     return ESP_OK;
 }
 
-bool encoder_wait_event(encoder_event_t *ev, TickType_t timeout)
+bool encoder_wait_event(input_event_t *ev, TickType_t timeout)
 {
     if (!s_events) {
         vTaskDelay(timeout);
         return false;
     }
     return xQueueReceive(s_events, ev, timeout) == pdTRUE;
+}
+
+bool encoder_post(input_event_t ev)
+{
+    return s_events && xQueueSend(s_events, &ev, 0) == pdTRUE;
 }

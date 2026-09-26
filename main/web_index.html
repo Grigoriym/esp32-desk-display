@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Desk display</title>
+<style>
+  :root { --bg: #f4f4f2; --card: #fff; --fg: #1c1c1c; --dim: #6b6b6b; --accent: #2f6fdf; --warn: #c9760a; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #121212; --card: #1e1e1e; --fg: #eaeaea; --dim: #9a9a9a; --accent: #7aa7ff; --warn: #f0a640; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 16px; background: var(--bg); color: var(--fg);
+         font: 16px/1.4 system-ui, sans-serif; max-width: 520px; margin-inline: auto; }
+  header { display: flex; justify-content: space-between; align-items: baseline; }
+  h1 { font-size: 2.6rem; margin: 0; font-variant-numeric: tabular-nums; }
+  .dim { color: var(--dim); font-size: .9rem; }
+  .card { background: var(--card); border-radius: 12px; padding: 12px 14px; margin-top: 12px; }
+  .card h2 { font-size: .8rem; text-transform: uppercase; letter-spacing: .06em; color: var(--dim); margin: 0 0 6px; }
+  .big { font-size: 1.6rem; font-weight: 600; }
+  .row { display: flex; justify-content: space-between; gap: 8px; }
+  .warn { color: var(--warn); font-weight: 600; }
+  .buttons { display: flex; flex-wrap: wrap; gap: 8px; }
+  button { font: inherit; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--dim);
+           background: transparent; color: var(--fg); cursor: pointer; }
+  button.on { background: var(--accent); border-color: var(--accent); color: var(--card); }
+  #err { color: var(--warn); }
+</style>
+</head>
+<body>
+<header><h1 id="time">--:--</h1><span class="dim" id="date"></span></header>
+<div id="err"></div>
+<div class="card" id="warning" hidden></div>
+<div class="card"><h2>Outdoor</h2><div id="outdoor">--</div></div>
+<div class="card"><h2>Indoor</h2><div id="indoor">--</div></div>
+<div class="card"><h2>Air</h2><div id="air">--</div></div>
+<div class="card"><h2>BVG</h2><div id="bvg">--</div></div>
+<div class="card"><h2>Panel</h2>
+  <div class="buttons" id="screens"></div>
+  <div class="buttons" style="margin-top:8px">
+    <button onclick="cmd('screen','prev')">&larr; prev</button>
+    <button onclick="cmd('screen','next')">next &rarr;</button>
+    <button id="panel" onclick="cmd('panel','toggle')">panel</button>
+  </div>
+</div>
+<p class="dim" id="holiday"></p>
+<script>
+const SCREENS = ['home', 'outdoor', 'air', 'indoor', 'bvg'];
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'})[c]);
+// Pollen levels (grains/m3), the same rough scale as the panel.
+const POLLEN = g => g < 1 ? null : g <= 10 ? 'low' : g <= 50 ? 'medium' : 'high';
+
+$('screens').innerHTML = SCREENS.map(s => `<button id="s-${s}" onclick="cmd('screen','${s}')">${s}</button>`).join('');
+
+function render(d) {
+  $('time').textContent = d.time;
+  $('date').textContent = d.date.split('-').reverse().join('/');
+  const o = d.outdoor;
+  $('outdoor').innerHTML = o ? `<div class="big">${o.temp_c}&deg;C</div>
+    <div class="row"><span>wind ${o.wind_kmh} km/h</span><span>UV max ${o.uv_max}</span></div>
+    <div class="row"><span>sunrise ${o.sunrise}</span><span>sunset ${o.sunset}</span></div>
+    <div class="dim">${o.rain.in_h < 0 ? 'no rain in the next 12 h' : o.rain.in_h > 0 ? 'rain from ' + o.rain.from
+      : o.rain.until ? 'raining until ' + o.rain.until : 'raining'}</div>` : '--';
+  const i = d.indoor;
+  $('indoor').innerHTML = i ? `<div class="big">${i.temp_c.toFixed(1)}&deg;C</div>
+    <div class="row"><span>humidity ${Math.round(i.humidity_pct)}%</span><span>${Math.round(i.pressure_hpa)} hPa</span></div>` : '--';
+  const a = d.air;
+  if (a) {
+    const pollen = Object.entries(a.pollen).filter(([, g]) => POLLEN(g)).map(([k, g]) => `${k} ${POLLEN(g)}`);
+    $('air').innerHTML = `<div class="big">AQI ${a.aqi} <span class="dim">${a.aqi_label.toLowerCase()}</span></div>
+      <div class="dim">pollen: ${pollen.length ? pollen.join(', ') : 'none'}</div>`;
+  } else $('air').textContent = '--';
+  const w = d.warning;
+  $('warning').hidden = !(w && w.count);
+  if (w && w.count) $('warning').innerHTML = `<span class="warn">${esc(w.event)}</span>
+    <span class="dim">(${w.severity}, ${w.started ? 'since' : 'from'} ${w.onset})</span>`;
+  const b = d.bvg;
+  if (!b) $('bvg').textContent = 'no data yet';
+  else if (!b.departures.length) $('bvg').textContent = 'no trains';
+  else $('bvg').innerHTML = b.departures.map(t => `<div class="row${t.in_min < b.walk_min ? ' dim' : ''}">
+      <span>${esc(t.line)} ${esc(t.direction)}</span><span>${t.time} &middot; ${t.in_min} min</span></div>`).join('');
+  $('holiday').textContent = d.next_holiday ? `next holiday: ${d.next_holiday.name.toLowerCase()}, ${d.next_holiday.date}` : '';
+  SCREENS.forEach(s => $('s-' + s).classList.toggle('on', s === d.screen));
+  $('panel').textContent = d.panel_on ? 'panel off' : 'panel on';
+}
+
+async function refresh() {
+  try {
+    const r = await fetch('/api/status');
+    render(await r.json());
+    $('err').textContent = '';
+  } catch (e) {
+    $('err').textContent = 'display not reachable';
+  }
+}
+
+async function cmd(what, value) {
+  const key = what === 'panel' ? 'set' : 'go';
+  await fetch(`/api/${what}?${key}=${value}`, {method: 'POST'}).catch(() => {});
+  setTimeout(refresh, 150);
+}
+
+refresh();
+setInterval(refresh, 5000);
+</script>
+</body>
+</html>

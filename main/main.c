@@ -18,6 +18,7 @@
 #include "health.h"
 #include "metrics.h"
 #include "metrics_format.h"
+#include "web.h"
 #include "bvg_secrets.h"
 #include <time.h>
 
@@ -317,6 +318,8 @@ static void start_background(void)
     if (eerr != ESP_OK) ESP_LOGW(TAG, "encoder not used: %s", esp_err_to_name(eerr));
     esp_err_t merr = metrics_start();
     if (merr != ESP_OK) ESP_LOGI(TAG, "dashboard upload off: %s", esp_err_to_name(merr));
+    esp_err_t werr = web_start();
+    if (werr != ESP_OK) ESP_LOGW(TAG, "web API not used: %s", esp_err_to_name(werr));
 }
 
 // The per-second jobs below return true when the screen needs a redraw.
@@ -336,11 +339,12 @@ static bool tick_minute(app_state_t *st)
     return true;
 }
 
-// Departures are fetched in the background, only while their screen is up;
-// set from the 1s tick so spinning past it doesn't fetch.
+// Departures are fetched in the background, only while their screen is up
+// or a phone is reading the web API; set from the 1s tick so spinning past
+// the screen doesn't fetch.
 static bool tick_bvg(void)
 {
-    bvg_set_active(s_screen == SCREEN_BVG);
+    bvg_set_active(s_screen == SCREEN_BVG || web_recently_polled());
     return bvg_take_update(&s_data.bvg, &s_data.bvg_ok, &s_data.bvg_failed);
 }
 
@@ -433,10 +437,11 @@ static void tick_metrics(app_state_t *st)
     metrics_submit(lines);
 }
 
-// Waits out the rest of this second, reacting to the encoder straight away
-// instead of on the next tick. A quick spin queues several clicks: they're
-// all applied, then drawn once. Press turns the panel off/on; a turn while
-// it is off only wakes it, without switching screens.
+// Waits out the rest of this second, reacting to the encoder (and web API
+// commands, which come through its queue) straight away instead of on the
+// next tick. A quick spin queues several clicks: they're all applied, then
+// drawn once. Press turns the panel off/on; a turn while it is off only
+// wakes it, without switching screens. A web screen pick also wakes it.
 static void wait_second_handling_encoder(TickType_t *next_second)
 {
     *next_second += pdMS_TO_TICKS(1000);
@@ -446,14 +451,18 @@ static void wait_second_handling_encoder(TickType_t *next_second)
     for (;;) {
         TickType_t now = xTaskGetTickCount();
         if ((int32_t)(*next_second - now) <= 0) return;
-        encoder_event_t ev;
+        input_event_t ev;
         if (!encoder_wait_event(&ev, *next_second - now)) continue;
         int screen = s_screen;
         bool on = s_panel_on;
         do {
-            if (ev == ENCODER_EV_PRESS) on = !on;
-            else if (!on) on = true; // a turn while off just wakes the panel
-            else if (ev == ENCODER_EV_CW) screen = (screen + 1) % SCREEN_COUNT;
+            if (ev.type == INPUT_PRESS) on = !on;
+            else if (ev.type == INPUT_PANEL) on = ev.arg != 0;
+            else if (ev.type == INPUT_SCREEN) {
+                screen = ev.arg;
+                on = true;
+            } else if (!on) on = true; // a turn while off just wakes the panel
+            else if (ev.type == INPUT_CW) screen = (screen + 1) % SCREEN_COUNT;
             else screen = (screen + SCREEN_COUNT - 1) % SCREEN_COUNT;
         } while (encoder_wait_event(&ev, 0));
         if (on != s_panel_on) {
@@ -466,6 +475,7 @@ static void wait_second_handling_encoder(TickType_t *next_second)
             ESP_LOGI(TAG, "screen %d", screen);
             draw_screen();
         }
+        web_publish(&s_data, s_screen, s_panel_on);
     }
 }
 
@@ -510,6 +520,7 @@ void app_main(void)
         tick_health(&st);
         tick_metrics(&st);
         if (changed) draw_screen();
+        web_publish(&s_data, s_screen, s_panel_on);
         wait_second_handling_encoder(&next_second);
     }
 }

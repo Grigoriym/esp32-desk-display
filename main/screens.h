@@ -12,7 +12,7 @@
 #include "bme280_reading.h"
 #include "bvg_parse.h"
 
-// Cycled with the encoder (press = back to HOME).
+// Cycled with the encoder; the web API picks one by name (screen_name()).
 typedef enum { SCREEN_HOME, SCREEN_OUTDOOR, SCREEN_AIR, SCREEN_INDOOR, SCREEN_BVG, SCREEN_COUNT } screen_t;
 
 // Everything the screens draw from.
@@ -51,3 +51,10 @@ void screen_layout(screen_t screen, const screen_data_t *data, int now_min, scre
 // gone. Departures are at most an hour ahead, so wrapping over midnight is
 // resolved towards the nearer day.
 int screen_minutes_until(int now_min, int hour, int minute);
+
+// Lowercase name for the web API: "home", "outdoor", "air", "indoor", "bvg";
+// NULL for an out-of-range value.
+const char *screen_name(screen_t screen);
+
+// The screen with that name, or -1 if there's none.
+int screen_from_name(const char *name);

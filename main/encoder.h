@@ -4,16 +4,19 @@
 #include "esp_err.h"
 #include "freertos/FreeRTOS.h"
 
-// KY-040 rotary encoder, pins in docs/WIRING.md.
-typedef enum {
-    ENCODER_EV_CW,    // one detent clockwise
-    ENCODER_EV_CCW,   // one detent counter-clockwise
-    ENCODER_EV_PRESS, // button pressed (debounced)
-} encoder_event_t;
+#include "input.h"
 
-// Configures the pins, the rotation interrupt and the button polling task.
+// KY-040 rotary encoder, pins in docs/WIRING.md. Its event queue also takes
+// the web API's commands (input.h).
+
+// Creates the event queue, then configures the pins, the rotation interrupt
+// and the button polling task. The queue works even if the pins fail.
 esp_err_t encoder_init(void);
 
 // Waits up to timeout for the next event. Returns false on timeout (or
-// straight away after sleeping, if encoder_init() failed).
-bool encoder_wait_event(encoder_event_t *ev, TickType_t timeout);
+// straight away after sleeping, if encoder_init() never ran).
+bool encoder_wait_event(input_event_t *ev, TickType_t timeout);
+
+// Queues an event from another task (the web API) without waiting; false if
+// the queue is full or missing.
+bool encoder_post(input_event_t ev);

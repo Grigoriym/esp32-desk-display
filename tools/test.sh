@@ -20,6 +20,7 @@ CFLAGS=(-std=gnu17 -Wall -Wextra -Werror -g -fsanitize=address,undefined -fno-om
 extra_sources() {
     case "$1" in
         test_screens) echo main/air_parse.c main/holidays_parse.c ;;
+        test_web_api) echo main/screens.c main/air_parse.c main/holidays_parse.c ;;
     esac
 }
 

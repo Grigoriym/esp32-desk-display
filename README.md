@@ -4,7 +4,8 @@ A small always-on desk companion: an ESP32 drives a 0.96" OLED that shows
 the time, the weather outside and inside, air quality and pollen, DWD
 weather warnings, public holidays and the next U-Bahn departures. A rotary
 knob switches between screens. Readings are also uploaded to a self-hosted
-InfluxDB + Grafana dashboard.
+InfluxDB + Grafana dashboard, and a phone on the same WiFi can see them and
+switch screens at `http://desk.local`.
 
 Written in C on ESP-IDF, with a small hand-rolled SSD1306 driver and no
 graphics library. All data sources are free and need no API key.
@@ -104,6 +105,25 @@ uptime) every minute. Run it on an always-on machine on the display's LAN:
 see [`server/README.md`](server/README.md) and
 [`server/INSTALL.md`](server/INSTALL.md).
 
+## Phone access and API
+
+The display serves a small page at **`http://desk.local`** (mDNS; the IP
+from the boot log works too) with everything the screens show, refreshed
+every 5 s, plus buttons for the screens and the panel. Home WiFi only, and
+**no authentication**: anyone on the LAN can read it and switch screens.
+
+| Request | Does |
+|---|---|
+| `GET /api/status` | JSON: `time`, `date` (`YYYY-MM-DD`), `screen`, `panel_on`, and `outdoor`, `indoor`, `air`, `warning`, `next_holiday`, `bvg`. A section is `null` until its first fetch or read succeeds (`--` on the panel); `warning` is `{"count": 0}` when there is none |
+| `POST /api/screen?go=next\|prev\|home\|outdoor\|air\|indoor\|bvg` | Switch screens, like turning the knob. A screen by name also turns the panel on; `next`/`prev` while it's off only wake it, as the knob does |
+| `POST /api/panel?set=on\|off\|toggle` | Panel on/off, like pressing the knob |
+
+Commands answer `{"ok":true}` (`400` for a bad value) and apply within a
+few hundred ms, or once a running fetch finishes. While `/api/status` is
+being read (the last 2 minutes), departures are fetched even if the BVG
+screen isn't up. The server also announces itself as `_http._tcp` for
+discovery (Android NSD).
+
 ## Configuration
 
 Settings are hardcoded constants. Change them and reflash:
@@ -153,6 +173,8 @@ main/
   encoder.c         KY-040 ISR + button task; encoder_decode.c
   metrics.c         dashboard upload, own task; metrics_format.c
   health.c          periodic heap/stack report in the log
+  web.c             phone page + JSON API, mDNS; web_api.c (pure,
+                    host-tested), page in web_index.html
 test/               host unit tests + fixtures
 tools/              test, format, lint, size and serial scripts
 server/             InfluxDB + Grafana (Docker Compose)

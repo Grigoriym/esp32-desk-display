@@ -14,8 +14,8 @@ static const char *TAG = "health";
 #define STACK_WARN_BYTES 1024
 
 // Tasks this firmware creates, plus the system event task that runs its
-// WiFi/IP event handler. Names as passed to xTaskCreate().
-static const char *const TASKS[] = {"bvg", "enc_button", "metrics", "sys_evt"};
+// WiFi/IP event handler, the web server (httpd) and mDNS. Names as passed to xTaskCreate().
+static const char *const TASKS[] = {"bvg", "enc_button", "metrics", "httpd", "mdns", "sys_evt"};
 
 static void log_stack(const char *name, TaskHandle_t task)
 {

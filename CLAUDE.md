@@ -132,6 +132,7 @@ Rules:
 | HTTP GET | `main/http.c` `http_get(url, buf, size)`, shared by weather/air/alerts/holidays; big responses (alerts 16 KB, holidays 8 KB) get a heap buffer for the fetch only |
 | BVG departures | `esp_http_client` against `v6.bvg.transport.rest` (community-run, no key, **has outages**: 503 after 10s or no answer, the `v6.vbb` mirror too, seen 2026-09-24), in its own FreeRTOS task (`main/bvg.c`) so a slow/down API never blocks the main loop |
 | Dashboard upload | `esp_http_client` plain-HTTP POST of InfluxDB line protocol every 60 s, in its own task (`main/metrics.c`, 4 KB stack) so a down server never blocks the main loop; lines built by the pure `main/metrics_format.c` (host-tested). Server side (InfluxDB 2 + Grafana, Docker Compose) in `server/`, see `server/README.md`; runs on the always-on home box, Grafana at `http://192.168.0.139:34897/` (since 2026-09-25, the dev-machine copy is gone). `METRICS_TOKEN` must be the `INFLUX_TOKEN` of *that* server's `server/.env`: a token from another install gets `401` |
+| Phone page + JSON API | `esp_http_server` + mDNS (`espressif/mdns`, component manager) in `main/web.c`: `http://desk.local`, page embedded from `main/web_index.html` (`EMBED_TXTFILES`), JSON built by the pure `main/web_api.c` (host-tested). Commands go to the main loop through the encoder queue (`input_event_t`, `main/input.h`). Endpoints in README "Phone access and API". No auth, LAN only. Since 2026-09-26 (ROADMAP 11) |
 | JSON parsing | `cJSON` — **not bundled** in this ESP-IDF version (v6.1-dev); pulled via the component manager (`main/idf_component.yml` → `espressif/cjson`), lands in gitignored `managed_components/` |
 
 ## Display driver notes (`main/display.c`)
@@ -185,7 +186,9 @@ Rules:
   60 main-loop ticks, and boot fetches that block the loop push it back:
   since the alerts + holidays fetches (2026-09-25) it lands at **~75 s**, so
   a 70 s capture misses it; use 90 s. After those two fetches: heap lowest
-  139 KB, stack left main 4.5 KB.
+  139 KB, stack left main 4.5 KB. After the web API (2026-09-26, with
+  requests served during the capture): heap lowest 116 KB, stack left
+  httpd 2.4 KB (of 4), mdns 2.2 KB, main 4.2 KB, bvg 4.2 KB.
 - `snprintf` into a buffer that can't hold the worst case fails the build
   (`-Werror=format-truncation`): size buffers for the longest possible
   value, not the typical one.
