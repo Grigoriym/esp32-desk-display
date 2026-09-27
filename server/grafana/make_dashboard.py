@@ -7,12 +7,14 @@ import os
 DS = {"type": "influxdb", "uid": "influxdb"}
 
 
-def flux(meas, field, agg="mean"):
+def flux(meas, field, agg="mean", empty=False):
+    """empty=True: windows with no data come back as nulls, so a graph can
+    break its line while the display was off (see spanNulls in panel())."""
     return (
         'from(bucket: "desk")\n'
         "  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n"
         f'  |> filter(fn: (r) => r._measurement == "{meas}" and r._field == "{field}")\n'
-        f"  |> aggregateWindow(every: v.windowPeriod, fn: {agg}, createEmpty: false)"
+        f"  |> aggregateWindow(every: v.windowPeriod, fn: {agg}, createEmpty: {str(empty).lower()})"
     )
 
 
@@ -42,7 +44,7 @@ def panel(kind, title, series, unit, grid, desc, decimals=0, thresholds=None):
     targets, overrides = [], []
     for i, s in enumerate(series):
         ref = chr(ord("A") + i)
-        query = s[1] if len(s) == 2 else flux(s[1], s[2])
+        query = s[1] if len(s) == 2 else flux(s[1], s[2], empty=kind == "timeseries")
         targets.append({"refId": ref, "datasource": DS, "query": query})
         overrides.append({"matcher": {"id": "byFrameRefID", "options": ref},
                           "properties": [{"id": "displayName", "value": s[0]}]})
@@ -58,6 +60,8 @@ def panel(kind, title, series, unit, grid, desc, decimals=0, thresholds=None):
                         "graphMode": "area", "colorMode": "value" if thresholds else "none",
                         "textMode": "value"}
     else:
+        # Bridge nulls only across gaps under 5 min (uploads are every 60 s):
+        # a longer gap is the display being off, and the line breaks there.
         defaults["custom"] = {"lineWidth": 2, "fillOpacity": 0, "showPoints": "never",
                               "spanNulls": 300000}
         if thresholds:
