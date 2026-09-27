@@ -218,7 +218,8 @@ WiFi connect timeout: done 2026-09-25, see Open questions in `CLAUDE.md`.
   room" hint on screen was considered and not built: not needed while
   the window is open anyway.
 
-- [ ] **15. Enclosure + soldered carrier board** (planned 2026-09-26).
+- [ ] **15. Enclosure + soldered carrier board** (planned 2026-09-26;
+  **the current main task**).
   Everything is on a solderless breadboard now (a first all-soldered
   perfboard attempt was abandoned). The case comes first, the board is
   designed to fit it. No 3D printer here: the case is an OpenSCAD model in
@@ -238,8 +239,11 @@ WiFi connect timeout: done 2026-09-25, see Open questions in `CLAUDE.md`.
     pin order, **GND, 3V3, SDA, SCL**; the cables do the per-module swap.
     I2C cables < ~20 cm. Board outline and holes match the case's posts.
     A KiCad/JLCPCB version only if the perfboard one proves the layout.
-  - Steps: [ ] measure every part (checklist in the session notes / reply
-    of 2026-09-26) -> [ ] OpenSCAD model + preview renders -> [ ] test
+  - **Next session starts here**: the user fills in
+    `enclosure/MEASUREMENTS.md` with the caliper (arrives 2026-09-28);
+    nothing else can start before those numbers exist.
+  - Steps: [ ] measure every part (`enclosure/MEASUREMENTS.md`)
+    -> [ ] OpenSCAD model + preview renders -> [ ] test
     print of the front panel only (OLED window, knob hole) -> [ ] full print
     -> [ ] perfboard layout on a grid, solder -> [ ] assemble, then compare
     BME280 with a reference thermometer with the case open vs closed.
