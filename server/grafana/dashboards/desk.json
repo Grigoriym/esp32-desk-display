@@ -4,7 +4,7 @@
   "tags": [
     "esp32"
   ],
-  "timezone": "browser",
+  "timezone": "Europe/Berlin",
   "schemaVersion": 39,
   "refresh": "1m",
   "time": {
@@ -35,7 +35,7 @@
             "type": "influxdb",
             "uid": "influxdb"
           },
-          "query": "from(bucket: \"desk\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"indoor\" and r._field == \"temp_c\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)"
+          "query": "data = from(bucket: \"desk\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"indoor\" and r._field == \"temp_c\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\nx = data |> last() |> findColumn(fn: (key) => true, column: \"_value\")\nlevel = if length(arr: x) == 0 then \"\" else if x[0] < 18.0 then \"Cold\" else if x[0] < 20.0 then \"Cool\" else if x[0] < 25.0 then \"Comfortable\" else if x[0] < 28.0 then \"Warm\" else \"Hot\"\ndata |> set(key: \"level\", value: level)\n  |> group(columns: [\"_start\", \"_stop\", \"_measurement\", \"_field\", \"device\", \"level\"])"
         }
       ],
       "fieldConfig": {
@@ -65,22 +65,10 @@
           },
           "color": {
             "mode": "thresholds"
-          }
+          },
+          "displayName": "${__field.labels.level}"
         },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byFrameRefID",
-              "options": "A"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Indoor"
-              }
-            ]
-          }
-        ]
+        "overrides": []
       },
       "options": {
         "reduceOptions": {
@@ -92,7 +80,7 @@
         },
         "graphMode": "area",
         "colorMode": "value",
-        "textMode": "value"
+        "textMode": "value_and_name"
       }
     },
     {
@@ -117,7 +105,7 @@
             "type": "influxdb",
             "uid": "influxdb"
           },
-          "query": "from(bucket: \"desk\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"indoor\" and r._field == \"humidity\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)"
+          "query": "data = from(bucket: \"desk\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"indoor\" and r._field == \"humidity\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\nx = data |> last() |> findColumn(fn: (key) => true, column: \"_value\")\nlevel = if length(arr: x) == 0 then \"\" else if x[0] < 30.0 then \"Dry\" else if x[0] < 40.0 then \"A bit dry\" else if x[0] < 60.0 then \"Comfortable\" else if x[0] < 70.0 then \"Humid\" else \"Too humid\"\ndata |> set(key: \"level\", value: level)\n  |> group(columns: [\"_start\", \"_stop\", \"_measurement\", \"_field\", \"device\", \"level\"])"
         }
       ],
       "fieldConfig": {
@@ -151,22 +139,10 @@
           },
           "color": {
             "mode": "thresholds"
-          }
+          },
+          "displayName": "${__field.labels.level}"
         },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byFrameRefID",
-              "options": "A"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Humidity"
-              }
-            ]
-          }
-        ]
+        "overrides": []
       },
       "options": {
         "reduceOptions": {
@@ -178,14 +154,14 @@
         },
         "graphMode": "area",
         "colorMode": "value",
-        "textMode": "value"
+        "textMode": "value_and_name"
       }
     },
     {
       "id": 3,
       "type": "stat",
       "title": "Pressure",
-      "description": "Air pressure in hPa, measured in the room (same as outside). Reads about 4 hPa below weather reports: those are converted to sea level, Berlin is ~35 m up. Rough guide (weather-report values): under 1000 low, unsettled, rain and wind likely; 1010-1020 normal; above 1025 high, settled, dry. The trend matters more than the value: see Pressure 3h.",
+      "description": "Air pressure in hPa, measured in the room (same as outside). Reads about 4 hPa below weather reports: those are converted to sea level, Berlin is ~35 m up. Rough guide (weather-report values): under 1000 low, unsettled, rain and wind likely; 1010-1020 normal; above 1025 high, settled, dry. The word on the tile uses those, shifted down 4 hPa. The trend matters more than the value: see Pressure 3h.",
       "gridPos": {
         "x": 6,
         "y": 0,
@@ -203,28 +179,16 @@
             "type": "influxdb",
             "uid": "influxdb"
           },
-          "query": "from(bucket: \"desk\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"indoor\" and r._field == \"pressure_hpa\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)"
+          "query": "data = from(bucket: \"desk\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"indoor\" and r._field == \"pressure_hpa\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\nx = data |> last() |> findColumn(fn: (key) => true, column: \"_value\")\nlevel = if length(arr: x) == 0 then \"\" else if x[0] < 996.0 then \"Low\" else if x[0] < 1021.0 then \"Normal\" else \"High\"\ndata |> set(key: \"level\", value: level)\n  |> group(columns: [\"_start\", \"_stop\", \"_measurement\", \"_field\", \"device\", \"level\"])"
         }
       ],
       "fieldConfig": {
         "defaults": {
           "unit": "pressurehpa",
-          "decimals": 0
+          "decimals": 0,
+          "displayName": "${__field.labels.level}"
         },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byFrameRefID",
-              "options": "A"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Pressure"
-              }
-            ]
-          }
-        ]
+        "overrides": []
       },
       "options": {
         "reduceOptions": {
@@ -236,7 +200,7 @@
         },
         "graphMode": "area",
         "colorMode": "none",
-        "textMode": "value"
+        "textMode": "value_and_name"
       }
     },
     {
@@ -261,7 +225,7 @@
             "type": "influxdb",
             "uid": "influxdb"
           },
-          "query": "data = from(bucket: \"desk\")\n  |> range(start: -3h)\n  |> filter(fn: (r) => r._measurement == \"indoor\" and r._field == \"pressure_hpa\")\nunion(tables: [data |> first(), data |> last()])\n  |> sort(columns: [\"_time\"])\n  |> difference()"
+          "query": "raw = from(bucket: \"desk\")\n  |> range(start: -3h)\n  |> filter(fn: (r) => r._measurement == \"indoor\" and r._field == \"pressure_hpa\")\ndata = union(tables: [raw |> first(), raw |> last()])\n  |> sort(columns: [\"_time\"])\n  |> difference()\nx = data |> last() |> findColumn(fn: (key) => true, column: \"_value\")\nlevel = if length(arr: x) == 0 then \"\" else if x[0] < -6.0 then \"Falling fast\" else if x[0] < -3.0 then \"Falling\" else if x[0] < -1.0 then \"Falling a bit\" else if x[0] < 1.0 then \"Steady\" else if x[0] < 3.0 then \"Rising a bit\" else \"Rising\"\ndata |> set(key: \"level\", value: level)\n  |> group(columns: [\"_start\", \"_stop\", \"_measurement\", \"_field\", \"device\", \"level\"])"
         }
       ],
       "fieldConfig": {
@@ -299,22 +263,10 @@
           },
           "color": {
             "mode": "thresholds"
-          }
+          },
+          "displayName": "${__field.labels.level}"
         },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byFrameRefID",
-              "options": "A"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Change"
-              }
-            ]
-          }
-        ]
+        "overrides": []
       },
       "options": {
         "reduceOptions": {
@@ -326,14 +278,14 @@
         },
         "graphMode": "area",
         "colorMode": "value",
-        "textMode": "value"
+        "textMode": "value_and_name"
       }
     },
     {
       "id": 5,
       "type": "stat",
       "title": "Outdoor",
-      "description": "Current outdoor temperature in central Berlin (Open-Meteo), refreshed every 15 min.",
+      "description": "Current outdoor temperature and weather in central Berlin (Open-Meteo), refreshed every 15 min.",
       "gridPos": {
         "x": 12,
         "y": 0,
@@ -351,28 +303,16 @@
             "type": "influxdb",
             "uid": "influxdb"
           },
-          "query": "from(bucket: \"desk\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"outdoor\" and r._field == \"temp_c\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)"
+          "query": "import \"dict\"\ndata = from(bucket: \"desk\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"outdoor\" and r._field == \"temp_c\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\ncode = from(bucket: \"desk\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"outdoor\" and r._field == \"weather_code\")\n  |> last()\n  |> findColumn(fn: (key) => true, column: \"_value\")\nlevel = if length(arr: code) == 0 then \"\" else dict.get(dict: [0: \"Clear\", 1: \"Mostly clear\", 2: \"Partly cloudy\", 3: \"Overcast\", 45: \"Fog\", 48: \"Fog\", 51: \"Drizzle\", 53: \"Drizzle\", 55: \"Drizzle\", 56: \"Freezing drizzle\", 57: \"Freezing drizzle\", 61: \"Light rain\", 63: \"Rain\", 65: \"Heavy rain\", 66: \"Freezing rain\", 67: \"Freezing rain\", 71: \"Light snow\", 73: \"Snow\", 75: \"Heavy snow\", 77: \"Snow grains\", 80: \"Showers\", 81: \"Showers\", 82: \"Heavy showers\", 85: \"Snow showers\", 86: \"Snow showers\", 95: \"Thunderstorm\", 96: \"Thunderstorm, hail\", 99: \"Thunderstorm, hail\"], key: int(v: code[0]), default: \"\")\ndata |> set(key: \"level\", value: level)\n  |> group(columns: [\"_start\", \"_stop\", \"_measurement\", \"_field\", \"device\", \"level\"])"
         }
       ],
       "fieldConfig": {
         "defaults": {
           "unit": "celsius",
-          "decimals": 0
+          "decimals": 0,
+          "displayName": "${__field.labels.level}"
         },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byFrameRefID",
-              "options": "A"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Outdoor"
-              }
-            ]
-          }
-        ]
+        "overrides": []
       },
       "options": {
         "reduceOptions": {
@@ -384,7 +324,7 @@
         },
         "graphMode": "area",
         "colorMode": "none",
-        "textMode": "value"
+        "textMode": "value_and_name"
       }
     },
     {
@@ -409,7 +349,7 @@
             "type": "influxdb",
             "uid": "influxdb"
           },
-          "query": "from(bucket: \"desk\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"air\" and r._field == \"aqi\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)"
+          "query": "data = from(bucket: \"desk\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"air\" and r._field == \"aqi\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\nx = data |> last() |> findColumn(fn: (key) => true, column: \"_value\")\nlevel = if length(arr: x) == 0 then \"\" else if x[0] < 20.0 then \"Good\" else if x[0] < 40.0 then \"Fair\" else if x[0] < 60.0 then \"Moderate\" else if x[0] < 80.0 then \"Poor\" else if x[0] < 100.0 then \"Very poor\" else \"Extremely poor\"\ndata |> set(key: \"level\", value: level)\n  |> group(columns: [\"_start\", \"_stop\", \"_measurement\", \"_field\", \"device\", \"level\"])"
         }
       ],
       "fieldConfig": {
@@ -443,22 +383,10 @@
           },
           "color": {
             "mode": "thresholds"
-          }
+          },
+          "displayName": "${__field.labels.level}"
         },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byFrameRefID",
-              "options": "A"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "AQI"
-              }
-            ]
-          }
-        ]
+        "overrides": []
       },
       "options": {
         "reduceOptions": {
@@ -470,7 +398,7 @@
         },
         "graphMode": "area",
         "colorMode": "value",
-        "textMode": "value"
+        "textMode": "value_and_name"
       }
     },
     {
@@ -495,7 +423,7 @@
             "type": "influxdb",
             "uid": "influxdb"
           },
-          "query": "from(bucket: \"desk\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"device\" and r._field == \"rssi\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)"
+          "query": "data = from(bucket: \"desk\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"device\" and r._field == \"rssi\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\nx = data |> last() |> findColumn(fn: (key) => true, column: \"_value\")\nlevel = if length(arr: x) == 0 then \"\" else if x[0] < -80.0 then \"Poor\" else if x[0] < -67.0 then \"Weak\" else if x[0] < -50.0 then \"Good\" else \"Excellent\"\ndata |> set(key: \"level\", value: level)\n  |> group(columns: [\"_start\", \"_stop\", \"_measurement\", \"_field\", \"device\", \"level\"])"
         }
       ],
       "fieldConfig": {
@@ -521,22 +449,10 @@
           },
           "color": {
             "mode": "thresholds"
-          }
+          },
+          "displayName": "${__field.labels.level}"
         },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byFrameRefID",
-              "options": "A"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "WiFi"
-              }
-            ]
-          }
-        ]
+        "overrides": []
       },
       "options": {
         "reduceOptions": {
@@ -548,14 +464,14 @@
         },
         "graphMode": "area",
         "colorMode": "value",
-        "textMode": "value"
+        "textMode": "value_and_name"
       }
     },
     {
       "id": 8,
       "type": "stat",
-      "title": "Uptime",
-      "description": "Time since the display last restarted. Drops to zero after a reset: normal after flashing or unplugging, otherwise a crash or a power problem (check the boot log for BROWNOUT).",
+      "title": "Display",
+      "description": "Online while the display uploads (every 60 s). No upload for 3 min: shows how long it has been off. Graphs have a gap there, and a marker where it came back (Display restarted).",
       "gridPos": {
         "x": 21,
         "y": 0,
@@ -573,28 +489,45 @@
             "type": "influxdb",
             "uid": "influxdb"
           },
-          "query": "from(bucket: \"desk\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"device\" and r._field == \"uptime_s\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)"
+          "query": "from(bucket: \"desk\")\n  |> range(start: -30d)\n  |> filter(fn: (r) => r._measurement == \"device\" and r._field == \"uptime_s\")\n  |> last()\n  |> map(fn: (r) => ({_time: r._time, _value: float(v: int(v: now()) - int(v: r._time)) / 1000000000.0}))\n  |> map(fn: (r) => ({r with level: if r._value < 180.0 then \"Display\" else \"Offline for\"}))\n  |> group(columns: [\"level\"])"
         }
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "s",
-          "decimals": 1
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byFrameRefID",
-              "options": "A"
-            },
-            "properties": [
+          "unit": "dtdurations",
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
               {
-                "id": "displayName",
-                "value": "Uptime"
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 180
               }
             ]
-          }
-        ]
+          },
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "type": "range",
+              "options": {
+                "from": 0,
+                "to": 180,
+                "result": {
+                  "text": "Online",
+                  "color": "green"
+                }
+              }
+            }
+          ],
+          "displayName": "${__field.labels.level}"
+        },
+        "overrides": []
       },
       "options": {
         "reduceOptions": {
@@ -604,19 +537,32 @@
           "fields": "",
           "values": false
         },
-        "graphMode": "area",
-        "colorMode": "none",
-        "textMode": "value"
+        "graphMode": "none",
+        "colorMode": "value",
+        "textMode": "value_and_name"
       }
     },
     {
       "id": 9,
+      "type": "row",
+      "title": "Room",
+      "collapsed": false,
+      "gridPos": {
+        "x": 0,
+        "y": 4,
+        "w": 24,
+        "h": 1
+      },
+      "panels": []
+    },
+    {
+      "id": 10,
       "type": "stat",
       "title": "CO2",
       "description": "CO2 in the room, in ppm, from the SCD41 on the display (one reading per 30 s). Outdoor air is about 420. Below 800 fresh (green); 800-1000 fine (yellow); 1000-1400 stuffy, concentration drops, time to air the room (orange); above 1400 open a window now (red). Breathing on the sensor makes it jump.",
       "gridPos": {
         "x": 0,
-        "y": 4,
+        "y": 5,
         "w": 4,
         "h": 8
       },
@@ -631,7 +577,7 @@
             "type": "influxdb",
             "uid": "influxdb"
           },
-          "query": "from(bucket: \"desk\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"co2\" and r._field == \"ppm\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)"
+          "query": "data = from(bucket: \"desk\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"co2\" and r._field == \"ppm\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\nx = data |> last() |> findColumn(fn: (key) => true, column: \"_value\")\nlevel = if length(arr: x) == 0 then \"\" else if x[0] < 800.0 then \"Fresh\" else if x[0] < 1000.0 then \"Fine\" else if x[0] < 1400.0 then \"Stuffy\" else \"Open a window\"\ndata |> set(key: \"level\", value: level)\n  |> group(columns: [\"_start\", \"_stop\", \"_measurement\", \"_field\", \"device\", \"level\"])"
         }
       ],
       "fieldConfig": {
@@ -661,22 +607,10 @@
           },
           "color": {
             "mode": "thresholds"
-          }
+          },
+          "displayName": "${__field.labels.level}"
         },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byFrameRefID",
-              "options": "A"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "CO2"
-              }
-            ]
-          }
-        ]
+        "overrides": []
       },
       "options": {
         "reduceOptions": {
@@ -688,17 +622,17 @@
         },
         "graphMode": "area",
         "colorMode": "value",
-        "textMode": "value"
+        "textMode": "value_and_name"
       }
     },
     {
-      "id": 10,
+      "id": 11,
       "type": "timeseries",
       "title": "CO2",
       "description": "CO2 in the room, in ppm, from the SCD41 on the display (one reading per 30 s). Outdoor air is about 420. Below 800 fresh (green); 800-1000 fine (yellow); 1000-1400 stuffy, concentration drops, time to air the room (orange); above 1400 open a window now (red). Breathing on the sensor makes it jump.",
       "gridPos": {
         "x": 4,
-        "y": 4,
+        "y": 5,
         "w": 20,
         "h": 8
       },
@@ -720,6 +654,15 @@
         "defaults": {
           "unit": "ppm",
           "decimals": 0,
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 0,
+            "showPoints": "never",
+            "spanNulls": 300000,
+            "thresholdsStyle": {
+              "mode": "area"
+            }
+          },
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -743,15 +686,6 @@
           },
           "color": {
             "mode": "palette-classic"
-          },
-          "custom": {
-            "lineWidth": 2,
-            "fillOpacity": 0,
-            "showPoints": "never",
-            "spanNulls": 300000,
-            "thresholdsStyle": {
-              "mode": "area"
-            }
           }
         },
         "overrides": [
@@ -773,7 +707,12 @@
         "legend": {
           "displayMode": "list",
           "placement": "bottom",
-          "showLegend": true
+          "showLegend": true,
+          "calcs": [
+            "min",
+            "max",
+            "mean"
+          ]
         },
         "tooltip": {
           "mode": "multi",
@@ -782,13 +721,13 @@
       }
     },
     {
-      "id": 11,
+      "id": 12,
       "type": "timeseries",
       "title": "Temperature",
-      "description": "Room temperature from the BME280 on the display. Comfortable: 20-24 °C (green). Below 18 blue, above 25 orange, above 28 red. Current outdoor temperature in central Berlin (Open-Meteo), refreshed every 15 min.",
+      "description": "Room temperature from the BME280 on the display. Comfortable: 20-24 °C (green). Below 18 blue, above 25 orange, above 28 red. Current outdoor temperature and weather in central Berlin (Open-Meteo), refreshed every 15 min.",
       "gridPos": {
         "x": 0,
-        "y": 12,
+        "y": 13,
         "w": 12,
         "h": 9
       },
@@ -856,7 +795,12 @@
         "legend": {
           "displayMode": "list",
           "placement": "bottom",
-          "showLegend": true
+          "showLegend": true,
+          "calcs": [
+            "min",
+            "max",
+            "mean"
+          ]
         },
         "tooltip": {
           "mode": "multi",
@@ -865,13 +809,13 @@
       }
     },
     {
-      "id": 12,
+      "id": 13,
       "type": "timeseries",
       "title": "Indoor humidity",
       "description": "Indoor relative humidity. Comfortable: 40-60 % (green). Below 30 % dry air (orange): dry eyes/throat. Above 60 % yellow, above 70 % red: mould risk, time to air the room.",
       "gridPos": {
         "x": 12,
-        "y": 12,
+        "y": 13,
         "w": 12,
         "h": 9
       },
@@ -893,6 +837,15 @@
         "defaults": {
           "unit": "percent",
           "decimals": 0,
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 0,
+            "showPoints": "never",
+            "spanNulls": 300000,
+            "thresholdsStyle": {
+              "mode": "area"
+            }
+          },
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -920,15 +873,6 @@
           },
           "color": {
             "mode": "palette-classic"
-          },
-          "custom": {
-            "lineWidth": 2,
-            "fillOpacity": 0,
-            "showPoints": "never",
-            "spanNulls": 300000,
-            "thresholdsStyle": {
-              "mode": "area"
-            }
           }
         },
         "overrides": [
@@ -950,7 +894,12 @@
         "legend": {
           "displayMode": "list",
           "placement": "bottom",
-          "showLegend": true
+          "showLegend": true,
+          "calcs": [
+            "min",
+            "max",
+            "mean"
+          ]
         },
         "tooltip": {
           "mode": "multi",
@@ -959,15 +908,15 @@
       }
     },
     {
-      "id": 13,
+      "id": 14,
       "type": "timeseries",
       "title": "Pressure",
-      "description": "Air pressure in hPa, measured in the room (same as outside). Reads about 4 hPa below weather reports: those are converted to sea level, Berlin is ~35 m up. Rough guide (weather-report values): under 1000 low, unsettled, rain and wind likely; 1010-1020 normal; above 1025 high, settled, dry. The trend matters more than the value: see Pressure 3h.",
+      "description": "Air pressure in hPa, measured in the room (same as outside). Reads about 4 hPa below weather reports: those are converted to sea level, Berlin is ~35 m up. Rough guide (weather-report values): under 1000 low, unsettled, rain and wind likely; 1010-1020 normal; above 1025 high, settled, dry. The word on the tile uses those, shifted down 4 hPa. The trend matters more than the value: see Pressure 3h.",
       "gridPos": {
         "x": 0,
-        "y": 21,
-        "w": 12,
-        "h": 9
+        "y": 22,
+        "w": 24,
+        "h": 8
       },
       "datasource": {
         "type": "influxdb",
@@ -1013,7 +962,12 @@
         "legend": {
           "displayMode": "list",
           "placement": "bottom",
-          "showLegend": true
+          "showLegend": true,
+          "calcs": [
+            "min",
+            "max",
+            "mean"
+          ]
         },
         "tooltip": {
           "mode": "multi",
@@ -1022,13 +976,26 @@
       }
     },
     {
-      "id": 14,
+      "id": 15,
+      "type": "row",
+      "title": "Outside",
+      "collapsed": false,
+      "gridPos": {
+        "x": 0,
+        "y": 30,
+        "w": 24,
+        "h": 1
+      },
+      "panels": []
+    },
+    {
+      "id": 16,
       "type": "timeseries",
       "title": "Air quality (European AQI)",
       "description": "European Air Quality Index for Berlin (Open-Meteo, refreshed every 15 min). 0-20 good, 20-40 fair (green), 40-60 moderate (yellow), 60-80 poor (orange), 80-100 very poor (red), above 100 extremely poor (purple).",
       "gridPos": {
-        "x": 12,
-        "y": 21,
+        "x": 0,
+        "y": 31,
         "w": 12,
         "h": 9
       },
@@ -1050,6 +1017,15 @@
         "defaults": {
           "unit": "none",
           "decimals": 0,
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 0,
+            "showPoints": "never",
+            "spanNulls": 300000,
+            "thresholdsStyle": {
+              "mode": "area"
+            }
+          },
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -1077,15 +1053,6 @@
           },
           "color": {
             "mode": "palette-classic"
-          },
-          "custom": {
-            "lineWidth": 2,
-            "fillOpacity": 0,
-            "showPoints": "never",
-            "spanNulls": 300000,
-            "thresholdsStyle": {
-              "mode": "area"
-            }
           }
         },
         "overrides": [
@@ -1107,7 +1074,12 @@
         "legend": {
           "displayMode": "list",
           "placement": "bottom",
-          "showLegend": true
+          "showLegend": true,
+          "calcs": [
+            "min",
+            "max",
+            "mean"
+          ]
         },
         "tooltip": {
           "mode": "multi",
@@ -1116,13 +1088,13 @@
       }
     },
     {
-      "id": 15,
+      "id": 17,
       "type": "timeseries",
       "title": "Pollen (grains/m³)",
-      "description": "Pollen in the air, grains per m³ (Open-Meteo, Europe only). Rough guide: 1-10 low, 11-50 medium, above 50 high. Zero outside the season (about Oct-Jan).",
+      "description": "Pollen in the air, grains per m³ (Open-Meteo, Europe only). Bands: 1-10 low, 11-50 medium (yellow), above 50 high (red). Types at zero over the whole time range are left out; zero outside the season (about Oct-Jan).",
       "gridPos": {
-        "x": 0,
-        "y": 30,
+        "x": 12,
+        "y": 31,
         "w": 12,
         "h": 9
       },
@@ -1137,7 +1109,7 @@
             "type": "influxdb",
             "uid": "influxdb"
           },
-          "query": "from(bucket: \"desk\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"air\" and r._field == \"alder\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: true)"
+          "query": "data = from(bucket: \"desk\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"air\" and r._field == \"alder\")\n  |> aggregateWindow(every: v.windowPeriod, fn: max, createEmpty: true)\npeak = data |> max() |> findColumn(fn: (key) => true, column: \"_value\")\ndata |> filter(fn: (r) => length(arr: peak) > 0 and peak[0] > 0.0)"
         },
         {
           "refId": "B",
@@ -1145,7 +1117,7 @@
             "type": "influxdb",
             "uid": "influxdb"
           },
-          "query": "from(bucket: \"desk\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"air\" and r._field == \"birch\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: true)"
+          "query": "data = from(bucket: \"desk\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"air\" and r._field == \"birch\")\n  |> aggregateWindow(every: v.windowPeriod, fn: max, createEmpty: true)\npeak = data |> max() |> findColumn(fn: (key) => true, column: \"_value\")\ndata |> filter(fn: (r) => length(arr: peak) > 0 and peak[0] > 0.0)"
         },
         {
           "refId": "C",
@@ -1153,7 +1125,7 @@
             "type": "influxdb",
             "uid": "influxdb"
           },
-          "query": "from(bucket: \"desk\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"air\" and r._field == \"grass\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: true)"
+          "query": "data = from(bucket: \"desk\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"air\" and r._field == \"grass\")\n  |> aggregateWindow(every: v.windowPeriod, fn: max, createEmpty: true)\npeak = data |> max() |> findColumn(fn: (key) => true, column: \"_value\")\ndata |> filter(fn: (r) => length(arr: peak) > 0 and peak[0] > 0.0)"
         },
         {
           "refId": "D",
@@ -1161,7 +1133,7 @@
             "type": "influxdb",
             "uid": "influxdb"
           },
-          "query": "from(bucket: \"desk\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"air\" and r._field == \"mugwort\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: true)"
+          "query": "data = from(bucket: \"desk\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"air\" and r._field == \"mugwort\")\n  |> aggregateWindow(every: v.windowPeriod, fn: max, createEmpty: true)\npeak = data |> max() |> findColumn(fn: (key) => true, column: \"_value\")\ndata |> filter(fn: (r) => length(arr: peak) > 0 and peak[0] > 0.0)"
         },
         {
           "refId": "E",
@@ -1169,7 +1141,7 @@
             "type": "influxdb",
             "uid": "influxdb"
           },
-          "query": "from(bucket: \"desk\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"air\" and r._field == \"ragweed\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: true)"
+          "query": "data = from(bucket: \"desk\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"air\" and r._field == \"ragweed\")\n  |> aggregateWindow(every: v.windowPeriod, fn: max, createEmpty: true)\npeak = data |> max() |> findColumn(fn: (key) => true, column: \"_value\")\ndata |> filter(fn: (r) => length(arr: peak) > 0 and peak[0] > 0.0)"
         }
       ],
       "fieldConfig": {
@@ -1180,8 +1152,32 @@
             "lineWidth": 2,
             "fillOpacity": 0,
             "showPoints": "never",
-            "spanNulls": 300000
-          }
+            "spanNulls": 300000,
+            "thresholdsStyle": {
+              "mode": "area"
+            }
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "transparent",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 11
+              },
+              {
+                "color": "red",
+                "value": 51
+              }
+            ]
+          },
+          "color": {
+            "mode": "palette-classic"
+          },
+          "noValue": "No pollen in this time range"
         },
         "overrides": [
           {
@@ -1250,7 +1246,12 @@
         "legend": {
           "displayMode": "list",
           "placement": "bottom",
-          "showLegend": true
+          "showLegend": true,
+          "calcs": [
+            "min",
+            "max",
+            "mean"
+          ]
         },
         "tooltip": {
           "mode": "multi",
@@ -1259,15 +1260,15 @@
       }
     },
     {
-      "id": 16,
+      "id": 18,
       "type": "timeseries",
       "title": "Outdoor wind and UV",
-      "description": "Outdoor wind speed (km/h) and today's maximum UV index. UV: 0-2 low, 3-5 moderate, 6-7 high, 8+ very high.",
+      "description": "Outdoor wind speed (km/h, left axis) and today's maximum UV index (right axis). UV: 0-2 low, 3-5 moderate, 6-7 high, 8+ very high.",
       "gridPos": {
-        "x": 12,
-        "y": 30,
-        "w": 12,
-        "h": 9
+        "x": 0,
+        "y": 40,
+        "w": 24,
+        "h": 8
       },
       "datasource": {
         "type": "influxdb",
@@ -1293,7 +1294,7 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "none",
+          "unit": "velocitykmh",
           "decimals": 0,
           "custom": {
             "lineWidth": 2,
@@ -1311,7 +1312,7 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "Wind km/h"
+                "value": "Wind"
               }
             ]
           },
@@ -1324,6 +1325,22 @@
               {
                 "id": "displayName",
                 "value": "UV max"
+              },
+              {
+                "id": "unit",
+                "value": "none"
+              },
+              {
+                "id": "custom.axisPlacement",
+                "value": "right"
+              },
+              {
+                "id": "custom.axisLabel",
+                "value": "UV index"
+              },
+              {
+                "id": "custom.lineInterpolation",
+                "value": "stepAfter"
               }
             ]
           }
@@ -1333,7 +1350,12 @@
         "legend": {
           "displayMode": "list",
           "placement": "bottom",
-          "showLegend": true
+          "showLegend": true,
+          "calcs": [
+            "min",
+            "max",
+            "mean"
+          ]
         },
         "tooltip": {
           "mode": "multi",
@@ -1342,88 +1364,182 @@
       }
     },
     {
-      "id": 17,
-      "type": "timeseries",
+      "id": 21,
+      "type": "row",
       "title": "Device",
-      "description": "Display health. WiFi dBm: see the WiFi tile. Free heap: memory left on the ESP32; ~150-190 KB is normal, a steady decline over days would mean a memory leak.",
+      "collapsed": true,
       "gridPos": {
         "x": 0,
-        "y": 39,
+        "y": 48,
         "w": 24,
-        "h": 7
+        "h": 1
       },
-      "datasource": {
-        "type": "influxdb",
-        "uid": "influxdb"
-      },
-      "targets": [
+      "panels": [
         {
-          "refId": "A",
+          "id": 19,
+          "type": "stat",
+          "title": "Uptime",
+          "description": "Time since the display last restarted. Drops to zero after a reset: normal after flashing or unplugging, otherwise a crash or a power problem (check the boot log for BROWNOUT). Each restart is a marker on the graphs.",
+          "gridPos": {
+            "x": 0,
+            "y": 49,
+            "w": 4,
+            "h": 7
+          },
           "datasource": {
             "type": "influxdb",
             "uid": "influxdb"
           },
-          "query": "from(bucket: \"desk\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"device\" and r._field == \"rssi\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: true)"
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": {
+                "type": "influxdb",
+                "uid": "influxdb"
+              },
+              "query": "from(bucket: \"desk\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"device\" and r._field == \"uptime_s\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "dtdurations",
+              "decimals": 2,
+              "displayName": "Uptime"
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "graphMode": "area",
+            "colorMode": "none",
+            "textMode": "value"
+          }
         },
         {
-          "refId": "B",
+          "id": 20,
+          "type": "timeseries",
+          "title": "Device",
+          "description": "Display health. WiFi dBm (left axis): see the WiFi tile. Free heap (right axis): memory left on the ESP32; ~150-190 KB is normal, a steady decline over days would mean a memory leak.",
+          "gridPos": {
+            "x": 4,
+            "y": 49,
+            "w": 20,
+            "h": 7
+          },
           "datasource": {
             "type": "influxdb",
             "uid": "influxdb"
           },
-          "query": "from(bucket: \"desk\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"device\" and r._field == \"heap_free_kb\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: true)"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "none",
-          "decimals": 0,
-          "custom": {
-            "lineWidth": 2,
-            "fillOpacity": 0,
-            "showPoints": "never",
-            "spanNulls": 300000
-          }
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byFrameRefID",
-              "options": "A"
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": {
+                "type": "influxdb",
+                "uid": "influxdb"
+              },
+              "query": "from(bucket: \"desk\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"device\" and r._field == \"rssi\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: true)"
             },
-            "properties": [
+            {
+              "refId": "B",
+              "datasource": {
+                "type": "influxdb",
+                "uid": "influxdb"
+              },
+              "query": "from(bucket: \"desk\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"device\" and r._field == \"heap_free_kb\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: true)"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "dBm",
+              "decimals": 0,
+              "custom": {
+                "lineWidth": 2,
+                "fillOpacity": 0,
+                "showPoints": "never",
+                "spanNulls": 300000
+              }
+            },
+            "overrides": [
               {
-                "id": "displayName",
-                "value": "WiFi dBm"
+                "matcher": {
+                  "id": "byFrameRefID",
+                  "options": "A"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "WiFi"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byFrameRefID",
+                  "options": "B"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Free heap"
+                  },
+                  {
+                    "id": "unit",
+                    "value": "kbytes"
+                  },
+                  {
+                    "id": "custom.axisPlacement",
+                    "value": "right"
+                  },
+                  {
+                    "id": "custom.axisLabel",
+                    "value": "Free heap"
+                  }
+                ]
               }
             ]
           },
-          {
-            "matcher": {
-              "id": "byFrameRefID",
-              "options": "B"
+          "options": {
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true,
+              "calcs": [
+                "min",
+                "max",
+                "mean"
+              ]
             },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Free heap KB"
-              }
-            ]
+            "tooltip": {
+              "mode": "multi",
+              "sort": "none"
+            }
           }
-        ]
-      },
-      "options": {
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "none"
         }
-      }
+      ]
     }
   ],
+  "annotations": {
+    "list": [
+      {
+        "name": "Restarts",
+        "datasource": {
+          "type": "influxdb",
+          "uid": "influxdb"
+        },
+        "enable": true,
+        "iconColor": "rgba(255, 152, 48, 0.7)",
+        "target": {
+          "refId": "Anno",
+          "query": "from(bucket: \"desk\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"device\" and r._field == \"uptime_s\")\n  |> duplicate(column: \"_value\", as: \"up\")\n  |> difference()\n  |> filter(fn: (r) => r._value < 0.0)\n  |> map(fn: (r) => ({_time: time(v: int(v: r._time) - int(v: r.up) * 1000000000), text: \"Display restarted\"}))"
+        }
+      }
+    ]
+  },
   "description": "Hover the (i) next to a panel title for what its numbers mean."
 }
