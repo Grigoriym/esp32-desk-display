@@ -45,9 +45,10 @@ esp_antenna = 6; // antenna end, opposite the USB
 ky_l = 26.18;
 ky_w = 19.29;
 ky_t = 1.6; // ASSUMED
-ky_shaft_y = ky_l / 2; // ASSUMED: shaft centre from the board's short edge
-                       // away from the pins. MEASURE before the test print
 ky_cap_d = 14.78;
+ky_shaft_y = 16 - ky_cap_d / 2; // shaft centre from the board's short edge away
+                                // from the pins: that edge to the cap's far side
+                                // was ~16 (2026-09-28, skewed reading, +-1)
 ky_cap_h = 31.79 - 15.58; // cap height
 ky_cap_above = 15.58 - ky_t; // board front face to the cap's lower edge
 ky_body = 12.5; // EC11 body footprint (ASSUMED, standard part)

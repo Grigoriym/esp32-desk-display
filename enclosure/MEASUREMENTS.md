@@ -25,6 +25,7 @@ OpenSCAD model is written from these numbers, not from datasheet guesses.
 - Design choice (2026-09-28): the knob **cap** sticks out through a round hole in the case and the KY-040 board sits on posts behind the panel, so shaft/collar sizes aren't needed (standard EC11: 6 mm shaft, M7 collar, if ever)
 - Board bottom to top of the cap (cap on): 31.79
 - Board bottom to the lower edge of the cap: 15.58 (the panel has to sit below this), so the cap itself is ~16.2 tall
+- Shaft position: board's short edge away from the pins to the cap's far side ~16 (2026-09-28; hard to hold straight since the cap is higher than the board, +-1), so the shaft centre is ~8.6 from that edge, not the middle. Precise enough: the 16 mm top hole only has to clear the ~7 mm collar
 - Knob cap diameter: 14.78 (panel hole ~16, so it turns freely) (black knurled aluminium cap, seller image in the chat 2026-09-28)
 
 ## DS3231 RTC

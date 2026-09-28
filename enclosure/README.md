@@ -67,14 +67,8 @@ clearance in the model is 0.3 mm (`clr`): ask the person printing it.
 
 ## Assumed, not measured
 
-Marked `ASSUMED` in `enclosure.scad`. The one that matters before the test
-print:
-
-- **KY-040 shaft position** (`ky_shaft_y`): distance from the shaft centre
-  to the board's short edge *away from the pins*. The model assumes the
-  middle, 13.1 mm. If it's wrong, the knob hole won't line up.
-
-Others (the test print shows whether they're right): the OLED lit area's
+Marked `ASSUMED` in `enclosure.scad`; the test print shows whether they're
+right: the OLED lit area's
 position (±0.5 from a photo), the EC11 body size, the ESP32/KY-040 PCB
 thickness (1.6), and the female header height (8.5).
 

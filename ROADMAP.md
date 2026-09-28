@@ -239,14 +239,14 @@ WiFi connect timeout: done 2026-09-25, see Open questions in `CLAUDE.md`.
     pin order, **GND, 3V3, SDA, SCL**; the cables do the per-module swap.
     I2C cables < ~20 cm. Board outline and holes match the case's posts.
     A KiCad/JLCPCB version only if the perfboard one proves the layout.
-  - **Next session starts here**: measure the KY-040 shaft position, set
-    `ky_shaft_y` in `enclosure/enclosure.scad`, run `enclosure/export.sh`,
-    send `stl/test_front.stl` to the person printing it.
+  - **Next session starts here**: run `enclosure/export.sh` and send
+    `stl/test_front.stl` to the person printing it (ask them PLA/PETG and
+    their clearance); then the checklist in `enclosure/README.md`.
   - Steps: [x] measure every part (`enclosure/MEASUREMENTS.md`, 2026-09-28)
     -> [x] OpenSCAD model + preview renders (`enclosure/`, see its README;
     2026-09-28: 80 x 84 x 54 mm, knob on top, OLED held by clamp bars, the
-    carrier is 60 x 40 mm) -> [ ] measure the KY-040 shaft position
-    (`ky_shaft_y`, assumed as the middle) -> [ ] test
+    carrier is 60 x 40 mm) -> [x] KY-040 shaft position (~8.6 mm from
+    the end away from the pins, not the middle) -> [ ] test
     print of the front panel only (`test_front` STL: OLED window, knob mount) -> [ ] full print
     -> [ ] perfboard layout on a grid, solder -> [ ] assemble, then compare
     BME280 with a reference thermometer with the case open vs closed.
