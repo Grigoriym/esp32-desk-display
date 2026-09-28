@@ -20,6 +20,7 @@ show_shell = true; // assembly only: untick to see inside
 show_base = true;
 show_hood = true;
 show_clamps = true;
+show_labels = true; // names over the module stand-ins
 
 $fn = 48;
 eps = 0.01;
@@ -343,6 +344,28 @@ module stand_ins() {
   color("gray") translate([knob_x, knob_y, H + knob_gap]) cylinder(d = ky_cap_d, h = ky_cap_h);
 }
 
+// a name on a stick from point p, the text at dz above the case top,
+// facing the front
+module label(txt, p, dz) color("black") translate(p) {
+  cylinder(d = 0.4, h = H + dz - p.z, $fn = 6);
+  translate([0, 0, H + dz - p.z + 0.5]) rotate([90, 0, 0]) linear_extrude(0.4) text(txt, size = 2.5, halign = "center");
+}
+
+// panel coordinates (x, inwards, up the slope) to world
+function panel_pt(x, y, z) = [W / 2 + x, y * cos(tilt) + z * sin(tilt), skirt_h + z * cos(tilt) - y * sin(tilt)];
+
+module labels() {
+  label("OLED", panel_pt(0, wall + oled_t + oled_back, oled_v + oled_h / 2), 13);
+  label("ESP32", [esp_x0 + esp_w / 2, esp_y0 + 30, esp_z + esp_top], 3);
+  label("antenna", [esp_x0 + esp_w / 2, esp_y0 + 3, esp_z + esp_top], 13);
+  label("USB-C", [usb_x, esp_y1, esp_z + esp_top], 18);
+  label("carrier", [(ds_x0 + ds_w + esp_x0) / 2, perf_y0 + 3, perf_z + perf_t], 3);
+  label("DS3231", [ds_x0 + ds_w / 2, ds_y0 + ds_l / 2, ds_z + ds_h], 25);
+  label("KY-040", [knob_x, knob_y, H + knob_gap + ky_cap_h], 20);
+  label("BME280", [bme_xy.x, bme_xy.y, base_t + ledge_h + bme_h], 8);
+  label("SCD41", [scd_xy.x, scd_xy.y, base_t + ledge_h + scd_h], 8);
+}
+
 // ------------------------------------------------------------ output
 module test_front() intersection() {
   shell();
@@ -376,4 +399,5 @@ else {
     else box([-10, -10, -10], [W + 10, D + 10, H + 10]);
   }
   stand_ins();
+  if (show_labels) labels();
 }

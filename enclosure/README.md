@@ -11,6 +11,12 @@ enclosure/export.sh   # clash check, then stl/*.stl (gitignored) + renders/*.png
 
 The clash check fails if any printed part overlaps a module stand-in.
 
+To look inside: **Window → Customizer**, untick `show_shell` (also
+`show_base`, `show_hood`, `show_clamps`, `show_labels`), or set `cut`.
+Stand-in colours: OLED steel blue, ESP32 black (antenna end orange),
+carrier green, DS3231 navy, KY-040 red with a grey cap, sensors purple;
+`show_labels` puts their names over them.
+
 ![front](renders/front.png) ![inside](renders/inside.png)
 
 ## Layout
