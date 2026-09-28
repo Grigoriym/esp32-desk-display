@@ -32,8 +32,9 @@ OpenSCAD model is written from these numbers, not from datasheet guesses.
 - Mounting holes: not needed, it plugs into a socket on the carrier board
 
 ## BME280
-- Length x width x tallest part: ___ x ___ x ___
-- Mounting holes: diameter ___, positions ___
+- Length x width x tallest part: 13.15 x 10.66 x ~3 (not measured: nothing tall on it, board ~1.6 + the sensor can ~1; the header pins are separate)
+- Mounting holes: 1, in the corner at the VIN end, away from the pins (seller image 2026-09-28), ~3 assumed from the photo, not measured
+- 4 pins: VIN, GND, SCL, SDA
 
 ## SCD41
 - Length x width x tallest part: ___ x ___ x ___
