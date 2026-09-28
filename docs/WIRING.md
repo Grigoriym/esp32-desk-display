@@ -32,6 +32,11 @@ Wire colours: 🟢 green = D21 (SDA), 🟡 yellow = D22 (SCL).
 | | DT | D26 | |
 | | CLK | D25 | |
 
+- ESP32 DevKit pin order (read off the board, 2026-09-28), from the USB
+  end: one row `VIN GND D13 D12 D14 D27 D26 D25 D33 D32 D35 D34 VN VP EN`,
+  the other `3V3 GND D15 D2 D4 RX2 TX2 D5 D18 D19 D21 RX0 TX0 D22 D23`.
+  Component side up with the USB to the right, the VIN row is the one
+  nearer you.
 - I2C modules are wired **in parallel** straight to D21/D22, not daisy-chained
   through the DS3231's pass-through header (that setup failed, see `CLAUDE.md`).
 - KY-040: male-female Dupont cable from the breadboard to the knob, in

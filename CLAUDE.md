@@ -389,6 +389,26 @@ first time for both encoder tests on 2026-09-24.
    there is normal and the 30s retry fills it in. Still open: anything further
    under Open questions below.
 
+## Enclosure (ROADMAP 15, since 2026-09-28)
+OpenSCAD (local 2021.01) in `enclosure/`, see its README. `export.sh
+[file.scad] [var=value]` = clash check + STLs + PNG renders (openscad's
+PNG export works headless here; there is no Chrome for page screenshots);
+`cardboard.py` = 1:1 A4 mock-up templates from the model. Lessons:
+- **Check fits against the hole grid, not millimetres.** v1 put the ESP32
+  across the 4 cm side of the 4 x 6 cm perfboard: 40 mm fit geometrically,
+  but that side has 14 holes and a pin row is 15. Nothing in the model
+  caught it; the user's cardboard mock-up did. v2 places ESP32, board
+  outline and sockets on one hole grid.
+- Solids exactly tangent to a wall (corner bosses) make CGAL output
+  non-manifold: sink them into the wall. openscad exits non-zero on an
+  empty result, which is the *pass* case of the clash check. A top-level
+  `assert` in a `for` fired in STL exports but not with
+  `--export-format=echo`, so checks rely on `export.sh`'s STL pass.
+- Mounting: the OLED's glass reaches nearly to its corner holes (no screw
+  posts: clamp bars instead); KY-040 posts at its holes would hit the EC11
+  body and it can't slide into rails (shaft through the top): snap hooks.
+  A mated JST-XH plug is too tall to sit under the socketed ESP32 (8.5 mm).
+
 ## Roadmap
 Next tasks live in `ROADMAP.md` as a checklist, one task per session — read it
 at the start of a session and tick items off there when done.

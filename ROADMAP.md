@@ -244,8 +244,13 @@ WiFi connect timeout: done 2026-09-25, see Open questions in `CLAUDE.md`.
     (14 holes, the ESP32 needs 15). `enclosure/enclosure_v2.scad` has two
     fixes (`carrier=cut`: board cut to 40 x 44, USB out the back;
     `carrier=whole`: board uncut, USB out the right side); the DS3231 gets
-    its own cable in both. User to compare (OpenSCAD + cardboard) and pick,
-    then: test print of `test_front`, see `enclosure/README.md`.
+    its own cable in both. Sockets modelled on the hole grid: only `whole`
+    fits all five JST-XH sockets (`cut` fits 3), so `whole` is the
+    recommendation; the user hasn't picked yet. Wiring explained visually
+    in the "Carrier Board Wiring" artifact (see memory). Open before the
+    soldering plan: measure where the real board's hole grid sits (model
+    assumes centred), check the ~0.5 mm plug-to-ESP32 clearance of the
+    front sockets. Then test print of `test_front`, see `enclosure/README.md`.
   - Steps: [x] measure every part (`enclosure/MEASUREMENTS.md`, 2026-09-28)
     -> [x] OpenSCAD model + preview renders (`enclosure/`, see its README;
     2026-09-28: 80 x 84 x 54 mm, knob on top, OLED held by clamp bars, the
