@@ -37,7 +37,7 @@ OpenSCAD model is written from these numbers, not from datasheet guesses.
 - 4 pins: VIN, GND, SCL, SDA
 
 ## SCD41
-- Length x width x tallest part: ___ x ___ x ___
+- Length x width x tallest part: 21.81 x 13.49 x 7.59
 - Mounting holes: diameter ___, positions ___
 
 ## Other
