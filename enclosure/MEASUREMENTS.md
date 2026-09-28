@@ -13,11 +13,12 @@ OpenSCAD model is written from these numbers, not from datasheet guesses.
 - From photos (2026-09-28): board is JMD0.96D-1; 4-pin header (GND VCC SCL SDA) soldered with its black plastic on the **back**; the display's orange flex cable wraps around the **bottom** edge through a notch, and the back has small SMD parts: the case must not press on the flex or the back
 
 ## ESP32 DevKit (ELEGOO ESP-32S, 30-pin)
-- Board length x width: ___ x ___
-- Pin rows, center to center: ___
+- Board length x width: 51.49 x 28.36 (measured; the seller's drawing says 51.74 x 29, trust ours)
+- Pin rows, center to center: 25.4 (10 x 2.54 pitch; seller's drawing says 25.64 = 1.01", the rows must sit on the 2.54 perfboard grid anyway), pins 2.54 apart, 15 per row
+- From the seller's images (2026-09-28): 4 mounting holes, one per corner; pins stick out ~6 below the board; the USB-C port overhangs the short edge
 - USB-C port: on which edge ___, width ___, height above the board ___
 - Tallest part on top (metal shield): ___
-- Antenna end (zigzag copper, opposite the USB): confirm ___
+- Antenna end: opposite the USB (seen in the seller's image: antenna on the module's top end, above the metal shield)
 
 ## KY-040 encoder
 - Board length x width: ___ x ___, mounting holes (if any): ___
