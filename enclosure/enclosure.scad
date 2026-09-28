@@ -16,6 +16,10 @@
 
 part = "assembly"; // [assembly, shell, base, hood, clamp, test_front, clash]
 cut = -1; // assembly only: >= 0 cuts the printed parts away left of this x
+show_shell = true; // assembly only: untick to see inside
+show_base = true;
+show_hood = true;
+show_clamps = true;
 
 $fn = 48;
 eps = 0.01;
@@ -361,12 +365,12 @@ else if (part == "clash") intersection() {
   stand_ins();
 }
 else {
-  color("dimgray") oled_frame() for (m = [0, 1]) mirror([m, 0, 0]) clamp_bar();
+  if (show_clamps) color("dimgray") oled_frame() for (m = [0, 1]) mirror([m, 0, 0]) clamp_bar();
   intersection() {
     union() {
-      color("white") shell();
-      color("khaki") base();
-      color("tan") hood();
+      if (show_shell) color("white") shell();
+      if (show_base) color("khaki") base();
+      if (show_hood) color("tan") hood();
     }
     if (cut >= 0) box([cut, -10, -10], [W + 10, D + 10, H + 10]);
     else box([-10, -10, -10], [W + 10, D + 10, H + 10]);
