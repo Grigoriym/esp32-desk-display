@@ -90,7 +90,7 @@ scd_h = 7.59;
 // through, drill 2 mm). perf_w = size along X, perf_d = along Y
 whole = carrier == "whole";
 perf_w = whole ? 60 : 40;
-perf_d = whole ? 40 : 44;
+perf_d = whole ? 40 : 17 * 2.54;
 perf_t = 1.6;
 perf_standoff = whole ? 16 : 5; // whole: the DS3231 lies on the floor under it
 perf_hole_inset = 3.5;
@@ -147,24 +147,30 @@ knob_hole = 16;
 ky_face_z = H + knob_gap - ky_cap_above; // board front (component) face
 ky_back_z = ky_face_z - ky_t;
 
-// ESP32 world box: esp_b = [x0, y0, x1, y1]; USB end at the back (cut) or
-// at the right (whole), 1.5 from the wall
-usb_gap = 1.5;
-esp_pin_edge = (esp_l - esp_pin_span) / 2; // board end to the first pin
-esp_b = whole ? [W - wall - usb_gap - esp_l, 0, W - wall - usb_gap, 0] // y set below
-              : [0, D - wall - usb_gap - esp_l, 0, D - wall - usb_gap];
-// cut: carrier right, clear of the back-right boss; front edge one hole row
-// (2.54) before the first pin, so the antenna end hangs off it
-// whole: carrier centred, back edge clear of the back bosses' row
-perf_x0 = whole ? (W - perf_w) / 2 : W - boss_in - boss_d / 2 - 0.5 - perf_w;
-perf_y0 = whole ? D - wall - boss_d - 1 - perf_d : esp_b[1] + esp_pin_edge - 2.54;
+// Everything on the carrier sits on its 2.54 hole grid: hole (col, row) is
+// at [grid_x0 + col * p, grid_y0 + row * p]. The board has 14 x 20 holes,
+// ASSUMED centred (margins 3.49 across 14, 5.87 along 20).
+p = 2.54;
+usb_gap = 1.5; // ESP32's USB end to the wall
+esp_pin_edge = (esp_l - esp_pin_span) / 2 + p / 2; // board end to the first pin's centre
+esp_row_edge = (esp_w - 10 * p) / 2; // long edge to its pin row's centre
+// cut: 14 cols across X, rows along Y. ESP32 pin rows in cols 3 and 13,
+// pins in rows 1-15; row 0 is left for the antenna end. Board cut through
+// the holes of rows -1 and 17 (17 rows kept), right edge clear of the
+// back-right boss
+// whole: 20 cols along X, 14 rows across Y. ESP32 pins in cols 5-19,
+// pin rows in rows 2 and 12; cols 0-2 and row 0 are free for sockets
+grid_x0 = whole ? W - wall - usb_gap - esp_pin_edge - 19 * p : W - boss_in - boss_d / 2 - 0.5 - 3.49 - 13 * p;
+grid_y0 = whole ? D - wall - boss_d - 1 - 40 + 3.49 : D - wall - usb_gap - esp_l + esp_pin_edge - p;
+perf_x0 = grid_x0 - (whole ? 5.87 : 3.49);
+perf_y0 = grid_y0 - (whole ? 3.49 : p / 2);
 perf_x1 = perf_x0 + perf_w;
 perf_y1 = perf_y0 + perf_d;
 perf_z = base_t + perf_standoff;
-esp_x0 = whole ? esp_b[0] : perf_x0 + (perf_w - esp_w) / 2;
-esp_y0 = whole ? perf_y0 + (perf_d - esp_w) / 2 : esp_b[1];
-esp_x1 = whole ? esp_b[2] : esp_x0 + esp_w;
-esp_y1 = whole ? esp_y0 + esp_w : esp_b[3];
+esp_x0 = whole ? grid_x0 + 5 * p - esp_pin_edge : grid_x0 + 3 * p - esp_row_edge;
+esp_y0 = whole ? grid_y0 + 2 * p - esp_row_edge : grid_y0 + p - esp_pin_edge;
+esp_x1 = esp_x0 + (whole ? esp_l : esp_w);
+esp_y1 = esp_y0 + (whole ? esp_w : esp_l);
 esp_z = perf_z + perf_t + hdr_h; // ESP32 board bottom
 usb_x = (esp_x0 + esp_x1) / 2; // cut: hole in the back wall
 usb_y = (esp_y0 + esp_y1) / 2; // whole: hole in the right wall
@@ -181,8 +187,22 @@ ds_b = whole ? [26, (perf_y0 + perf_y1) / 2 - ds_w / 2, 26 + ds_l, (perf_y0 + pe
 
 echo(str("case ", W, " x ", D, " x ", H, " mm (W x D x H)"));
 echo(str("usb centre z ", usb_z, ", knob board face z ", ky_face_z));
-pin0 = (whole ? esp_x0 : esp_y0) + esp_pin_edge; // pin rows along the ESP32's long axis
-assert(pin0 > (whole ? perf_x0 : perf_y0) && pin0 + esp_pin_span < (whole ? perf_x1 : perf_y1), "ESP32 pins off the carrier");
+assert(perf_x1 < W - wall && perf_y1 < D - wall, "carrier hits a wall");
+assert(esp_x1 < W - wall && esp_y1 < D - wall, "ESP32 hits a wall");
+
+// JST-XH sockets (vertical, 2.5 pitch) on the carrier: [name, pins, col,
+// row of the first pin, pin line along X?]. cut only has room for three:
+// the ESP32 covers the rest of the board
+xh = whole ? [["BME280", 4, 3, 0, true], ["SCD41", 4, 8, 0, true], ["OLED", 4, 13, 0, true],
+              ["RTC", 4, 0, 3, false], ["KNOB", 5, 0, 8, false]]
+           : [["KNOB", 5, 0, 1, false], ["OLED", 4, 0, 7, false], ["SCD41", 4, 0, 12, false]];
+xh_missing = whole ? "" : "BME280, RTC (DS3231)";
+xh_h = 7; // socket height
+xh_plug = 12; // mated plug + cable bend above the board (ASSUMED)
+for (c = xh) let(l = (c[1] - 1) * 2.5 + 4.9, at = hole(c[2], c[3]), e = [at.x - 2.9, at.y - 2.9,
+  at.x + (c[4] ? (c[1] - 1) * p : 0) + 2.9, at.y + (c[4] ? 0 : (c[1] - 1) * p) + 2.9])
+  assert(e[0] > perf_x0 && e[1] > perf_y0 && e[2] < perf_x1 && e[3] < perf_y1, str(c[0], " socket off the carrier"));
+if (xh_missing != "") echo(str("no room on the carrier for sockets: ", xh_missing));
 assert(!whole || perf_z - 3 > ds_z + ds_h, "no room for the DS3231 under the carrier");
 
 // ------------------------------------------------------------ helpers
@@ -364,6 +384,26 @@ module hood() difference() {
 // ------------------------------------------------------------ stand-ins
 // ESP32 local coordinates: x 0..esp_w, y 0..esp_l (antenna at y 0, USB at
 // esp_l), world z; placed in the esp box
+// one JST-XH socket, with its mated plug + cable bend as a see-through block
+function hole(col, row) = [grid_x0 + col * p, grid_y0 + row * p];
+
+module xh_frame(c) {
+  n = c[1];
+  mid = (n - 1) * p / 2;
+  at = hole(c[2], c[3]);
+  translate([at.x, at.y, perf_z + perf_t]) if (c[4]) translate([mid, 0, 0]) children();
+  else translate([0, mid, 0]) rotate([0, 0, 90]) children();
+}
+
+module xh_socket(c) xh_frame(c) {
+  l = (c[1] - 1) * 2.5 + 4.9;
+  color("white") box([-l / 2, -5.75 / 2, eps], [l / 2, 5.75 / 2, xh_h]);
+  color("gold", 0.35) box([-l / 2 - 0.3, -3.2, xh_h + eps], [l / 2 + 0.3, 3.2, xh_plug]);
+}
+
+module xh_label(c) xh_frame(c) color("black") translate([0, 0, xh_plug + 0.3])
+  linear_extrude(0.3) text(c[0], size = 2, halign = "center", valign = "center");
+
 module esp_place() if (whole) translate([esp_x0, esp_y1, 0]) rotate([0, 0, -90]) children();
                    else translate([esp_x0, esp_y0, 0]) children();
 
@@ -377,12 +417,13 @@ module stand_ins() {
   color("darkgreen") box([perf_x0, perf_y0, perf_z], [perf_x0 + perf_w, perf_y1, perf_z + perf_t]);
   esp_place() {
     color("dimgray") for (dx = [0, 25.4])
-      box([(esp_w - 25.4) / 2 + dx - 1.27, esp_pin_edge, perf_z + perf_t], [(esp_w - 25.4) / 2 + dx + 1.27, esp_pin_edge + esp_pin_span, esp_z]);
+      box([esp_row_edge + dx - p / 2, esp_pin_edge - p / 2, perf_z + perf_t], [esp_row_edge + dx + p / 2, esp_pin_edge + 14.5 * p, esp_z]);
     color("black") box([0, 0, esp_z], [esp_w, esp_l, esp_z + esp_t]);
     color("silver") box([5, esp_antenna + 1, esp_z + esp_t], [esp_w - 5, 25, esp_z + esp_top]);
     color("silver") box([esp_w / 2 - 4.45, esp_l - 7, esp_z + esp_t], [esp_w / 2 + 4.45, esp_l + 0.5, esp_z + esp_top]);
     color("orange", 0.5) box([0, 0, esp_z + esp_t], [esp_w, esp_antenna, esp_z + esp_top]); // antenna: keep clear
   }
+  for (c = xh) xh_socket(c);
   ds_place() {
     color("navy") box([0, 0, ds_z], [ds_w, ds_l, ds_z + ds_h]);
     color("dimgray", 0.6) {
@@ -412,6 +453,7 @@ module label(txt, p, dz) color("black") translate(p) {
 function panel_pt(x, y, z) = [W / 2 + x, y * cos(tilt) + z * sin(tilt), skirt_h + z * cos(tilt) - y * sin(tilt)];
 
 module labels() {
+  for (c = xh) xh_label(c);
   label("OLED", panel_pt(0, wall + oled_t + oled_back, oled_v + oled_h / 2), 13);
   label("ESP32", [usb_x, usb_y, esp_z + esp_top], 3);
   label("antenna", whole ? [esp_x0 + 3, usb_y, esp_z + esp_top] : [usb_x, esp_y0 + 3, esp_z + esp_top], 13);
@@ -444,14 +486,27 @@ else if (part == "dims") echo(W = W, D = D, H = H, wall = wall, tilt = tilt, ski
   perf_w = perf_w, perf_d = perf_d, esp_x0 = esp_x0, esp_y0 = esp_y0, esp_w = esp_x1 - esp_x0, esp_l = esp_y1 - esp_y0,
   esp_antenna = esp_antenna, ant_x = whole ? esp_x0 + 1 : esp_x0 + 1, ant_y = whole ? esp_y0 - 1.5 : esp_y0 + 2,
   ds_x0 = ds_b[0], ds_y0 = ds_b[1], ds_w = ds_b[2] - ds_b[0], ds_l = ds_b[3] - ds_b[1], ds_under = whole ? 1 : 0); // for cardboard.py
-else if (part == "clash") intersection() {
-  union() {
-    shell();
-    base();
-    hood();
-    oled_frame() for (m = [0, 1]) mirror([m, 0, 0]) clamp_bar();
+else if (part == "clash") {
+  intersection() {
+    union() {
+      shell();
+      base();
+      hood();
+      oled_frame() for (m = [0, 1]) mirror([m, 0, 0]) clamp_bar();
+    }
+    stand_ins();
   }
-  stand_ins();
+  // sockets and plugs against the ESP32 (and its headers) and the DS3231
+  intersection() {
+    for (c = xh) xh_socket(c);
+    union() {
+      esp_place() {
+        box([0, 0, esp_z], [esp_w, esp_l, esp_z + esp_top]);
+        for (dx = [0, 10 * p]) box([esp_row_edge + dx - p / 2, esp_pin_edge - p / 2, perf_z + perf_t], [esp_row_edge + dx + p / 2, esp_pin_edge + 14.5 * p, esp_z]);
+      }
+      ds_place() box([0, -ds_pins6, ds_z], [ds_w, ds_l + ds_pins4, ds_z + ds_h]);
+    }
+  }
 }
 else {
   if (show_clamps) color("dimgray") oled_frame() for (m = [0, 1]) mirror([m, 0, 0]) clamp_bar();

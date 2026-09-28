@@ -40,9 +40,19 @@ enclosure/export.sh enclosure_v2.scad carrier=cut        # or carrier=whole
 enclosure/cardboard.py 2 enclosure_v2.scad carrier=cut   # -> cardboard-enclosure_v2-cut.pdf
 ```
 
-Open question for the soldering layout (either way): where the JST
-connectors go. `cut` has only ~3 spare hole columns beside the ESP32's
-pins; `whole` has ~5 columns free at the left end. The DS3231's pins (both
+**JST-XH sockets** are modelled on the board's hole grid (white, with the
+mated plug + cable bend as a see-through gold block, labelled on top); the
+clash check covers them against the ESP32, its headers, the DS3231 and the
+case, and the model errors if one hangs off the board:
+
+- `whole`: all five fit. BME280, SCD41, OLED along the front edge (row 0,
+  under nothing; the plugs clear the ESP32's edge by only ~0.5 mm in plan),
+  RTC and KNOB at the left end (col 0), next to the ESP32's antenna end.
+- `cut`: only three fit (KNOB, OLED, SCD41, in the one free column left of
+  the ESP32). **No room for BME280 and RTC**: the ESP32 covers the rest of
+  the board, and a plug is too tall to go under it.
+
+The hole grid is ASSUMED centred on the board. The DS3231's pins (both
 ends) are modelled with the cable soldered on, not a Dupont plug.
 
 ![cut](renders/enclosure_v2-cut-inside.png) ![whole](renders/enclosure_v2-whole-inside.png)
