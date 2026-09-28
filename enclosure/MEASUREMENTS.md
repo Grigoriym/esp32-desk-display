@@ -9,7 +9,7 @@ OpenSCAD model is written from these numbers, not from datasheet guesses.
 - Board width x height x thickness (incl. glass): 26.00 x 26.04 x 2.64
 - Lit area: size 21.93 x 11.32 (w x h); position estimated from a straight-on photo (2026-09-28, +-0.5): top of the lit area ~3 mm below the top (pin-side) edge, roughly centred left-right; confirm with the front-panel test print
 - Mounting holes: 4, one per corner (seen in the photos), diameter ~1.70 measured (tiny hole, inside jaws read low: likely 2.0 nominal, for M2 screws), centre spacing 22.00 left-right x 21.52 top-bottom, so hole centres ~2.0 mm from the left/right edges and ~2.26 mm from the top/bottom edges
-- Header pins stick out at the back: ___
+- Header pins stick out at the back: 8.25 from the back surface, incl. the black plastic (a plugged-in Dupont connector adds ~14 more: leave room behind the OLED)
 - From photos (2026-09-28): board is JMD0.96D-1; 4-pin header (GND VCC SCL SDA) soldered with its black plastic on the **back**; the display's orange flex cable wraps around the **bottom** edge through a notch, and the back has small SMD parts: the case must not press on the flex or the back
 
 ## ESP32 DevKit (ELEGOO ESP-32S, 30-pin)
