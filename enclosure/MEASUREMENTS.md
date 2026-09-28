@@ -21,7 +21,7 @@ OpenSCAD model is written from these numbers, not from datasheet guesses.
 - Antenna end: opposite the USB (seen in the seller's image: antenna on the module's top end, above the metal shield)
 
 ## KY-040 encoder
-- Board length x width: ___ x ___, mounting holes (if any): ___
+- Board length x width: 26.18 x 19.29, mounting holes (if any): ___
 - Shaft diameter ___, length above the threaded collar ___
 - Threaded collar: diameter ___, length ___ (limits the front panel thickness)
 - Knob cap diameter: ___
