@@ -378,6 +378,14 @@ else if (part == "base") base();
 else if (part == "clamp") for (i = [0, 1]) translate([i * 12, 0, 0])
   translate([0, 0, -oled_t]) rotate([90, 0, 0]) clamp_bar();
 else if (part == "hood") translate([0, 0, hood_top]) rotate([180, 0, 0]) hood();
+else if (part == "dims") echo(W = W, D = D, H = H, wall = wall, tilt = tilt, skirt_h = skirt_h, run = run,
+  panel_len = panel_len, oled_w = oled_w, oled_h = oled_h, oled_v = oled_v, lit_dz = lit_dz, win_w = win_w,
+  win_h = win_h, knob_x = knob_x, knob_y = knob_y, knob_hole = knob_hole, ky_y0 = ky_y0, ky_l = ky_l, ky_w = ky_w,
+  usb_x = usb_x, usb_z = usb_z, usb_w = usb_hole[0], usb_h = usb_hole[1], boss_in = boss_in, boss_d = boss_d,
+  bay_back = bay_back, hood_t = hood_t, bme_x = bme_xy.x, bme_y = bme_xy.y, bme_l = bme_l, bme_w = bme_w,
+  scd_x = scd_xy.x, scd_y = scd_xy.y, scd_l = scd_l, scd_w = scd_w, perf_x0 = perf_x0, perf_y0 = perf_y0,
+  perf_w = perf_w, perf_d = perf_d, esp_x0 = esp_x0, esp_y0 = esp_y0, esp_w = esp_w, esp_l = esp_l,
+  esp_antenna = esp_antenna, ds_x0 = ds_x0, ds_y0 = ds_y0, ds_w = ds_w, ds_l = ds_l); // for cardboard.py
 else if (part == "clash") intersection() {
   union() {
     shell();

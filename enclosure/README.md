@@ -19,6 +19,20 @@ carrier green, DS3231 navy, KY-040 red with a grey cap, sensors purple;
 
 ![front](renders/front.png) ![inside](renders/inside.png)
 
+## Cardboard mock-up
+
+```
+enclosure/cardboard.py [cardboard mm, default 2]   # -> enclosure/cardboard.pdf (gitignored)
+```
+
+Two A4 pages of 1:1 templates, sized from the model: 2 sides, front strip,
+screen panel (with the window), top (with the knob hole), back (with the
+USB hole), and a paper floor plan to lay the real modules on. Print at 100%
+("Actual size") and check the 50 mm bar with a ruler. Panels other than the
+sides are narrower by 2 × the cardboard thickness, so they fit between the
+sides. The mock-up checks size, screen angle, knob reach, and cables and
+battery space; not the printed fits or the heat.
+
 ## Layout
 
 80 x 84 x 54 mm (W x D x H). A wedge: the OLED sits on a panel tilted 20°
