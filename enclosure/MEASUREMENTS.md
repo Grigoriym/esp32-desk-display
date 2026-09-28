@@ -28,8 +28,8 @@ OpenSCAD model is written from these numbers, not from datasheet guesses.
 - Knob cap diameter: 14.78 (panel hole ~16, so it turns freely) (black knurled aluminium cap, seller image in the chat 2026-09-28)
 
 ## DS3231 RTC
-- Length x width x tallest part (coin cell counts): 31.93 x 21.79 x ___
-- Mounting holes: diameter ___, positions ___
+- Length x width x tallest part (coin cell counts): 31.93 x 21.79 x 9.39
+- Mounting holes: not needed, it plugs into a socket on the carrier board
 
 ## BME280
 - Length x width x tallest part: ___ x ___ x ___
