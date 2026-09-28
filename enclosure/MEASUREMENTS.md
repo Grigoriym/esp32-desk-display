@@ -38,10 +38,11 @@ OpenSCAD model is written from these numbers, not from datasheet guesses.
 
 ## SCD41
 - Length x width x tallest part: 21.81 x 13.49 x 7.59
-- Mounting holes: diameter ___, positions ___
+- Mounting holes: unknown (asked 2026-09-28, no answer): check before modelling its holder
 
 ## Other
-- USB-C cable plug housing: width ___ x height ___
-- Wanted case size (rough): ___
-- Wanted screen tilt: ___ (default ~20 degrees)
-- Printer contact: material (PLA/PETG) ___, clearance they use ___ (usually 0.2-0.3)
+- USB-C cable: an ordinary one, not measured. Rear hole sized for a typical plug overmold (~12 x 6.5): **13 x 8, rounded ends**
+- Case size: as small as the parts allow (no preference given)
+- Screen tilt: ~20 degrees (default)
+- Printer material: ask the printing person; PETG preferred (PLA is fine indoors, softens ~55 °C, e.g. in direct sun), clearance 0.2-0.3 assumed
+- Battery: **not in the MVP** (2026-09-28). Planned later (see CLAUDE.md Open questions: LiPo + TP4056 leaning), so keep the case easy to open and don't pack it so tight a small cell can never fit
