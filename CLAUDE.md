@@ -399,6 +399,18 @@ at the start of a session and tick items off there when done.
   LiPo + TP4056 charge module sized as backup/short-gap runtime (keeps the "always
   on" display concept intact) rather than a full multi-day-portable redesign, but
   not decided or ordered. Revisit once the base build works.
+  Worked out 2026-09-28 (still not ordered, user will come back to it):
+  a bare LiPo + TP4056 won't do: the DevKit's AMS1117 needs ~4.3 V+ on
+  VIN and a LiPo gives 4.2-3.0 V, and a TP4056 can't power the load while
+  charging. Plan instead: a LiPo UPS/power-bank module with 5 V output and
+  pass-through charging (IP5306-type or MH-CD42) -> ESP32 VIN; the case's
+  USB-C hole moves to that module (ESP32's own USB stays inside, for
+  flashing with the case open). Cell: flat 803040 (~1000 mAh, ~6 h) or
+  103450 (~2000 mAh, ~11 h; case maybe 5-10 mm deeper). Place: back-left
+  upper corner above the DS3231, beside the knob (~35 x 35 x 20 mm free),
+  away from the sensors and not over the ESP32's top vents. Optional
+  divider to D34/D35 (ADC1) for a battery level on screen. Needs from the
+  user: module + cell sizes from the listings, then model + templates.
 - **WiFi connect timeout** (done 2026-09-25): `wifi_connect()` waits at most
   `WIFI_CONNECT_TIMEOUT_SECONDS` (15s), then boot shows `WIFI NO`/`NTP NO`/
   `WEATHER NO` and goes to the main screen on RTC time. WiFi keeps retrying
