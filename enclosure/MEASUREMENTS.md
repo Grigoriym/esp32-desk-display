@@ -21,7 +21,7 @@ OpenSCAD model is written from these numbers, not from datasheet guesses.
 - Antenna end: opposite the USB (seen in the seller's image: antenna on the module's top end, above the metal shield)
 
 ## KY-040 encoder
-- Board length x width: 26.18 x 19.29, mounting holes (if any): ___
+- Board length x width: 26.18 x 19.29, 2 mounting holes: centre spacing 16.48, diameter ___
 - Design choice (2026-09-28): the knob **cap** sticks out through a round hole in the case and the KY-040 board sits on posts behind the panel, so shaft/collar sizes aren't needed (standard EC11: 6 mm shaft, M7 collar, if ever)
 - Board bottom to top of the cap (cap on): 31.79
 - Board bottom to the lower edge of the cap: 15.58 (the panel has to sit below this), so the cap itself is ~16.2 tall
