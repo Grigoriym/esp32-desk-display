@@ -239,9 +239,13 @@ WiFi connect timeout: done 2026-09-25, see Open questions in `CLAUDE.md`.
     pin order, **GND, 3V3, SDA, SCL**; the cables do the per-module swap.
     I2C cables < ~20 cm. Board outline and holes match the case's posts.
     A KiCad/JLCPCB version only if the perfboard one proves the layout.
-  - **Next session starts here**: run `enclosure/export.sh` and send
-    `stl/test_front.stl` to the person printing it (ask them PLA/PETG and
-    their clearance); then the checklist in `enclosure/README.md`.
+  - **Next session starts here**: the cardboard mock-up (2026-09-28)
+    showed the 4 x 6 cm carrier can't hold the ESP32 across its 4 cm side
+    (14 holes, the ESP32 needs 15). `enclosure/enclosure_v2.scad` has two
+    fixes (`carrier=cut`: board cut to 40 x 44, USB out the back;
+    `carrier=whole`: board uncut, USB out the right side); the DS3231 gets
+    its own cable in both. User to compare (OpenSCAD + cardboard) and pick,
+    then: test print of `test_front`, see `enclosure/README.md`.
   - Steps: [x] measure every part (`enclosure/MEASUREMENTS.md`, 2026-09-28)
     -> [x] OpenSCAD model + preview renders (`enclosure/`, see its README;
     2026-09-28: 80 x 84 x 54 mm, knob on top, OLED held by clamp bars, the

@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 """Cardboard mock-up templates of the enclosure, 1:1, as a 2-page A4 PDF.
 
-Sizes come from enclosure.scad (part="dims"), so the templates follow the
-model. Print at 100% / "Actual size" and check the 50 mm bar with a ruler.
+Sizes come from the model (part="dims"), so the templates follow it.
+Print at 100% / "Actual size" and check the 50 mm bar with a ruler.
 
-Usage: enclosure/cardboard.py [cardboard thickness in mm, default 2]
-Writes enclosure/cardboard.pdf (gitignored).
+Usage: enclosure/cardboard.py [cardboard mm, default 2] [file.scad] [var=value ...]
+  enclosure/cardboard.py                                   -> cardboard.pdf
+  enclosure/cardboard.py 2 enclosure_v2.scad carrier=whole -> cardboard-enclosure_v2-whole.pdf
+Writes into enclosure/ (gitignored).
 """
 import math
 import re
@@ -16,6 +18,9 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 CT = float(sys.argv[1]) if len(sys.argv) > 1 else 2.0  # cardboard thickness
+SCAD = sys.argv[2] if len(sys.argv) > 2 else "enclosure.scad"
+DEFS = sys.argv[3:]  # var=value, passed to openscad as strings
+NAME = "-".join([Path(SCAD).stem] + [kv.split("=", 1)[1] for kv in DEFS])
 PT = 72 / 25.4  # PDF points per mm
 PAGE_W, PAGE_H = 210, 297
 
@@ -23,8 +28,9 @@ PAGE_W, PAGE_H = 210, 297
 def dims():
     with tempfile.TemporaryDirectory() as tmp:
         out = Path(tmp) / "d.echo"
-        subprocess.run(["openscad", "-D", 'part="dims"', "-o", str(out), "--export-format=echo",
-                        str(HERE / "enclosure.scad")], check=True, capture_output=True)
+        defs = [a for kv in DEFS for a in ("-D", '{}="{}"'.format(*kv.split("=", 1)))]
+        subprocess.run(["openscad", *defs, "-D", 'part="dims"', "-o", str(out), "--export-format=echo",
+                        str(HERE / SCAD)], check=True, capture_output=True)
         line = next(l for l in out.read_text().splitlines() if l.startswith("ECHO: W ="))
     return {k: float(v) for k, v in re.findall(r"(\w+) = ([-\d.e]+)", line)}
 
@@ -115,7 +121,8 @@ def main():
 
     # ---- page 1: sides, front strip, screen panel
     p1 = Page()
-    p1.text(M, 10, f"Desk display case: cardboard mock-up, page 1/2  (case {W:.0f} x {D:.0f} x {H:.0f} mm, "
+    usb_side = d.get("usb_wall", 0) == 1  # USB-C out the right side, not the back
+    p1.text(M, 10, f"Desk display case ({NAME}): cardboard mock-up, page 1/2  (case {W:.0f} x {D:.0f} x {H:.0f} mm, "
                    f"cardboard {CT:g} mm)", 3.5)
     p1.scale_bar(M, 17)
     y = 30
@@ -125,8 +132,10 @@ def main():
         p1.poly([(M + a, y + H - b) for a, b in pts], **solid)
         # sensor bay behind the front strip, for orientation
         p1.rect(M + CT, y + H - d["skirt_h"] + 1, d["bay_back"] - CT, d["skirt_h"] - 1 - CT, **dash)
-        p1.text(M + D + 4, y + 8, f"SIDE {n} of 2", 4)
-        p1.text(M + D + 4, y + 14, "front edge on the left", 3)
+        if usb_side and n == 2:
+            p1.stadium(M + d["usb_y"], y + H - d["usb_z"], d["usb_w"], d["usb_h"], **solid)
+        p1.text(M + D + 4, y + 8, f"SIDE {n} of 2" + ((": LEFT", ": RIGHT")[n - 1] if usb_side else ""), 4)
+        p1.text(M + D + 4, y + 14, "front edge on the left" + ("; cut the USB-C hole" if usb_side and n == 2 else ""), 3)
         p1.text(M + D + 4, y + 19, "dashed: sensor bay inside", 3)
         p1.text(M + D + 4, y + 24, "cut out along the solid line", 3)
         y += H + 10
@@ -149,7 +158,7 @@ def main():
 
     # ---- page 2: top, back, floor layout
     p2 = Page()
-    p2.text(M, 10, "Desk display case: cardboard mock-up, page 2/2", 3.5)
+    p2.text(M, 10, f"Desk display case ({NAME}): cardboard mock-up, page 2/2", 3.5)
     p2.scale_bar(M, 17)
     y = 28
     tl = D - d["run"]  # top, from the panel's top edge to the back
@@ -164,9 +173,10 @@ def main():
     p2.text(M + iw + 4, y + 24, "dashed: vent slots over the ESP32", 3)
     y += tl + 8
     p2.rect(M, y, iw, H, **solid)
-    p2.stadium(M + (W - CT) - d["usb_x"], y + H - d["usb_z"], d["usb_w"], d["usb_h"], **solid)
+    if not usb_side:
+        p2.stadium(M + (W - CT) - d["usb_x"], y + H - d["usb_z"], d["usb_w"], d["usb_h"], **solid)
     p2.text(M + iw + 4, y + 8, "BACK (seen from behind)", 4)
-    p2.text(M + iw + 4, y + 14, "cut out the USB-C hole", 3)
+    p2.text(M + iw + 4, y + 14, "no hole: USB-C is on the right side" if usb_side else "cut out the USB-C hole", 3)
     y += H + 8
     # floor: the base, with the modules' outlines to lay the real ones on; top view, front at the bottom
     fy = lambda wy: y + D - wy  # noqa: E731
@@ -178,16 +188,18 @@ def main():
     p2.rect(M + d["wall"], fy(d["bay_back"] + d["hood_t"]), W - 2 * d["wall"], d["hood_t"], **dash)
     p2.text(M + 10, fy(3), "sensor bay", 2.5)
 
-    def part(x0, y0, w, l, name, style=solid):
+    def part(x0, y0, w, l, name, style=solid, bottom=False):
         p2.rect(M + x0, fy(y0 + l), w, l, **style)
-        p2.text(M + x0 + 1, fy(y0 + l) + 3.5, name, 2.5)
+        p2.text(M + x0 + 1, fy(y0) - 1.2 if bottom else fy(y0 + l) + 3.5, name, 2.5)
 
     part(d["bme_x"] - d["bme_l"] / 2, d["bme_y"] - d["bme_w"] / 2, d["bme_l"], d["bme_w"], "BME280")
     part(d["scd_x"] - d["scd_l"] / 2, d["scd_y"] - d["scd_w"] / 2, d["scd_l"], d["scd_w"], "SCD41")
-    part(d["perf_x0"], d["perf_y0"], d["perf_w"], d["perf_d"], "carrier", dash)
-    part(d["ds_x0"], d["ds_y0"], d["ds_w"], d["ds_l"], "DS3231")
-    part(d["esp_x0"], d["esp_y0"], d["esp_w"], d["esp_l"], "ESP32 (USB at the back)")
-    p2.text(M + d["esp_x0"] + 1, fy(d["esp_y0"]) - 1.5, "antenna", 2.5)
+    part(d["perf_x0"], d["perf_y0"], d["perf_w"], d["perf_d"], "carrier", dash, bottom=True)
+    under = d.get("ds_under", 0) == 1
+    part(d["ds_x0"], d["ds_y0"], d["ds_w"], d["ds_l"], "DS3231 (floor, under the carrier)" if under else "DS3231",
+         dash if under else solid, bottom=under)
+    part(d["esp_x0"], d["esp_y0"], d["esp_w"], d["esp_l"], "ESP32 (USB " + ("right)" if usb_side else "at the back)"))
+    p2.text(M + d.get("ant_x", d["esp_x0"] + 1), fy(d.get("ant_y", d["esp_y0"] + 2)), "antenna", 2.5)
     p2.text(M + 2, fy(-4) + 0.5, "FRONT", 3)
     p2.text(M + W + 4, y + 8, "FLOOR", 4)
     for i, s in enumerate(["cut the outer border only: the",
@@ -197,11 +209,11 @@ def main():
                            "solid: parts on the floor / carrier",
                            "dashed: inside walls, screw posts,",
                            "sensor bay wall, carrier board",
-                           f"KY-040 hangs under the top at x {d['knob_x']:.0f}",
-                           "(above the DS3231), not drawn"]):
+                           "KY-040 hangs under the top,",
+                           "front left: not drawn"]):
         p2.text(M + W + 4, y + 14 + i * 5, s, 3)
 
-    out = HERE / "cardboard.pdf"
+    out = HERE / ("cardboard.pdf" if NAME == "enclosure" else f"cardboard-{NAME}.pdf")
     write_pdf([p1, p2], out)
     print(out)
 

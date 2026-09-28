@@ -6,7 +6,7 @@ coloured stand-in blocks). `-D cut=40` cuts the printed parts away left of
 x = 40 to show the inside.
 
 ```
-enclosure/export.sh   # clash check, then stl/*.stl (gitignored) + renders/*.png
+enclosure/export.sh   # clash check, then stl/enclosure/*.stl (gitignored) + renders/enclosure-*.png
 ```
 
 The clash check fails if any printed part overlaps a module stand-in.
@@ -17,12 +17,40 @@ Stand-in colours: OLED steel blue, ESP32 black (antenna end orange),
 carrier green, DS3231 navy, KY-040 red with a grey cap, sensors purple;
 `show_labels` puts their names over them.
 
-![front](renders/front.png) ![inside](renders/inside.png)
+![front](renders/enclosure-front.png) ![inside](renders/enclosure-inside.png)
+
+## v2: the carrier is the 4 x 6 cm board (`enclosure_v2.scad`)
+
+The mock-up (2026-09-28) showed v1's carrier can't work: the 4 x 6 cm
+perfboard has 14 holes across its 4 cm side, and an ESP32 pin row is 15, so
+the ESP32 only fits along the 6 cm side. `enclosure.scad` (v1) is kept;
+`enclosure_v2.scad` has two layouts, `carrier` in the Customizer:
+
+| | `cut` (suggested) | `whole` |
+|---|---|---|
+| board | turned front-to-back, cut to 40 x 44 (keep 17 hole rows) | uncut 60 x 40 |
+| ESP32 | front-to-back | left-to-right |
+| USB-C | out the back | out the right side |
+| antenna | hangs off the board's front edge | over the board (and under the knob) |
+| DS3231 | own holder on the floor, left, JST cable | own holder on the floor under the carrier (tall 16 mm standoffs), JST cable |
+| case size | same 80 x 84 x 54 | same |
+
+```
+enclosure/export.sh enclosure_v2.scad carrier=cut        # or carrier=whole
+enclosure/cardboard.py 2 enclosure_v2.scad carrier=cut   # -> cardboard-enclosure_v2-cut.pdf
+```
+
+Open question for the soldering layout (either way): where the JST
+connectors go. `cut` has only ~3 spare hole columns beside the ESP32's
+pins; `whole` has ~5 columns free at the left end. The DS3231's pins (both
+ends) are modelled with the cable soldered on, not a Dupont plug.
+
+![cut](renders/enclosure_v2-cut-inside.png) ![whole](renders/enclosure_v2-whole-inside.png)
 
 ## Cardboard mock-up
 
 ```
-enclosure/cardboard.py [cardboard mm, default 2]   # -> enclosure/cardboard.pdf (gitignored)
+enclosure/cardboard.py [cardboard mm, default 2] [file.scad] [var=value]   # -> enclosure/cardboard*.pdf (gitignored)
 ```
 
 Two A4 pages of 1:1 templates, sized from the model: 2 sides, front strip,
