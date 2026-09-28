@@ -19,3 +19,6 @@ sdkconfig
 
 # Dashboard server secrets
 server/.env
+
+# Enclosure STLs (enclosure/export.sh regenerates them)
+enclosure/stl/
