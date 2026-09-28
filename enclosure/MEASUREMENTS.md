@@ -22,9 +22,10 @@ OpenSCAD model is written from these numbers, not from datasheet guesses.
 
 ## KY-040 encoder
 - Board length x width: 26.18 x 19.29, mounting holes (if any): ___
-- Shaft diameter ___, length above the threaded collar ___
-- Threaded collar: diameter ___, length ___ (limits the front panel thickness)
-- Knob cap diameter: ___
+- Design choice (2026-09-28): the knob **cap** sticks out through a round hole in the case and the KY-040 board sits on posts behind the panel, so shaft/collar sizes aren't needed (standard EC11: 6 mm shaft, M7 collar, if ever)
+- Board bottom to top of the cap (cap on): 31.79
+- Board bottom to the lower edge of the cap: ___ (the panel has to sit below this)
+- Knob cap diameter: ___ (black knurled aluminium cap, seller image in the chat 2026-09-28)
 
 ## DS3231 RTC
 - Length x width x tallest part (coin cell counts): ___ x ___ x ___
