@@ -27,7 +27,7 @@ enclosure/cardboard.py [cardboard mm, default 2]   # -> enclosure/cardboard.pdf 
 
 Two A4 pages of 1:1 templates, sized from the model: 2 sides, front strip,
 screen panel (with the window), top (with the knob hole), back (with the
-USB hole), and a paper floor plan to lay the real modules on. Print at 100%
+USB hole), and a floor with the modules' outlines drawn on it (not holes) to lay the real ones on. Print at 100%
 ("Actual size") and check the 50 mm bar with a ruler. Panels other than the
 sides are narrower by 2 × the cardboard thickness, so they fit between the
 sides. The mock-up checks size, screen angle, knob reach, and cables and

@@ -168,7 +168,7 @@ def main():
     p2.text(M + iw + 4, y + 8, "BACK (seen from behind)", 4)
     p2.text(M + iw + 4, y + 14, "cut out the USB-C hole", 3)
     y += H + 8
-    # floor: paper sheet to lay the real modules on, top view, front at the bottom
+    # floor: the base, with the modules' outlines to lay the real ones on; top view, front at the bottom
     fy = lambda wy: y + D - wy  # noqa: E731
     p2.rect(M, y, W, D, **solid)
     p2.rect(M + d["wall"], y + d["wall"], W - 2 * d["wall"], D - 2 * d["wall"], **dash)
@@ -189,8 +189,10 @@ def main():
     part(d["esp_x0"], d["esp_y0"], d["esp_w"], d["esp_l"], "ESP32 (USB at the back)")
     p2.text(M + d["esp_x0"] + 1, fy(d["esp_y0"]) - 1.5, "antenna", 2.5)
     p2.text(M + 2, fy(-4) + 0.5, "FRONT", 3)
-    p2.text(M + W + 4, y + 8, "FLOOR (paper, don't cut)", 4)
-    for i, s in enumerate(["top view, front at the bottom",
+    p2.text(M + W + 4, y + 8, "FLOOR", 4)
+    for i, s in enumerate(["cut the outer border only: the",
+                           "boxes inside are outlines, not holes",
+                           "top view, front at the bottom",
                            "lay the real modules on it",
                            "solid: parts on the floor / carrier",
                            "dashed: inside walls, screw posts,",
