@@ -429,8 +429,23 @@ at the start of a session and tick items off there when done.
   103450 (~2000 mAh, ~11 h; case maybe 5-10 mm deeper). Place: back-left
   upper corner above the DS3231, beside the knob (~35 x 35 x 20 mm free),
   away from the sensors and not over the ESP32's top vents. Optional
-  divider to D34/D35 (ADC1) for a battery level on screen. Needs from the
-  user: module + cell sizes from the listings, then model + templates.
+  divider to D34/D35 (ADC1) for a battery level on screen.
+  **Parts chosen 2026-09-28 (not ordered yet):**
+  - Cell: Soldered LiPo 803160, 3.7 V 1800 mAh (~7-8 h), protected,
+    JST-PH 2 mm, **60 x 31.4 x 8 mm**: too long for the 35 x 35 corner
+    above, needs a new spot (flat on the floor / against the back wall).
+  - Module: generic "5V 2A integrated charging discharge module"
+    (IP5306-type): pads VIN/GND (charge in), BAT/GND, VOUT/GND (5 V ->
+    ESP32 VIN), KEY (low pulse: once = on, twice = off). Auto-off under
+    50 mA load (we draw ~150 mA, fine). **Plugging the charger in cuts
+    VOUT for ~0.3 s -> the ESP32 reboots once** (accepted; RTC keeps time).
+  - USB-C breakout (PENGLIN, red, 6-pin VBUS/GND/CC1/CC2/D+/D-) with
+    5.1k CC resistors onboard ("512"), so C-to-C chargers work. VBUS ->
+    module VIN, GND -> GND, rest unconnected. This is the case's USB-C hole.
+  - JST-PH 2.0 2-pin pigtail for the cell -> module BAT/GND (check the
+    red/black polarity against the cell before plugging in).
+  - On hand: slide switch (VOUT -> ESP32 VIN, check it's rated >= 0.5 A),
+    2x 100k for the optional D34 divider.
 - **WiFi connect timeout** (done 2026-09-25): `wifi_connect()` waits at most
   `WIFI_CONNECT_TIMEOUT_SECONDS` (15s), then boot shows `WIFI NO`/`NTP NO`/
   `WEATHER NO` and goes to the main screen on RTC time. WiFi keeps retrying
