@@ -38,7 +38,7 @@ OpenSCAD model is written from these numbers, not from datasheet guesses.
 
 ## SCD41
 - Length x width x tallest part: 21.81 x 13.49 x 7.59
-- Mounting holes: unknown (asked 2026-09-28, no answer): check before modelling its holder
+- Mounting holes: none (confirmed 2026-09-28): held by a printed slot or clips around the board edges
 
 ## Other
 - USB-C cable: an ordinary one, not measured. Rear hole sized for a typical plug overmold (~12 x 6.5): **13 x 8, rounded ends**

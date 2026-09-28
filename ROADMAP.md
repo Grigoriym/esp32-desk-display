@@ -240,8 +240,7 @@ WiFi connect timeout: done 2026-09-25, see Open questions in `CLAUDE.md`.
     I2C cables < ~20 cm. Board outline and holes match the case's posts.
     A KiCad/JLCPCB version only if the perfboard one proves the layout.
   - **Next session starts here**: write the OpenSCAD model from
-    `enclosure/MEASUREMENTS.md` (all parts measured 2026-09-28; one open
-    question there: does the SCD41 board have screw holes).
+    `enclosure/MEASUREMENTS.md` (all parts measured 2026-09-28).
   - Steps: [x] measure every part (`enclosure/MEASUREMENTS.md`, 2026-09-28)
     -> [ ] OpenSCAD model + preview renders -> [ ] test
     print of the front panel only (OLED window, knob hole) -> [ ] full print
