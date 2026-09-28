@@ -16,7 +16,7 @@ OpenSCAD model is written from these numbers, not from datasheet guesses.
 - Board length x width: 51.49 x 28.36 (measured; the seller's drawing says 51.74 x 29, trust ours)
 - Pin rows, center to center: 25.4 (10 x 2.54 pitch; seller's drawing says 25.64 = 1.01", the rows must sit on the 2.54 perfboard grid anyway), pins 2.54 apart, 15 per row
 - From the seller's images (2026-09-28): 4 mounting holes, one per corner; pins stick out ~6 below the board; the USB-C port overhangs the short edge
-- USB-C port: on which edge ___, width ___, height above the board ___
+- USB-C port: on the short edge opposite the antenna, standard socket ~8.9 x 3.2; board bottom to port top 4.75, so it sits on top of the board (1.6 board assumed + ~3.15 port), port centre ~3.2 above the board bottom
 - Tallest part on top (metal shield): ___
 - Antenna end: opposite the USB (seen in the seller's image: antenna on the module's top end, above the metal shield)
 
