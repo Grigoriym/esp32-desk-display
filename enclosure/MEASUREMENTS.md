@@ -6,8 +6,8 @@ OpenSCAD model is written from these numbers, not from datasheet guesses.
 "From the left/top edge": hold the board with its pins at the top.
 
 ## OLED (SSD1315, 0.96")
-- Board width x height x thickness (incl. glass): ___ x ___ x ___
-- Lit area: size ___ x ___, from left edge ___, from top edge ___
+- Board width x height x thickness (incl. glass): 26.00 x 26.04 x 2.64
+- Lit area: size 21.93 x 11.32 (w x h); position on the board not measured (too small to measure reliably): standard module layout assumed, checked with the front-panel test print
 - Mounting holes: diameter ___, centers from the board edges ___
 - Header pins stick out at the back: ___
 
