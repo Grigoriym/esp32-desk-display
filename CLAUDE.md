@@ -446,6 +446,16 @@ at the start of a session and tick items off there when done.
     red/black polarity against the cell before plugging in).
   - On hand: slide switch (VOUT -> ESP32 VIN, check it's rated >= 0.5 A),
     2x 100k for the optional D34 divider.
+  - Berrybase equivalents (one-shop order; user wary of LiPos from
+    Amazon): module = CHB-214 "4in1 ... 5V / 2A" (same IP5306-type),
+    USB-C = Adafruit ADA4090 ("Downstream", has the CC resistors). Upgrade
+    that avoids the plug-in reboot: Adafruit PowerBoost 1000 Charger
+    (ADA2465, load sharing, micro-USB). Optional I2C fuel gauge instead
+    of the divider: Soldered BQ27441 (SOL-333065).
+  - If the plug-in reboot ever bothers: diode-OR (USB-C 5 V and module
+    VOUT each through a 1N5819 into ESP32 VIN, ~4.7 V at VIN), or a
+    1 F / 5.5 V supercap on VIN (needs inrush limiting). Unplug side not
+    checked for a gap.
 - **WiFi connect timeout** (done 2026-09-25): `wifi_connect()` waits at most
   `WIFI_CONNECT_TIMEOUT_SECONDS` (15s), then boot shows `WIFI NO`/`NTP NO`/
   `WEATHER NO` and goes to the main screen on RTC time. WiFi keeps retrying
