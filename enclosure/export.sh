@@ -23,7 +23,14 @@ if ! grep -q "Current top level object is empty" <<<"$log"; then
     echo "FAIL: parts overlap a module stand-in (open /tmp/enclosure_clash.stl)" >&2
     exit 1
 fi
+if grep -qE "WARNING: (Ignoring unknown|undefined operation|Unable to convert)" <<<"$log"; then
+    echo "$log" | grep WARNING >&2
+    echo "FAIL: model warnings (a variable used before it's defined?)" >&2
+    exit 1
+fi
 
+# wiped first, so parts the model no longer has don't linger
+rm -rf "stl/$name"
 mkdir -p "stl/$name" renders
 for part in shell base hood clamp test_front; do
     echo "stl/$name/$part.stl"
