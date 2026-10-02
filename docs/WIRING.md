@@ -1,7 +1,7 @@
 # Wiring
 
 All modules share the ESP32's 3V3 and GND. Never 5V/VIN (see "Power & bus
-budget" in `CLAUDE.md`). Everything is currently on a solderless
+budget" in `CLAUDE.md` for this build's total). Everything is currently on a solderless
 breadboard; the soldered carrier board comes with the enclosure (ROADMAP
 task 15).
 
@@ -32,18 +32,16 @@ Wire colours: 🟢 green = D21 (SDA), 🟡 yellow = D22 (SCL).
 | | DT | D26 | |
 | | CLK | D25 | |
 
-- ESP32 DevKit pin order (read off the board, 2026-09-28), from the USB
-  end: one row `VIN GND D13 D12 D14 D27 D26 D25 D33 D32 D35 D34 VN VP EN`,
-  the other `3V3 GND D15 D2 D4 RX2 TX2 D5 D18 D19 D21 RX0 TX0 D22 D23`.
-  Component side up with the USB to the right, the VIN row is the one
-  nearer you.
-- I2C modules are wired **in parallel** straight to D21/D22, not daisy-chained
-  through the DS3231's pass-through header (that setup failed, see `CLAUDE.md`).
-- KY-040: male-female Dupont cable from the breadboard to the knob, in
-  KY-040 pin order (GND, +, SW, DT, CLK), so it can sit apart from the board. The encoder pins are only `#define`s, so they can
+- Part facts (module pin order, addresses, current draw, the DevKit's pin order)
+  are in `../grappim-watcher/docs/esp32/parts/`; GPIO, power and I2C rules in
+  `../grappim-watcher/docs/esp32/WIRING_RULES.md`. This file is only this
+  build's pin table.
+- I2C modules are wired **in parallel** straight to D21/D22 (rule and the
+  failed daisy-chain: `WIRING_RULES.md`, `parts/ds3231.md` there).
+- KY-040: male-female Dupont cable from the breadboard to the knob, in the
+  module's pin order, so it can sit apart from the board. The encoder pins can
   move to D18/D19/D23 if a board redesign makes the right side more convenient.
-- Analog sensors must use **ADC1** pins (D32-D39): ADC2 is unusable while
-  WiFi runs. (An LDR divider sat on D34 briefly on 2026-09-25; removed
-  again, see ROADMAP task 5.)
+- An LDR divider sat on D34 briefly on 2026-09-25; removed again, see ROADMAP
+  task 5.
 - Free, non-strapping GPIOs for future modules: D4, D16, D17, D18, D19, D23,
-  D32, D33 (D34/D35/VP/VN are input-only, ADC1-capable).
+  D32, D33 (plus the input-only D34/D35/VP/VN).

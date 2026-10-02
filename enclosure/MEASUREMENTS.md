@@ -1,49 +1,30 @@
 # Part measurements (ROADMAP task 15)
 
-Step 1 of the enclosure: the user measures every part with a digital
-caliper (ordered 2026-09-27) and fills in the blanks below, in mm. The
-OpenSCAD model is written from these numbers, not from datasheet guesses.
-"From the left/top edge": hold the board with its pins at the top.
+The caliper measurements of each part (taken 2026-09-28, in mm) live in the
+shared part sheets, `../../grappim-watcher/docs/esp32/parts/` (section
+"Mechanical" of each). The OpenSCAD model is written from those numbers, not
+from datasheet guesses. A new or corrected measurement goes in the sheet.
 
-## OLED (SSD1315, 0.96")
-- Board width x height x thickness (incl. glass): 26.00 x 26.04 x 2.64
-- Lit area: size 21.93 x 11.32 (w x h); position estimated from a straight-on photo (2026-09-28, +-0.5): top of the lit area ~3 mm below the top (pin-side) edge, roughly centred left-right; confirm with the front-panel test print
-- Mounting holes: 4, one per corner (seen in the photos), diameter ~1.70 measured (tiny hole, inside jaws read low: likely 2.0 nominal, for M2 screws), centre spacing 22.00 left-right x 21.52 top-bottom, so hole centres ~2.0 mm from the left/right edges and ~2.26 mm from the top/bottom edges
-- Header pins stick out at the back: 8.25 from the back surface, incl. the black plastic (a plugged-in Dupont connector adds ~14 more: leave room behind the OLED)
-- From photos (2026-09-28): board is JMD0.96D-1; 4-pin header (GND VCC SCL SDA) soldered with its black plastic on the **back**; the display's orange flex cable wraps around the **bottom** edge through a notch, and the back has small SMD parts: the case must not press on the flex or the back
+| Part | Sheet |
+|---|---|
+| OLED (SSD1315, 0.96") | `oled-ssd1315.md` |
+| ESP32 DevKit (ELEGOO ESP-32S, 30-pin) | `esp32-devkit-30pin.md` |
+| KY-040 encoder | `ky-040.md` |
+| DS3231 RTC | `ds3231.md` |
+| BME280 | `bme280.md` |
+| SCD41 | `scd41.md` |
 
-## ESP32 DevKit (ELEGOO ESP-32S, 30-pin)
-- Board length x width: 51.49 x 28.36 (measured; the seller's drawing says 51.74 x 29, trust ours)
-- Pin rows, center to center: 25.4 (10 x 2.54 pitch; seller's drawing says 25.64 = 1.01", the rows must sit on the 2.54 perfboard grid anyway), pins 2.54 apart, 15 per row
-- From the seller's images (2026-09-28): 4 mounting holes, one per corner; pins stick out ~6 below the board; the USB-C port overhangs the short edge
-- USB-C port: on the short edge opposite the antenna, standard socket ~8.9 x 3.2; board bottom to port top 4.75, so it sits on top of the board (1.6 board assumed + ~3.15 port), port centre ~3.2 above the board bottom
-- Tallest part on top: 4.78 above the board bottom (about level with the USB port top, 4.75); pins ~6 below
-- Antenna end: opposite the USB (seen in the seller's image: antenna on the module's top end, above the metal shield)
+How to measure: `../../grappim-watcher/docs/esp32/ENCLOSURE_PLAYBOOK.md`.
 
-## KY-040 encoder
-- Board length x width: 26.18 x 19.29, 2 mounting holes: centre spacing 16.48, diameter 2.85 measured (likely 3.0 nominal, for M3 or M2.5 screws)
-- Design choice (2026-09-28): the knob **cap** sticks out through a round hole in the case and the KY-040 board sits on posts behind the panel, so shaft/collar sizes aren't needed (standard EC11: 6 mm shaft, M7 collar, if ever)
-- Board bottom to top of the cap (cap on): 31.79
-- Board bottom to the lower edge of the cap: 15.58 (the panel has to sit below this), so the cap itself is ~16.2 tall
-- Shaft position: board's short edge away from the pins to the cap's far side ~16 (2026-09-28; hard to hold straight since the cap is higher than the board, +-1), so the shaft centre is ~8.6 from that edge, not the middle. Precise enough: the 16 mm top hole only has to clear the ~7 mm collar
-- Knob cap diameter: 14.78 (panel hole ~16, so it turns freely) (black knurled aluminium cap, seller image in the chat 2026-09-28)
-
-## DS3231 RTC
-- Length x width x tallest part (coin cell counts): 31.93 x 21.79 x 9.39
-- Mounting holes: not needed, it plugs into a socket on the carrier board
-
-## BME280
-- Length x width x tallest part: 13.15 x 10.66 x ~3 (not measured: nothing tall on it, board ~1.6 + the sensor can ~1; the header pins are separate)
-- Mounting holes: 1, in the corner at the VIN end, away from the pins (seller image 2026-09-28), ~3 assumed from the photo, not measured
-- 4 pins: VIN, GND, SCL, SDA
-
-## SCD41
-- Length x width x tallest part: 21.81 x 13.49 x 7.59
-- Mounting holes: none (confirmed 2026-09-28): held by a printed slot or clips around the board edges
-
-## Other
-- USB-C cable: an ordinary one, not measured. Rear hole sized for a typical plug overmold (~12 x 6.5): **13 x 8, rounded ends**
+## This case's choices
+- KY-040 (2026-09-28): the knob **cap** sticks out through a round hole in the
+  case and the board sits behind the panel, so shaft/collar sizes aren't needed.
+  Top hole 16 mm.
+- DS3231: its mounting holes aren't used.
+- USB-C cable: an ordinary one, not measured. Rear hole **13 x 8, rounded ends**.
 - Case size: as small as the parts allow (no preference given)
 - Screen tilt: ~20 degrees (default)
-- Printer material: ask the printing person; PETG preferred (PLA is fine indoors, softens ~55 °C, e.g. in direct sun), clearance 0.2-0.3 assumed
-- Battery: **not in the MVP** (2026-09-28). Planned later (see CLAUDE.md Open questions: LiPo + TP4056 leaning), so keep the case easy to open and don't pack it so tight a small cell can never fit
+- Printer material: ask the printing person; PETG preferred, clearance 0.2-0.3 assumed
+- Battery: **not in the MVP** (2026-09-28). Planned later (see CLAUDE.md Open
+  questions), so keep the case easy to open and don't pack it so tight a small
+  cell can never fit

@@ -6,25 +6,25 @@ weather, always on. First "real" project after the esp32 lessons repo — not a
 tutorial exercise, meant to actually sit on the desk.
 
 ## Hardware
-- **Board**: same ESP32 DevKit used in the `esp32` lessons project (GPIO2 onboard
-  LED, flashes on `/dev/ttyUSB0`) for this build. No new board needed for v1.
-- **Display**: 0.96" 128x64 I2C OLED module, **SSD1315 controller** (confirmed from
-  listing, SSD1306-command-compatible — SSD1306 drivers/init sequence work
-  unmodified). Ordered 2026-09-17, see Shopping list below.
-- **Wiring plan**: I2C on GPIO21 (SDA) / GPIO22 (SCL) — ESP32's conventional default
-  I2C pins, unused by any lesson so far. VCC/GND from the board's 3V3/GND rail.
-- Breadboard, jumper wires, USB cable — already on hand from the Freenove kit.
-- **Hardware confirmed working (2026-09-19)**: all 3 ESP32 boards and all 3 OLED
-  panels from the shopping list tested individually (LED blink, I2C scan, OLED
-  fill/text) via the `esp32-hw-checks` sibling project (see below) — no DOA units,
-  no substitutions needed. OLED always responds at I2C address 0x3C.
-- The OLED is mounted physically upside-down (since the first soldered
-  attempt); fixed in software, not wiring — see Display driver notes below.
-- **As-built wiring (2026-09-23)**: OLED and DS3231 are each wired **directly** to
-  the ESP32 in parallel (both on 3V3/GND/D21/D22), not daisy-chained. While chained
-  through the DS3231's 4-pin pass-through, one module setup left the OLED answering
-  but no 0x68, another took the whole bus down (nothing answered); root cause not
-  pinned down (wiring/joints, not the modules), the parallel wiring just worked.
+**Part facts live in the shared sheets, `../grappim-watcher/docs/esp32/parts/`**
+(one file per part: pinout and pin order, voltage, I2C address, current draw,
+measured dimensions, mounting, quirks, hw-checks status; index and inventory in
+its `README.md`). **A new fact about a part goes in its sheet there, not here.**
+This file holds only what is specific to this build. Generic rules:
+`../grappim-watcher/docs/esp32/WIRING_RULES.md`, `ENCLOSURE_PLAYBOOK.md`,
+`FIRMWARE_PLAYBOOK.md` (same folder).
+
+- **Board**: ESP32 DevKit 30-pin (`esp32-devkit-30pin.md`), flashes on
+  `/dev/ttyUSB0`. The blue GPIO2 LED is off in this firmware.
+- **Modules in this build**, all I2C ones in parallel on D21 (SDA) / D22 (SCL),
+  all on 3V3:
+  | Part | Sheet | Here |
+  |---|---|---|
+  | OLED SSD1315 | `oled-ssd1315.md` | 0x3C; mounted upside-down, fixed in software (see Display driver notes) |
+  | DS3231 RTC | `ds3231.md` | 0x68 (+0x57, 0x5F); boot time source since 2026-09-23 |
+  | BME280 | `bme280.md` | 0x76; read since 2026-09-23 (`main/bme280.c`) |
+  | SCD41 CO2 | `scd41.md` | 0x62; `main/scd41.c` since 2026-09-26 |
+  | KY-040 | `ky-040.md` | D25/D26/D27; switches screens since 2026-09-24 |
 - **Pin table for every module lives in `docs/WIRING.md`**; keep it updated
   when wiring changes. **Current state (2026-09-26): everything is on a
   solderless plastic breadboard.** A first all-soldered perfboard attempt
@@ -32,91 +32,33 @@ tutorial exercise, meant to actually sit on the desk.
   and moved back to the breadboard. The final soldered board is designed
   together with the enclosure (ROADMAP task 15): a carrier board sized to
   the case, keyed connectors out to each module.
-- LEDs: the red LED on the ESP32 DevKit and the red LED on the DS3231 are both
-  plain **power** indicators (not error/short signs). The blue LED is GPIO2 —
-  blinked by `esp32-hw-checks`, off in this firmware.
-- **The OLED keeps its last image while powered, even across an ESP32 reset** —
-  a leftover "HELLO" on screen does *not* prove the OLED is on the bus. To test
-  the bus, trust the I2C scan (or power-cycle the board, not just reset it).
-
-## Shopping list — ordered 2026-09-17 (sourced away from AliExpress, brand-name
-sellers, to avoid EU import duty on AliExpress orders; exact per-item source not logged, just
-that it wasn't raw AliExpress)
-- [x] 0.96" 128x64 I2C OLED breakout, 4-pin (VCC/GND/SCL/SDA), **SSD1315
-  controller confirmed** (SSD1306-compatible) — APKLVSR, pack of 3, blue
-- [x] BME280 (temp/humidity/pressure, I2C) — 5V-labeled board, but schematic shows
-  onboard 3.3V LDO + BSS138 level shifters, so **wire its VIN to the ESP32's 3.3V
-  pin** (not 5V) to keep the I2C lines at safe logic level. Board silkscreen says
-  "BME/BMP 280" (generic PCB for either chip); **confirmed real BME280
-  2026-09-23** via chip ID 0x60 (BMP280 would be 0x58) — check lives in
-  `esp32-hw-checks`. Wired in parallel on the bus (VIN→3V3, SDA→21, SCL→22),
-  answers at **0x76**; read by this firmware since 2026-09-23 (`main/bme280.c`)
-- [x] DS3231 RTC module (I2C, coin-cell backed, AT24C32 EEPROM bonus onboard) —
-  APKLVSR, pack of 3; power VCC from 3.3V not 5V for the same I2C-safety reason.
-  Module has two headers: a 6-pin one (32K, SQW, SCL, SDA, VCC, GND) and a 4-pin
-  pass-through (SCL, SDA, VCC, GND) wired in parallel on the PCB, for daisy-chaining
-  a second I2C device without a breadboard tie point. Wiring plan: 6-pin header to
-  the ESP32 (SDA→GPIO21, SCL→GPIO22, VCC→3.3V, GND→GND — same bus as the OLED,
-  different address: OLED 0x3C, DS3231 0x68), then the 4-pin pass-through straight
-  to the OLED's four pins. 32K and SQW left unconnected (not needed for basic
-  timekeeping). Soldered and working 2026-09-23 (two of the three modules tested,
-  both fine — earlier "no 0x68" failures were wiring, not DOA units); in the end
-  wired in parallel rather than through the pass-through, see Hardware above. On
-  the scan it answers at **0x68** (clock), **0x57** (AT24C32 EEPROM) and **0x5F**
-  (extra address some of these modules expose — normal, not a fault).
-- [x] Rotary encoder (KY-040) — GIAK, pack of 5; candidate UI input for cycling
-  screens/adjusting brightness; one is wired (D25/D26/D27) and drives the
-  screen switching since 2026-09-24
-- [x] ESP32-WROOM-family DevKit boards, onboard PCB antenna, USB-C, CP2102 — ELEGOO
-  "ESP-32S", pack of 3, 30-pin, 4MB flash; bulk restock, same chip family as the
-  current lesson board (exact WROOM-32D marking unconfirmed but functionally
-  equivalent for this project either way)
-- [x] Perforated/prototyping PCB grid board kit (Miuzei, 78-piece, 21 double-sided
-  boards) — not in the original plan, general prototyping stock for soldering up
-  the OLED/BME280/RTC wiring once breadboarding is done
-- [ ] 1-2x ESP32-WROVER-B DevKit (onboard antenna, PSRAM) — note the Freenove kit
-  (see `esp32` lessons repo) already includes an **ESP32-WROVER** board with PSRAM,
-  so one is on hand before ordering — held in reserve for a
-  future color-TFT/LVGL project, not this one — not ordered yet
-- MQ-135 (air quality) and RC522 (RFID) were discussed as optional future adds —
-  not part of this order
-- 2.4"-3.5" ILI9341/ILI9488 TFT (touch) — discussed as a **future** upgrade path
-  for a color-graphics version of this project, not part of this order
-
-**Parts arrived and confirmed (2026-09-19)**: BOM matches what's checked off above,
-no substitutions, all 3 ESP32 boards and 3 OLEDs tested working (see Hardware
-section above). Milestones 1-4 built on this hardware.
+- **Parts history**: ordered 2026-09-17 (sourced away from AliExpress,
+  brand-name sellers, to avoid EU import duty; exact per-item source not
+  logged), arrived and tested 2026-09-19 via `esp32-hw-checks`: no DOA units,
+  no substitutions. Milestones 1-4 were built on this hardware.
+- **Not part of this build**: ESP32-WROVER-B DevKit (not ordered; the Freenove
+  kit's WROVER is held in reserve for a future colour-TFT/LVGL project),
+  MQ-135 (air quality) and RC522 (RFID) discussed as optional future adds, a
+  2.4"-3.5" ILI9341/ILI9488 touch TFT as a future colour version.
 
 ## Power & bus budget (guardrail — check before wiring any new module)
-Everything runs from the DevKit's 3V3 pin (onboard regulator, likely AMS1117 —
-~500 mA safe continuous from USB, which itself caps at ~500 mA).
+Per-part current draw is in each part sheet; the rules (3V3 regulator and USB
+cap ~500 mA, keep the summed peak under ~450 mA, I2C pull-ups in parallel, 3V3
+not 5V, 5V parts on VIN, battery runtime) are in
+`../grappim-watcher/docs/esp32/WIRING_RULES.md`.
 
-| Part | Typical | Peak | Notes |
-|---|---|---|---|
-| ESP32 + WiFi | 100-150 mA | ~350 mA | TX bursts; the dominant load |
-| OLED SSD1315 | 10-15 mA | ~25 mA | scales with lit pixels |
-| DS3231 module | 1-2 mA | ~3 mA | mostly the power LED |
-| BME280 | 1-2 mA | ~3 mA | LDO + LED; sensor itself is µA |
-| KY-040 | ~0.3 mA | ~1 mA | pull-ups only |
-| SCD41 (CO2) | ~3 mA | ~205 mA | low-power periodic mode (30 s); peak is a short pulse, buffered by the module's own decoupling cap (C1); 10k pull-ups (R1/R2, "103"); no extra bulk cap fitted (a tested 47 µF / 25 V is on hand if `PWR NO` ever shows) |
-| **Total** | **~135-175 mA** | **~585 mA** | worst case only if an SCD41 pulse lands on a WiFi TX burst: brief; watch for `PWR NO` / brownout |
+**This build's total** (ESP32 + WiFi, OLED, DS3231, BME280, KY-040, SCD41):
+**~135-175 mA typical, ~585 mA peak**. The peak is the worst case only if an
+SCD41 pulse (~205 mA, short) lands on a WiFi TX burst: brief; watch for
+`PWR NO` / brownout. No extra bulk cap is fitted for the SCD41.
 
-Rules:
-- New module → add a row above, re-check the total stays under ~450 mA peak.
-- **I2C pull-ups add up in parallel**: each module brings its own (4.7k/10k).
-  Keep combined ≥ ~1.1k (3 mA sink limit) — roughly 5-6 modules max before
-  removing pull-ups from some boards. Keep bus wires short.
-- New I2C address → check it doesn't clash, then add it to `KNOWN_I2C` in
-  `main/main.c` (boot log warns on any unknown address).
-- All I2C modules powered from 3.3V, never 5V (logic level + the DS3231
-  module's coin-cell "charging" circuit, which would overcharge a plain CR2032
-  on 5V). GPIOs are signals only (~12 mA each), never power.
-- 5V-hungry parts go on VIN, not 3V3: MQ-135 heater ~150 mA @5V (and its
-  analog out needs a divider); TFT backlight 50-100 mA.
-- Battery (open question below): ~150 mA average → 1000 mAh ≈ 6-7 h.
+Here:
+- New module → add its draw to the total above, re-check the peak.
+- Four I2C modules are on the bus, each with its own pull-ups (limit: ~5-6).
+- New I2C address → add it to `KNOWN_I2C` in `main/main.c` (boot log warns on
+  any unknown address).
 - Runtime check: status screen `PWR NO` / log `last reset was a BROWNOUT`
-  means the supply sagged (overload or weak USB port/cable) — ESP-IDF's
-  brownout detector is on by default (`CONFIG_ESP_BROWNOUT_DET`).
+  means the supply sagged.
 
 ## Software / ESP-IDF components used
 | Need | Component |
@@ -195,23 +137,17 @@ Rules:
 - `snprintf` into a buffer that can't hold the worst case fails the build
   (`-Werror=format-truncation`): size buffers for the longest possible
   value, not the typical one.
-- **`CONFIG_FREERTOS_HZ=100`** here and in `esp32-hw-checks`: one tick is
-  10 ms, so `pdMS_TO_TICKS(<10)` is 0 and `vTaskDelay(0)` busy-loops. That's
-  why the KY-040 check decodes the quadrature in a GPIO any-edge ISR (10 ms
-  polling would drop steps on a quick spin) and only polls the button.
+- **`CONFIG_FREERTOS_HZ=100`** here and in `esp32-hw-checks` (10 ms tick, see
+  the firmware playbook): why the encoder is decoded in an ISR.
 - **Pure logic is checked on the host before flashing** by `tools/test.sh`
   (see Host unit tests), incl. `utc_to_epoch()` and the TZ rule's switch
   dates (`test/test_clock_time.c`, against glibc: it checks the rule string,
   not picolibc's parser of it).
-- **Brightness can't be dimmed on this SSD1315** (tested 2026-09-25):
-  contrast (`0x81`) 0x01-0x40 look the same, 0x00 turns the panel off,
-  0xFF is only slightly brighter; lowering pre-charge (`0xD9`) / VCOMH
-  (`0xDB`) together with contrast 0 also gives black. Effectively on/off
-  only. Contrast is 0x40 (was 0xCF, no visible difference).
-- Panel orientation: `0xA0`/`0xC0` (segment remap / COM scan) in the init sequence
-  is flipped 180° from the SSD1306 default, to match how the OLED ended up mounted
-  (upside-down relative to native wiring). If a new panel is mounted in a
-  different orientation, flip these two bytes, not the wiring.
+- **Brightness**: the panel can't be dimmed, only on/off (tests in
+  `oled-ssd1315.md`). Contrast is 0x40 (was 0xCF, no visible difference).
+- Panel orientation: `0xA0`/`0xC0` in the init sequence, flipped 180° from
+  the SSD1306 default to match how the OLED is mounted. New mounting → flip
+  these two bytes, not the wiring.
 
 ## Data source decisions (decided)
 - **Weather API**: Open-Meteo (free, no signup/API key), HTTPS.
@@ -251,19 +187,10 @@ already excludes `*_secrets.h` and `sdkconfig`.
 
 ## Build / flash
 `. ~/esp/esp-idf/export.sh && idf.py -p /dev/ttyUSB0 build flash` (same for
-`../esp32-hw-checks`). Swapping between the two projects' firmware on one board is
-routine during hardware debugging — remember to flash this project back after.
-After such a swap, esptool may print "Verification failed after fast reflash ...
-Reflashing the whole image" — harmless, it recovers on its own and ends `Done`.
-`A fatal error occurred: No serial data received` from the flash step
-was transient (2026-09-25): the same command worked on the next try.
-**Check the flash actually happened** before trusting a device test: when
-filtering `idf.py` output, grep case-insensitively (`-iE "error|failed|Done"`).
-The partition-overflow failure prints `Error: app partition is too small`
-and no `Done`; a case-sensitive `error` filter hid it on 2026-09-25, the old
-firmware kept running, and a device check "passed" against it. The boot
-log's `app_init: App version: <short hash>[-dirty]` / `Compile time` lines
-say which build is actually running.
+`../esp32-hw-checks`; remember to flash this project back after a swap).
+Flash traps (transient errors, **checking the flash actually happened** with a
+case-insensitive `-iE "error|failed|Done"` filter, which build is running):
+`../grappim-watcher/docs/esp32/FIRMWARE_PLAYBOOK.md`.
 
 ## Code style (since 2026-09-25)
 `tools/format.sh` formats all tracked C sources with clang-format (style in
@@ -330,26 +257,13 @@ needs a second pure source (e.g. `test_screens` → `air_parse.c`) gets it
 from `extra_sources()` in `tools/test.sh`. Fixtures in `test/fixtures/` (see its README:
 `bvg_ok.json` is hand-written, the wrapper was down).
 
-## Serial monitoring gotcha (this dev harness)
-`idf.py monitor` fails here with "Monitor requires standard input to be attached to
-TTY" — the Claude Code Bash tool isn't a real terminal. Workaround used this session:
-read the port directly with pyserial via the IDF python env, e.g.
-`~/.espressif/python_env/idf6.2_py3.14_env/bin/python` opening `/dev/ttyUSB0` at
-115200 and looping `read()`. **This capture method is unreliable** — it repeatedly
-produced huge garbled/duplicated bursts (once 13MB from a 15-second read, physically
-impossible over 115200 baud) that looked like device crash-loops but weren't; the
-device was fine every time, confirmed by just asking what the physical screen showed.
-Prefer asking the user for ground truth (what's on screen) over trusting these
-captures when something looks wrong. 2026-09-23 update: a short capture (toggle RTS
-to reset, read 5-20s, cap the buffer, grep for the log tags you care about) was
-reliable all session. The first read right after the board re-enumerates on USB
-(replug/rewire) **or right after a flash** sometimes returns nothing at all — just
-retry once. This is packaged as **`tools/serial_log.py [seconds] [regex]`** (run
-with the IDF python env above): resets via RTS, caps the buffer, greps, retries
-once if empty. Use it instead of ad-hoc pyserial snippets. For tests that need
-the user to act (turn the knob, press a button), list the steps in the reply
-*before* starting a ~40s capture, then grep for the relevant tags; this worked
-first time for both encoder tests on 2026-09-24.
+## Serial monitoring
+`idf.py monitor` doesn't work in Claude Code (no TTY). Use
+**`tools/serial_log.py [seconds] [regex]`** with the IDF python env
+(`~/.espressif/python_env/idf6.2_py3.14_env/bin/python`); it resets the board.
+How to use it and its traps (empty first read, panic tags in the regex, checks
+that need the user's hands, ask what the screen shows when a capture looks
+wrong): `../grappim-watcher/docs/esp32/FIRMWARE_PLAYBOOK.md`.
 
 ## Build milestones (rough order)
 1. ✅ I2C bring-up — SSD1306 shows static text (2026-09-19)
@@ -391,23 +305,13 @@ first time for both encoder tests on 2026-09-24.
 
 ## Enclosure (ROADMAP 15, since 2026-09-28)
 OpenSCAD (local 2021.01) in `enclosure/`, see its README. `export.sh
-[file.scad] [var=value]` = clash check + STLs + PNG renders (openscad's
-PNG export works headless here; there is no Chrome for page screenshots);
-`cardboard.py` = 1:1 A4 mock-up templates from the model. Lessons:
-- **Check fits against the hole grid, not millimetres.** v1 put the ESP32
-  across the 4 cm side of the 4 x 6 cm perfboard: 40 mm fit geometrically,
-  but that side has 14 holes and a pin row is 15. Nothing in the model
-  caught it; the user's cardboard mock-up did. v2 places ESP32, board
-  outline and sockets on one hole grid.
-- Solids exactly tangent to a wall (corner bosses) make CGAL output
-  non-manifold: sink them into the wall. openscad exits non-zero on an
-  empty result, which is the *pass* case of the clash check. A top-level
-  `assert` in a `for` fired in STL exports but not with
-  `--export-format=echo`, so checks rely on `export.sh`'s STL pass.
-- Mounting: the OLED's glass reaches nearly to its corner holes (no screw
-  posts: clamp bars instead); KY-040 posts at its holes would hit the EC11
-  body and it can't slide into rails (shaft through the top): snap hooks.
-  A mated JST-XH plug is too tall to sit under the socketed ESP32 (8.5 mm).
+[file.scad] [var=value]` = clash check + STLs + PNG renders; `cardboard.py` =
+1:1 A4 mock-up templates from the model. Modelling, clash-check and
+printability lessons: `../grappim-watcher/docs/esp32/ENCLOSURE_PLAYBOOK.md`;
+part dimensions and how each part is held: the part sheets.
+- v1 put the ESP32 across the 4 cm side of the 4 x 6 cm perfboard (14 holes,
+  a pin row is 15); the user's cardboard mock-up caught it. v2 places ESP32,
+  board outline and sockets on one hole grid.
 
 ## Roadmap
 Next tasks live in `ROADMAP.md` as a checklist, one task per session — read it
@@ -465,17 +369,15 @@ at the start of a session and tick items off there when done.
   on hardware (dropped, not needed).
 
 ## Relationship to `esp32` lessons repo
-Separate git repo, not a subfolder of the lessons project — this is meant to be a
-standalone real build, not another numbered lesson. Reuses concepts learned there
-(GPIO setup, debounce patterns, `vTaskDelay` discipline) but doesn't share code.
+Separate git repo at `~/proj/esp32` (not a sibling of this folder), not a
+subfolder of it — this is meant to be a standalone real build, not another
+numbered lesson. Reuses concepts learned there (GPIO setup, debounce patterns,
+`vTaskDelay` discipline) but doesn't share code.
 
 ## Relationship to `esp32-hw-checks`
-Sibling folder (`../esp32-hw-checks`, not a subfolder), created 2026-09-19. Holds
-standalone bring-up/test firmware for verifying ESP32 boards and modules/sensors in
-isolation (LED blink + I2C scan + OLED fill/text test + BME280 chip-ID check
-(0x60 BME280 vs 0x58 BMP280, added 2026-09-23) + KY-040 encoder on D25/D26/D27
-(passed 2026-09-24) + SCD41 CO2 serial number + readings every 5 s
-(passed 2026-09-26: 813 ppm in the room, 1506 after breathing on it) + LDR raw ADC readout on D34 (added 2026-09-25; the LDR is no longer on the
-desk-display board); add a check there for each new sensor as it gets wired up) before that hardware is trusted
-enough to use in this project's real firmware. **It is not a git repo** — its
-changes exist only on disk, so there's nothing to commit there.
+Sibling folder (`../esp32-hw-checks`), created 2026-09-19: standalone
+bring-up/test firmware for verifying boards and modules in isolation before
+they're trusted in this firmware. A new sensor gets a check there first; what
+each check does and when a part passed is in its part sheet. It is a git repo
+since 2026-10-02 (local only, no remote) with its own `CLAUDE.md`: commit
+changes there too.
