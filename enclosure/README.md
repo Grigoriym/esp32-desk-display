@@ -31,7 +31,7 @@ perfboard has 14 holes across its 4 cm side, and an ESP32 pin row is 15, so
 the ESP32 only fits along the 6 cm side. `enclosure.scad` (v1) is kept;
 `enclosure_v2.scad` has two layouts, `carrier` in the Customizer:
 
-| | `cut` (suggested) | `whole` |
+| | `cut` | `whole` (**picked 2026-10-03**, the default) |
 |---|---|---|
 | board | turned front-to-back, cut to 40 x 44 (keep 17 hole rows) | uncut 60 x 40 |
 | ESP32 | front-to-back | left-to-right |

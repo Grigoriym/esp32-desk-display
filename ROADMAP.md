@@ -246,7 +246,8 @@ WiFi connect timeout: done 2026-09-25, see Open questions in `CLAUDE.md`.
     `carrier=whole`: board uncut, USB out the right side); the DS3231 gets
     its own cable in both. Sockets modelled on the hole grid: only `whole`
     fits all five JST-XH sockets (`cut` fits 3), so `whole` is the
-    recommendation; the user hasn't picked yet. Wiring explained visually
+    recommendation; **the user picked `whole` on 2026-10-03** (USB out
+    the right side; now the default). Wiring explained visually
     in the "Carrier Board Wiring" artifact (see memory). Open before the
     soldering plan: measure where the real board's hole grid sits (model
     assumes centred), check the ~0.5 mm plug-to-ESP32 clearance of the

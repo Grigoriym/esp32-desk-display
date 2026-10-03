@@ -26,7 +26,7 @@
 // blocks for the modules, "clash" is empty when nothing overlaps.
 
 part = "assembly"; // [assembly, shell, base, hood, clamp, test_front, clash]
-carrier = "cut"; // [cut, whole]
+carrier = "whole"; // [cut, whole]  (whole picked 2026-10-03)
 cut = -1; // assembly only: >= 0 cuts the printed parts away left of this x
 show_shell = true; // assembly only: untick to see inside
 show_base = true;
