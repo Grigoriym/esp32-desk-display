@@ -62,6 +62,24 @@ ends) are modelled with the cable soldered on, not a Dupont plug.
 
 ![cut](renders/enclosure_v2-cut-inside.png) ![whole](renders/enclosure_v2-whole-inside.png)
 
+## v3: ESP32 mini instead of the DevKit (`enclosure_v3.scad`, 2026-10-03)
+
+The current model. v2's `whole` layout (board uncut, USB-C out the right
+side) with the ESP32 mini (D1 mini layout, 31.5 x 39 mm) in place of the
+DevKit. The mini plugs into four 10-pin female headers (pad lines in rows
+1, 2, 11, 12; pads in cols 10-19), its USB end hangs ~3 mm off the board's
+right edge. All five JST-XH sockets stack at the board's left end (cols
+0-4, rows 0/3/6/9/12, pin lines along X), ~5 mm from the mini's antenna
+end. Case size unchanged. Why the mini: it fits the board either way round,
+so all sockets fit with the USB out the side. Its regulator (marked
+`73L33`) has no known rating: a full-load test follows the soldering.
+
+```
+enclosure/export.sh enclosure_v3.scad
+```
+
+![v3](renders/enclosure_v3-inside.png)
+
 ## Cardboard mock-up
 
 ```
