@@ -336,8 +336,8 @@ at the start of a session and tick items off there when done.
   upper corner above the DS3231, beside the knob (~35 x 35 x 20 mm free),
   away from the sensors and not over the ESP32's top vents. Optional
   divider to D34/D35 (ADC1) for a battery level on screen.
-  **Parts chosen 2026-09-28; cell and module arrived 2026-10-03, USB-C
-  breakout ordered, not arrived:**
+  **Parts chosen 2026-09-28; all three (cell, module, USB-C breakout)
+  arrived 2026-10-03, nothing wired yet:**
   - Cell (bought 2026-10-03, not wired yet): LiPo 103745, 3.7 V
     2000 mAh (~8-9 h), protection board, JST-PH 2.0 plug (red +, black -),
     **47 x 37 x 10 mm** (seller, not measured). Amazon.de B0CSSK9XJR.
@@ -355,8 +355,11 @@ at the start of a session and tick items off there when done.
     VOUT auto-off under ~50 mA load (we draw ~150 mA, would be fine);
     plugging the charger in cuts VOUT for ~0.3 s -> the ESP32 reboots once
     (accepted if so; RTC keeps time); KEY low pulse once = on, twice = off.
-  - USB-C breakout (ordered; PENGLIN, red, 6-pin VBUS/GND/CC1/CC2/D+/D-) with
-    5.1k CC resistors onboard ("512"), so C-to-C chargers work. VBUS ->
+  - USB-C breakout (arrived 2026-10-03, not wired or tested yet): PENGLIN
+    "USB C Breakout V10", pack of 10, Amazon.de B0DPF59D7X, 12.7 x 21.6 mm
+    (seller). Pins VBUS GND CC1 D- D+ CC2, 5.1k pull-downs ("512") on both
+    CC lines, so C-to-C chargers work. Sheet:
+    `../grappim-watcher/docs/esp32/parts/usb-c-breakout.md`. VBUS ->
     module VIN, GND -> GND, rest unconnected. This is the case's USB-C hole.
   - JST-PH 2.0 2-pin pigtail -> module BAT/GND, only if the module side
     wants a plug (the cell has one); check red/black polarity against the
@@ -365,7 +368,8 @@ at the start of a session and tick items off there when done.
     2x 100k for the optional D34 divider.
   - Berrybase equivalents (one-shop order; user wary of LiPos from
     Amazon): module = CHB-214 "4in1 ... 5V / 2A" (same IP5306-type),
-    USB-C = Adafruit ADA4090 ("Downstream", has the CC resistors). Upgrade
+    USB-C = Adafruit ADA4090 ("Downstream", has the CC resistors; not
+    needed, the PENGLIN one is in hand). Upgrade
     that avoids the plug-in reboot: Adafruit PowerBoost 1000 Charger
     (ADA2465, load sharing, micro-USB). Optional I2C fuel gauge instead
     of the divider: Soldered BQ27441 (SOL-333065).
