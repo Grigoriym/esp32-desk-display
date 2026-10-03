@@ -336,8 +336,8 @@ at the start of a session and tick items off there when done.
   upper corner above the DS3231, beside the knob (~35 x 35 x 20 mm free),
   away from the sensors and not over the ESP32's top vents. Optional
   divider to D34/D35 (ADC1) for a battery level on screen.
-  **Parts chosen 2026-09-28; cell bought, module + USB-C ordered
-  2026-10-03** (their part sheets/inventory entries still to come):
+  **Parts chosen 2026-09-28; cell and module arrived 2026-10-03, USB-C
+  breakout ordered, not arrived:**
   - Cell (bought 2026-10-03, not wired yet): LiPo 103745, 3.7 V
     2000 mAh (~8-9 h), protection board, JST-PH 2.0 plug (red +, black -),
     **47 x 37 x 10 mm** (seller, not measured). Amazon.de B0CSSK9XJR.
@@ -345,11 +345,16 @@ at the start of a session and tick items off there when done.
     the planned Soldered 803160 (1800 mAh, 60 x 31.4 x 8). Too long for
     the 35 x 35 corner above: needs a new spot (flat on the floor /
     against the back wall); case maybe 5-10 mm deeper.
-  - Module (ordered): generic "5V 2A integrated charging discharge module"
-    (IP5306-type): pads VIN/GND (charge in), BAT/GND, VOUT/GND (5 V ->
-    ESP32 VIN), KEY (low pulse: once = on, twice = off). Auto-off under
-    50 mA load (we draw ~150 mA, fine). **Plugging the charger in cuts
-    VOUT for ~0.3 s -> the ESP32 reboots once** (accepted; RTC keeps time).
+  - Module (arrived 2026-10-03, not powered or wired yet): generic "5V 2A
+    integrated charging discharge module", pack of 5, Youmile, Amazon.de
+    B08M3SFWNJ. Chip **FM5324HJ1** (marking A0A8231), not the IP5306 the
+    plan assumed; believed IP5306-compatible, no datasheet checked. Sheet:
+    `../grappim-watcher/docs/esp32/parts/charge-module-5v.md`. Pads
+    VIN/GND (charge in), BAT/GND, VOUT/GND (5 V -> ESP32 VIN), KEY.
+    **To test on this board** (IP5306 behaviour, unconfirmed for FM5324):
+    VOUT auto-off under ~50 mA load (we draw ~150 mA, would be fine);
+    plugging the charger in cuts VOUT for ~0.3 s -> the ESP32 reboots once
+    (accepted if so; RTC keeps time); KEY low pulse once = on, twice = off.
   - USB-C breakout (ordered; PENGLIN, red, 6-pin VBUS/GND/CC1/CC2/D+/D-) with
     5.1k CC resistors onboard ("512"), so C-to-C chargers work. VBUS ->
     module VIN, GND -> GND, rest unconnected. This is the case's USB-C hole.
