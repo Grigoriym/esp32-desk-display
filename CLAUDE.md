@@ -374,8 +374,12 @@ at the start of a session and tick items off there when done.
   - JST-PH 2.0 2-pin pigtail -> module BAT/GND, only if the module side
     wants a plug (the cell has one); check red/black polarity against the
     cell before plugging in.
-  - On hand: slide switch (VOUT -> ESP32 VIN, check it's rated >= 0.5 A),
-    2x 100k for the optional D34 divider.
+  - On hand: slide switch (VOUT -> ESP32 VIN): an **SS12D10** from the
+    VEXUNGA SPDT assortment (3 A / 250 V; one reserved in Homebox). The
+    other 7 types there are 0.5 A / 30 V: marginal, since the line peaks
+    near 0.6 A (WiFi TX + SCD41 pulse). SS12D10 body 12.8 x 6.7 x 18.2 mm,
+    3 pins 4.7 apart, 6.9 mm long, knob 5 mm (seller). Also 2x 100k for
+    the optional D34 divider.
   - Berrybase equivalents (one-shop order; user wary of LiPos from
     Amazon): module = CHB-214 "4in1 ... 5V / 2A" (same IP5306-type),
     USB-C = Adafruit ADA4090 ("Downstream", has the CC resistors; not
