@@ -186,6 +186,8 @@ empty host = upload off), and `server/.env` for the server side. A new
 already excludes `*_secrets.h` and `sdkconfig`.
 
 ## Build / flash
+Flashing and checking a build on the board: use the `esp32-flash-verify` skill
+(generic routine); this section keeps only what's specific to this repo.
 `. ~/esp/esp-idf/export.sh && idf.py -p /dev/ttyUSB0 build flash` (same for
 `../esp32-hw-checks`; remember to flash this project back after a swap).
 Flash traps (transient errors, **checking the flash actually happened** with a
