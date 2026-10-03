@@ -14,6 +14,16 @@ This file holds only what is specific to this build. Generic rules:
 `../grappim-watcher/docs/esp32/WIRING_RULES.md`, `ENCLOSURE_PLAYBOOK.md`,
 `FIRMWARE_PLAYBOOK.md` (same folder).
 
+**Parts inventory** (since 2026-10-03): every electronic part the user owns
+is in Homebox, `http://192.168.0.139:34899` (location "Office", tag
+"Electronics"); each item's description says `In use: N (project).
+[Reserved: ...] Free: N.` Before suggesting a part or a purchase, check
+what's there: `python3 ../grappim-watcher/docs/esp32/inventory/parts.py`
+(free parts), `parts.py all`, `parts.py find <text>` (read-only, API key
+from `~/.config/grappim/homebox.env`). When this build starts or stops
+using a part, its In use / Free must change: the user does it in the UI,
+or a session through the API with the user's OK. Never edit it silently.
+
 - **Board**: ESP32 DevKit 30-pin (`esp32-devkit-30pin.md`), flashes on
   `/dev/ttyUSB0`. The blue GPIO2 LED is off in this firmware.
 - **Modules in this build**, all I2C ones in parallel on D21 (SDA) / D22 (SCL),
