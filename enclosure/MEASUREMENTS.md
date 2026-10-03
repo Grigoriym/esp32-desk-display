@@ -1,18 +1,14 @@
 # Part measurements (ROADMAP task 15)
 
-The caliper measurements of each part (taken 2026-09-28, in mm) live in the
-shared part sheets, `../../grappim-watcher/docs/esp32/parts/` (section
-"Mechanical" of each). The OpenSCAD model is written from those numbers, not
-from datasheet guesses. A new or corrected measurement goes in the sheet.
+The caliper measurements of each part (in mm) live only in the part's
+Homebox entry (fields "Board size", "Mounting holes", ...): read them with
+`python3 ../../grappim-watcher/docs/esp32/inventory/parts.py show <part>`.
+The OpenSCAD model is written from those numbers, not from datasheet
+guesses. A new or corrected measurement goes in the entry, not here.
 
-| Part | Sheet |
-|---|---|
-| OLED (SSD1315, 0.96") | `oled-ssd1315.md` |
-| ESP32 DevKit (ELEGOO ESP-32S, 30-pin) | `esp32-devkit-30pin.md` |
-| KY-040 encoder | `ky-040.md` |
-| DS3231 RTC | `ds3231.md` |
-| BME280 | `bme280.md` |
-| SCD41 | `scd41.md` |
+Measured 2026-09-28: OLED (SSD1315), ESP32 DevKit 30-pin, KY-040, DS3231,
+BME280, SCD41. Measured 2026-10-03 (battery, not in the model yet): LiPo
+103745, FM5324 charge module, USB-C breakout.
 
 How to measure: `../../grappim-watcher/docs/esp32/ENCLOSURE_PLAYBOOK.md`.
 

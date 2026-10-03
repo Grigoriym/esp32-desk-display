@@ -6,35 +6,35 @@ weather, always on. First "real" project after the esp32 lessons repo — not a
 tutorial exercise, meant to actually sit on the desk.
 
 ## Hardware
-**Part facts live in the shared sheets, `../grappim-watcher/docs/esp32/parts/`**
-(one file per part: pinout and pin order, voltage, I2C address, current draw,
-measured dimensions, mounting, quirks, hw-checks status; index and inventory in
-its `README.md`). **A new fact about a part goes in its sheet there, not here.**
-This file holds only what is specific to this build. Generic rules:
+**Part facts live only in Homebox** (`http://192.168.0.139:34899`, since
+2026-10-03): every electronic part the user owns has one entry with its
+pinout and pin order, voltage, current draw, I2C address, measured
+dimensions, mounting, quirks, test status, ports/MACs, counts. Read one with
+`python3 ../grappim-watcher/docs/esp32/inventory/parts.py show <part>`;
+`parts.py` lists free parts, `parts.py all` everything, `parts.py find
+<text>` searches (read-only, API key from `~/.config/grappim/homebox.env`).
+**A new fact about a part goes in its Homebox entry, never here** (one
+source of truth per fact, no copies): the user does it in the UI, or a
+session through the API with the user's OK. This file holds only what is
+specific to this build: its pins, decisions, milestones, driver notes, its
+enclosure. Before suggesting a part or a purchase, check what's there.
+Each entry's description says `In use: N (project). [Reserved: ...] Free:
+N.`: when this build starts or stops using a part, that must change (same
+rule: UI, or API with the user's OK, never silently). Rules that span parts:
 `../grappim-watcher/docs/esp32/WIRING_RULES.md`, `ENCLOSURE_PLAYBOOK.md`,
 `FIRMWARE_PLAYBOOK.md` (same folder).
 
-**Parts inventory** (since 2026-10-03): every electronic part the user owns
-is in Homebox, `http://192.168.0.139:34899` (location "Office", tag
-"Electronics"); each item's description says `In use: N (project).
-[Reserved: ...] Free: N.` Before suggesting a part or a purchase, check
-what's there: `python3 ../grappim-watcher/docs/esp32/inventory/parts.py`
-(free parts), `parts.py all`, `parts.py find <text>` (read-only, API key
-from `~/.config/grappim/homebox.env`). When this build starts or stops
-using a part, its In use / Free must change: the user does it in the UI,
-or a session through the API with the user's OK. Never edit it silently.
-
-- **Board**: ESP32 DevKit 30-pin (`esp32-devkit-30pin.md`), flashes on
-  `/dev/ttyUSB0`. The blue GPIO2 LED is off in this firmware.
+- **Board**: ESP32 DevKit 30-pin, flashes on `/dev/ttyUSB0`. The blue GPIO2
+  LED is off in this firmware.
 - **Modules in this build**, all I2C ones in parallel on D21 (SDA) / D22 (SCL),
-  all on 3V3:
-  | Part | Sheet | Here |
-  |---|---|---|
-  | OLED SSD1315 | `oled-ssd1315.md` | 0x3C; mounted upside-down, fixed in software (see Display driver notes) |
-  | DS3231 RTC | `ds3231.md` | 0x68 (+0x57, 0x5F); boot time source since 2026-09-23 |
-  | BME280 | `bme280.md` | 0x76; read since 2026-09-23 (`main/bme280.c`) |
-  | SCD41 CO2 | `scd41.md` | 0x62; `main/scd41.c` since 2026-09-26 |
-  | KY-040 | `ky-040.md` | D25/D26/D27; switches screens since 2026-09-24 |
+  all on 3V3 (addresses: each part's entry, and `KNOWN_I2C` in `main/main.c`):
+  | Part | Here |
+  |---|---|
+  | OLED SSD1315 | mounted upside-down, fixed in software (see Display driver notes) |
+  | DS3231 RTC | boot time source since 2026-09-23 |
+  | BME280 | read since 2026-09-23 (`main/bme280.c`) |
+  | SCD41 CO2 | `main/scd41.c` since 2026-09-26 |
+  | KY-040 | switches screens since 2026-09-24 |
 - **Pin table for every module lives in `docs/WIRING.md`**; keep it updated
   when wiring changes. **Current state (2026-09-26): everything is on a
   solderless plastic breadboard.** A first all-soldered perfboard attempt
@@ -52,14 +52,14 @@ or a session through the API with the user's OK. Never edit it silently.
   2.4"-3.5" ILI9341/ILI9488 touch TFT as a future colour version.
 
 ## Power & bus budget (guardrail — check before wiring any new module)
-Per-part current draw is in each part sheet; the rules (3V3 regulator and USB
+Per-part current draw is in each part's Homebox entry; the rules (3V3 regulator and USB
 cap ~500 mA, keep the summed peak under ~450 mA, I2C pull-ups in parallel, 3V3
 not 5V, 5V parts on VIN, battery runtime) are in
 `../grappim-watcher/docs/esp32/WIRING_RULES.md`.
 
 **This build's total** (ESP32 + WiFi, OLED, DS3231, BME280, KY-040, SCD41):
 **~135-175 mA typical, ~585 mA peak**. The peak is the worst case only if an
-SCD41 pulse (~205 mA, short) lands on a WiFi TX burst: brief; watch for
+SCD41 pulse (short) lands on a WiFi TX burst: brief; watch for
 `PWR NO` / brownout. No extra bulk cap is fitted for the SCD41.
 
 Here:
@@ -153,8 +153,8 @@ Here:
   (see Host unit tests), incl. `utc_to_epoch()` and the TZ rule's switch
   dates (`test/test_clock_time.c`, against glibc: it checks the rule string,
   not picolibc's parser of it).
-- **Brightness**: the panel can't be dimmed, only on/off (tests in
-  `oled-ssd1315.md`). Contrast is 0x40 (was 0xCF, no visible difference).
+- **Brightness**: on/off only (why: the OLED's Homebox entry). Contrast
+  is 0x40 (was 0xCF, no visible difference).
 - Panel orientation: `0xA0`/`0xC0` in the init sequence, flipped 180° from
   the SSD1306 default to match how the OLED is mounted. New mounting → flip
   these two bytes, not the wiring.
@@ -320,7 +320,7 @@ OpenSCAD (local 2021.01) in `enclosure/`, see its README. `export.sh
 [file.scad] [var=value]` = clash check + STLs + PNG renders; `cardboard.py` =
 1:1 A4 mock-up templates from the model. Modelling, clash-check and
 printability lessons: `../grappim-watcher/docs/esp32/ENCLOSURE_PLAYBOOK.md`;
-part dimensions and how each part is held: the part sheets.
+part dimensions and how each part can be held: its Homebox entry.
 - v1 put the ESP32 across the 4 cm side of the 4 x 6 cm perfboard (14 holes,
   a pin row is 15); the user's cardboard mock-up caught it. v2 places ESP32,
   board outline and sockets on one hole grid.
@@ -346,40 +346,29 @@ at the start of a session and tick items off there when done.
   upper corner above the DS3231, beside the knob (~35 x 35 x 20 mm free),
   away from the sensors and not over the ESP32's top vents. Optional
   divider to D34/D35 (ADC1) for a battery level on screen.
-  **Parts chosen 2026-09-28; all three (cell, module, USB-C breakout)
-  arrived 2026-10-03, nothing wired yet:**
-  - Cell (bought 2026-10-03, not wired yet): LiPo 103745, 3.7 V
-    2000 mAh (~8-9 h), protection board, JST-PH 2.0 plug (red +, black -),
-    **47 x 37 x 10 mm** (seller, not measured). Amazon.de B0CSSK9XJR.
-    Sheet: `../grappim-watcher/docs/esp32/parts/lipo-103745.md`. Replaces
-    the planned Soldered 803160 (1800 mAh, 60 x 31.4 x 8). Too long for
-    the 35 x 35 corner above: needs a new spot (flat on the floor /
-    against the back wall); case maybe 5-10 mm deeper.
-  - Module (arrived 2026-10-03, not powered or wired yet): generic "5V 2A
-    integrated charging discharge module", pack of 5, Youmile, Amazon.de
-    B08M3SFWNJ. Chip **FM5324HJ1** (marking A0A8231), not the IP5306 the
-    plan assumed; believed IP5306-compatible, no datasheet checked. Sheet:
-    `../grappim-watcher/docs/esp32/parts/charge-module-5v.md`. Pads
-    VIN/GND (charge in), BAT/GND, VOUT/GND (5 V -> ESP32 VIN), KEY.
-    **To test on this board** (IP5306 behaviour, unconfirmed for FM5324):
-    VOUT auto-off under ~50 mA load (we draw ~150 mA, would be fine);
-    plugging the charger in cuts VOUT for ~0.3 s -> the ESP32 reboots once
-    (accepted if so; RTC keeps time); KEY low pulse once = on, twice = off.
-  - USB-C breakout (arrived 2026-10-03, not wired or tested yet): PENGLIN
-    "USB C Breakout V10", pack of 10, Amazon.de B0DPF59D7X, 12.7 x 21.6 mm
-    (seller). Pins VBUS GND CC1 D- D+ CC2, 5.1k pull-downs ("512") on both
-    CC lines, so C-to-C chargers work. Sheet:
-    `../grappim-watcher/docs/esp32/parts/usb-c-breakout.md`. VBUS ->
-    module VIN, GND -> GND, rest unconnected. This is the case's USB-C hole.
+  **Parts chosen 2026-09-28; all in hand 2026-10-03, measured, nothing
+  wired yet** (specs, sizes and what's still to test: their Homebox
+  entries, `parts.py show 103745` / `FM5324` / `USB-C breakout` / `Slide
+  switch`):
+  - Cell: LiPo 103745, 2000 mAh (~11 h at this build's ~150 mA). Replaces
+    the planned Soldered 803160. Doesn't fit the 35 x 35 corner above
+    either: needs a new spot (flat on the floor / against the back wall).
+  - Charge module (FM5324 chip, not the IP5306 the plan assumed): cell on
+    BAT, VOUT -> ESP32 VIN through the switch. The plan relied on IP5306
+    behaviour that is still **to test on this board**: auto-off under light
+    load (we draw ~150 mA, would be fine); a short VOUT cut when the
+    charger is plugged in -> the ESP32 reboots once (accepted if so; RTC
+    keeps time); KEY on/off. KEY needn't be reachable from outside: the
+    slide switch does on/off.
+  - USB-C breakout: the case's USB-C hole. VBUS -> module VIN, GND -> GND,
+    rest unconnected. Its CC resistors are what let C-to-C chargers work.
   - JST-PH 2.0 2-pin pigtail -> module BAT/GND, only if the module side
     wants a plug (the cell has one); check red/black polarity against the
     cell before plugging in.
-  - On hand: slide switch (VOUT -> ESP32 VIN): an **SS12D10** from the
-    VEXUNGA SPDT assortment (3 A / 250 V; one reserved in Homebox). The
-    other 7 types there are 0.5 A / 30 V: marginal, since the line peaks
-    near 0.6 A (WiFi TX + SCD41 pulse). SS12D10 body 12.8 x 6.7 x 18.2 mm,
-    3 pins 4.7 apart, 6.9 mm long, knob 5 mm (seller). Also 2x 100k for
-    the optional D34 divider.
+  - Slide switch (VOUT -> ESP32 VIN): an **SS12D10** from the assortment,
+    one reserved. The other types there are rated 0.5 A: marginal, since
+    this line peaks near 0.6 A (WiFi TX + SCD41 pulse). Also 2x 100k on
+    hand for the optional D34 divider.
   - Berrybase equivalents (one-shop order; user wary of LiPos from
     Amazon): module = CHB-214 "4in1 ... 5V / 2A" (same IP5306-type),
     USB-C = Adafruit ADA4090 ("Downstream", has the CC resistors; not
@@ -409,6 +398,6 @@ numbered lesson. Reuses concepts learned there (GPIO setup, debounce patterns,
 Sibling folder (`../esp32-hw-checks`), created 2026-09-19: standalone
 bring-up/test firmware for verifying boards and modules in isolation before
 they're trusted in this firmware. A new sensor gets a check there first; what
-each check does and when a part passed is in its part sheet. It is a git repo
+each check does and when a part passed is in the part's Homebox entry. It is a git repo
 since 2026-10-02 (local only, no remote) with its own `CLAUDE.md`: commit
 changes there too.

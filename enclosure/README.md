@@ -5,7 +5,8 @@ OpenSCAD model of the case, written from `MEASUREMENTS.md`. Open
 coloured stand-in blocks). `-D cut=40` cuts the printed parts away left of
 x = 40 to show the inside.
 
-Part dimensions and how each part is held: `../../grappim-watcher/docs/esp32/parts/`.
+Part dimensions and how each part can be held: its Homebox entry
+(`python3 ../../grappim-watcher/docs/esp32/inventory/parts.py show <part>`).
 General modelling, clash-check and printability lessons:
 `../../grappim-watcher/docs/esp32/ENCLOSURE_PLAYBOOK.md`. This file is this case only.
 

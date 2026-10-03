@@ -33,11 +33,12 @@ Wire colours: 🟢 green = D21 (SDA), 🟡 yellow = D22 (SCL).
 | | CLK | D25 | |
 
 - Part facts (module pin order, addresses, current draw, the DevKit's pin order)
-  are in `../grappim-watcher/docs/esp32/parts/`; GPIO, power and I2C rules in
+  are in each part's Homebox entry (`python3
+  ../grappim-watcher/docs/esp32/inventory/parts.py show <part>`); GPIO, power and I2C rules in
   `../grappim-watcher/docs/esp32/WIRING_RULES.md`. This file is only this
   build's pin table.
 - I2C modules are wired **in parallel** straight to D21/D22 (rule and the
-  failed daisy-chain: `WIRING_RULES.md`, `parts/ds3231.md` there).
+  failed daisy-chain: `WIRING_RULES.md` there, and the DS3231's Homebox entry).
 - KY-040: male-female Dupont cable from the breadboard to the knob, in the
   module's pin order, so it can sit apart from the board. The encoder pins can
   move to D18/D19/D23 if a board redesign makes the right side more convenient.
