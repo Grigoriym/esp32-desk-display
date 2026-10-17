@@ -390,6 +390,35 @@ at the start of a session and tick items off there when done.
     VOUT each through a 1N5819 into ESP32 VIN, ~4.7 V at VIN), or a
     1 F / 5.5 V supercap on VIN (needs inrush limiting). Unplug side not
     checked for a gap.
+  - **2026-10-17 review (nothing bought yet; user will report back):**
+    - **Plan stays the simple one**: FM5324 + cell + slide switch, accept
+      a reboot on plug-in if it happens. Everything below is optional
+      polish for that one reboot, not required. The user asked "don't we
+      overengineer it?": lead with this, not with the upgrades.
+    - **Cell swap**: the Amazon 103745 measures 38.5 mm long where a real
+      103745 is ~47 mm, so its 2000 mAh is likely overstated (~1200-1500).
+      Candidate replacement: Eckstein "LP103450 2000mAh JST-PHR-2"
+      (PKNERGY, datasheet ZB07009: PCM S-8261 + 8205, cut-off 4.28 / 3.0 V,
+      >= 1900 mAh, **max 1.5 A charge** and discharge, charge 10-45 C, max
+      34.5 x 52.5 x 10.3 mm + 100 mm leads, has UN38.3). The drawing says
+      **"Reverse Plug"**: check red/black against the board's +/- before
+      the first connection; if swapped, re-pin the PH housing (none of
+      the shop's plug adapters is PH to PH). Not yet in Homebox.
+    - **Charger upgrade, if wanted** (user rejects micro-USB, so the
+      PowerBoost 1000C above is out): Adafruit **4755** (bq24074, USB-C,
+      load sharing, 1 A charge default, LOAD out <= 4.4 V) + Adafruit
+      **4654** MiniBoost (TPS61023, 5 V / 1 A) into the 5 V pin; the boost
+      is needed because the board regulator wants well above 3.3 V
+      (DevKit AMS1117 ~4.3 V+, the mini's "73L33" unrated). Cheap
+      alternative to the 1N5819 diode-OR: Adafruit **5830** LM66200 ideal
+      dual diode (2.5 A, inputs up to 5.5 V), only useful if FM5324 VOUT
+      has no gap on unplug.
+    - **Ruled out**: DFRobot DFR0559 (load sharing undocumented), Seeed
+      LiPo Rider Plus (up to 3 A charge), Waveshare Solar Power Manager
+      (D) (SW6106 power-bank chip, 18650-sized), Waveshare Pico UPS (no
+      boost, battery-level out), SparkFun 5V/1A booster and Battery
+      Babysitter (micro-USB, no load sharing / no 5 V), plain chargers
+      (TP4056, Adafruit 4410/1304/1905): no 5 V output.
 - **WiFi connect timeout** (done 2026-09-25): `wifi_connect()` waits at most
   `WIFI_CONNECT_TIMEOUT_SECONDS` (15s), then boot shows `WIFI NO`/`NTP NO`/
   `WEATHER NO` and goes to the main screen on RTC time. WiFi keeps retrying
