@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <string.h>
 #include "bvg.h"
 #include "bvg_secrets.h"
@@ -10,14 +11,18 @@
 
 static const char *TAG = "bvg";
 
-#define BVG_URL                                                                                  \
-    "https://v6.bvg.transport.rest/stops/" BVG_STOP_ID "/departures?direction=" BVG_DIRECTION_ID \
-    "&duration=60&results=6&" BVG_PRODUCTS "&remarks=false&linesOfStops=false&pretty=false"
+// Official VBB API (HAFAS ReST). "direction" = the next stop, so
+// short-turning trains are kept; "products" = VBB bitmask (bvg_secrets.h).
+#define BVG_URL                                                                                              \
+    VBB_BASE_URL "/departureBoard?accessId=" VBB_ACCESS_ID "&id=" BVG_STOP_ID "&direction=" BVG_DIRECTION_ID \
+                 "&products=" BVG_PRODUCTS "&duration=60&maxJourneys=6"                                      \
+                 "&format=json"
 
-// ~1.2 KB of JSON per departure, 6 requested.
-#define RESPONSE_BUF_SIZE 12288
+// ~4.2 KB of JSON per departure, 6 requested (25 KB seen). On the heap for the
+// fetch only.
+#define RESPONSE_BUF_SIZE 32768
 
-static char s_response[RESPONSE_BUF_SIZE];
+static char *s_response;
 static int s_response_len;
 static bool s_truncated;
 
@@ -39,9 +44,10 @@ static esp_err_t http_event_handler(esp_http_client_event_t *evt)
 
 static esp_err_t bvg_fetch(bvg_departures_t *out)
 {
+    s_response = calloc(1, RESPONSE_BUF_SIZE);
+    if (!s_response) return ESP_ERR_NO_MEM;
     s_response_len = 0;
     s_truncated = false;
-    memset(s_response, 0, sizeof(s_response));
 
     esp_http_client_config_t config = {
         .url = BVG_URL,
@@ -54,17 +60,21 @@ static esp_err_t bvg_fetch(bvg_departures_t *out)
     int status = esp_http_client_get_status_code(client);
     esp_http_client_cleanup(client);
 
-    if (err != ESP_OK) return err;
-    if (status != 200) {
+    if (err == ESP_OK && status != 200) {
         ESP_LOGW(TAG, "unexpected HTTP status %d", status);
-        return ESP_FAIL;
+        err = ESP_FAIL;
     }
-    if (s_truncated) {
+    if (err == ESP_OK && s_truncated) {
         ESP_LOGW(TAG, "response over %d bytes, truncated", RESPONSE_BUF_SIZE);
-        return ESP_ERR_NO_MEM;
+        err = ESP_ERR_NO_MEM;
     }
-
-    return bvg_parse(s_response, out) ? ESP_OK : ESP_FAIL;
+    if (err == ESP_OK && !bvg_parse(s_response, out)) {
+        ESP_LOGW(TAG, "can't parse: %.120s", s_response); // e.g. a VBB errorCode
+        err = ESP_FAIL;
+    }
+    free(s_response);
+    s_response = NULL;
+    return err;
 }
 
 #define BVG_REFRESH_MS (60 * 1000)
@@ -116,8 +126,8 @@ esp_err_t bvg_start(void)
 {
     s_lock = xSemaphoreCreateMutex();
     if (!s_lock) return ESP_ERR_NO_MEM;
-    // TLS handshake + cJSON parse of a ~5-12 KB response: same budget the
-    // main task needed (see sdkconfig.defaults).
+    // TLS handshake + cJSON parse of one departure at a time: same budget
+    // the main task needed (see sdkconfig.defaults).
     if (xTaskCreate(bvg_task, "bvg", 8192, NULL, 4, &s_task) != pdPASS) return ESP_ERR_NO_MEM;
     return ESP_OK;
 }

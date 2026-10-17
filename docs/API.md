@@ -87,7 +87,7 @@ from the refresh cadence:
 | `outdoor`, `air`, `warning` | Open-Meteo, Open-Meteo air quality, DWD via Bright Sky | every 15 min (sooner retries after a failure) |
 | `indoor` | BME280 on the device | every 10 s |
 | `co2` | SCD41 on the device | every 30 s (`null` for the first ~30 s after boot) |
-| `bvg` | BVG departures (community API, **often down**, see below) | every 60 s, but only while fetching is active (see `bvg`) |
+| `bvg` | BVG departures (official VBB API) | every 60 s, but only while fetching is active (see `bvg`) |
 | `next_holiday` | Nager.Date | once a year |
 
 #### `outdoor`
@@ -159,10 +159,8 @@ All five pollen keys are always present.
 
 #### `bvg`
 
-`null` until the first successful departures fetch. The source (the
-community API `v6.bvg.transport.rest`) has long outages (503s), so **expect
-`null` for long stretches**; a switch to the official VBB API is planned,
-with the same fields here.
+`null` until the first successful departures fetch (source: the official
+VBB API since 2026-10-17; before that a community API with long outages).
 
 Departures are only fetched while the BVG screen is on the panel **or
 `/api/status` was read in the last 2 minutes**. So a client polling the

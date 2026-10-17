@@ -19,10 +19,10 @@ typedef struct {
     bvg_departure_t dep[BVG_MAX_DEPARTURES];
 } bvg_departures_t;
 
-// Parses a transport.rest (hafas-client) departures response: at most
-// BVG_MAX_DEPARTURES entries, cancelled trips ("when": null) and malformed
-// entries skipped. *out is only written on success; false on invalid JSON or
-// no "departures" array.
+// Parses a VBB (HAFAS ReST) departureBoard response: at most
+// BVG_MAX_DEPARTURES entries, cancelled trips ("cancelled": true) and malformed
+// entries skipped. *out is only written on success; false on an error answer,
+// invalid or truncated JSON. No "Departure" array = no trains, success.
 bool bvg_parse(const char *json, bvg_departures_t *out);
 
 // Makes a stop name drawable with the display font (A-Z, 0-9, space, '-',

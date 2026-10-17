@@ -40,24 +40,18 @@ on the physical display, and note anything the next task needs to know.
   `U5 HAUPTBAHNHOF`, `LEAVE IN N` (12+ min left), `GO NOW` (11), `HURRY` (6-10), then
   up to 3 trains >= 6 min away as `HH:MM   N MIN`. Verified: no crash, and a
   down API no longer freezes clock/encoder.
-- [ ] **4b. Switch BVG to the official VBB API** — *blocked on the key*.
-  Why: the community wrapper
-  `v6.bvg.transport.rest` returns 503 on every data request and has done so
-  mostly since July ([bvg-rest#30](https://github.com/derhuerst/bvg-rest/issues/30),
-  no maintainer reply), while BVG's own backend (`bvg.hafas.cloud`, what the
-  wrapper relays) answered fine when queried directly, so the wrapper is
-  what's broken. Decision: switch to the **official VBB API**. Access
-  requested by email to api@vbb.de on 2026-09-24 (test system first, then
-  production after accepting their terms). When the key arrives: key into
-  `bvg_secrets.h`, new parser in `bvg.c` (different response format;
-  screen and background task stay). Talking to `bvg.hafas.cloud` directly
-  was considered and not chosen: unofficial web-app backend with a token
-  copied from BVG's web app. Self-hosting the wrapper (Docker image
-  `derhuerst/bvg-rest:6`, last updated Oct 2025, untested) was also
-  considered as a bridge and not chosen: same unofficial backend, and the
-  ESP32 can't join Tailscale, so it would need a host on the display's
-  own LAN or a public HTTPS one. It would need only a URL change in
-  `bvg.c` (same response format) if revisited.
+- [x] **4b. Switch BVG to the official VBB API** (2026-10-17). The
+  community wrapper `v6.bvg.transport.rest` had returned 503 on almost every
+  data request since July ([bvg-rest#30](https://github.com/derhuerst/bvg-rest/issues/30)).
+  Access requested from api@vbb.de 2026-09-24, test-system key arrived
+  2026-10-17. `bvg.c` now calls VBB's `departureBoard` (same stop and
+  direction IDs, `products` as a bitmask), `bvg_parse.c` parses the HAFAS
+  format one departure at a time (heap); screen, task and API JSON
+  unchanged. Verified on the board: 6 departures, heap lowest 60 KB.
+  - [ ] **Production access**: VBB enables it after the development phase
+    and once their [terms](https://www.vbb.de/vbb-services/api-open-data/api/zugang-produktivsystem/)
+    are accepted; then only `VBB_BASE_URL` (and maybe the ID) change in
+    `bvg_secrets.h`. Tell VBB (they asked to be kept posted).
 - [x] **4c. Code quality: lint, tests, CI** (2026-09-25) (Android analogues: ktlint,
   detekt/lint, unit tests, GitHub Actions)
   - [x] clang-format (2026-09-25): `.clang-format` + `tools/format.sh

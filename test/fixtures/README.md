@@ -15,11 +15,12 @@
   with a real capture the next time Berlin has a warning.
 - `holidays_2026.json`: real Nager.Date response for 2026/DE, captured
   2026-09-25 (19 entries, 10 apply in Berlin).
-- `bvg_real.json`: real transport.rest response, captured 2026-09-25 10:29
-  with the URL from `main/bvg.c` (U Cottbusser Platz, U5 towards Hbf):
-  6 departures every 10 min, no delays or cancellations.
-- `bvg_ok.json`: **hand-written** in the same format (the wrapper was down
-  when the tests were first written); kept because it covers what the real
-  capture doesn't: a delayed trip, a cancelled one (`"when": null`), a
-  " (Berlin)" suffix and a trip after midnight. Replace both with VBB
-  responses once roadmap task 4b switches APIs.
+- `vbb_real.json`: real VBB `departureBoard` response (test system),
+  captured 2026-10-17 17:20 with the URL from `main/bvg.c` (U Cottbusser
+  Platz, U5 towards Hbf): 6 departures every 10 min, no delays or
+  cancellations. Contains no access ID.
+- `vbb_ok.json`: **hand-written**, trimmed to the fields the parser reads,
+  for what the real capture doesn't have: a delay (`rtTime` != `time`), a
+  cancelled trip (`"cancelled": true`), one without live data (no
+  `rtTime`), an umlaut as `\u00f6`, a trip after midnight, and a `}`/`"`
+  inside a note text (the parser splits departures by brace matching).

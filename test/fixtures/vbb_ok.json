@@ -1,0 +1,9 @@
+{"Departure":[
+{"ProductAtStop":{"name":"U5","catOut":"U"},"Notes":{"Note":[{"value":"brace } and quote \" in text","key":"XX"}]},
+ "name":"U5","direction":"S+U Hauptbahnhof","time":"22:38:00","date":"2026-09-24","rtTime":"22:41:00","rtDate":"2026-09-24"},
+{"name":"U5","direction":"S+U Hauptbahnhof","time":"22:48:00","date":"2026-09-24","cancelled":true},
+{"name":"U5","direction":"U Hönow","time":"22:58:00","date":"2026-09-24"},
+{"name":"U5","direction":"S+U Hauptbahnhof","time":"23:58:00","date":"2026-09-24","rtTime":"00:05:00","rtDate":"2026-09-25"}
+],
+"TechnicalMessages":{"TechnicalMessage":[{"value":"2026-09-24 22:30:00","key":"requestTime"}]},
+"serverVersion":"2.52.2","dialectVersion":"2.52"}

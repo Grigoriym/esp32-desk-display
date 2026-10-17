@@ -51,7 +51,7 @@ WEATHER OK
 | Air quality, pollen | Open-Meteo air-quality API | 15 min |
 | Weather warnings | DWD via [Bright Sky](https://brightsky.dev/) `/alerts` | 15 min |
 | Public holidays | [Nager.Date](https://date.nager.at/) (Berlin + nationwide) | once a year |
-| Departures | [`v6.bvg.transport.rest`](https://v6.bvg.transport.rest/) (community-run, has outages) | 60 s, only while the BVG screen is showing |
+| Departures | [VBB API](https://www.vbb.de/vbb-services/api-open-data/api/) (official, access ID by email) | 60 s, only while the BVG screen is showing |
 | Indoor | BME280 | 10 s |
 
 A failed weather fetch is retried after 30 s, then at growing intervals up

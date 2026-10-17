@@ -85,7 +85,7 @@ Here:
 | DWD weather warnings | Bright Sky `/alerts` (free, no key, `tz=Europe/Berlin`), fetched after the air quality on the same cadence via `http_get()` into a 16 KB heap buffer (each warning is ~1 KB of German + English text); parsed in `main/alerts_parse.c`. Shown on HOME page 1, under the clock. A failed fetch blanks it rather than keep a stale one |
 | Public holidays | Nager.Date (free, no key), `main/holidays.c` + pure `main/holidays_parse.c`: Berlin's (`DE-BE` + nationwide), fetched once a year (and the next year's after 26 Dec), shown on HOME page 1 unless a DWD warning is out. Its TLS chain is GTS Root R4 cross-signed by the old GlobalSign Root CA (not in the bundle), so `CONFIG_MBEDTLS_CERTIFICATE_BUNDLE_CROSS_SIGNED_VERIFY=y` (`sdkconfig.defaults`, ~700 B heap); symptom without it: `No matching trusted root certificate found` / `ESP_ERR_HTTP_CONNECT`. A new HTTPS host failing that way → check its chain with `openssl s_client -showcerts` |
 | HTTP GET | `main/http.c` `http_get(url, buf, size)`, shared by weather/air/alerts/holidays; big responses (alerts 16 KB, holidays 8 KB) get a heap buffer for the fetch only |
-| BVG departures | `esp_http_client` against `v6.bvg.transport.rest` (community-run, no key, **has outages**: 503 after 10s or no answer, the `v6.vbb` mirror too, seen 2026-09-24), in its own FreeRTOS task (`main/bvg.c`) so a slow/down API never blocks the main loop |
+| BVG departures | `esp_http_client` against the **official VBB API** (HAFAS ReST `departureBoard`, access ID + base URL in `bvg_secrets.h`, since 2026-10-17; **test system** `vbb.demo.hafas.cloud` until VBB opens production, which needs their terms accepted), in its own FreeRTOS task (`main/bvg.c`) so a slow/down API never blocks the main loop. ~4.2 KB of JSON per departure (notes, product info; no parameter found that trims it): fetched into a 32 KB heap buffer, and `bvg_parse.c` hands **one departure object at a time** to cJSON (whole response as a tree ~100 KB, one ~15 KB). Heap lowest since boot went 116 -> 60 KB with it (2026-10-17). Errors come back as `errorCode`/`errorText` in the JSON (logged) |
 | Dashboard upload | `esp_http_client` plain-HTTP POST of InfluxDB line protocol every 60 s, in its own task (`main/metrics.c`, 4 KB stack) so a down server never blocks the main loop; lines built by the pure `main/metrics_format.c` (host-tested). Server side (InfluxDB 2 + Grafana, Docker Compose) in `server/`, see `server/README.md`; runs on the always-on home box, Grafana at `http://192.168.0.139:34897/` (since 2026-09-25, the dev-machine copy is gone). `METRICS_TOKEN` must be the `INFLUX_TOKEN` of *that* server's `server/.env`: a token from another install gets `401` |
 | Phone page + JSON API | `esp_http_server` + mDNS (`espressif/mdns`, component manager) in `main/web.c`: `http://desk.local`, page embedded from `main/web_index.html` (`EMBED_TXTFILES`), JSON built by the pure `main/web_api.c` (host-tested). Commands go to the main loop through the encoder queue (`input_event_t`, `main/input.h`). Contract for clients in `docs/API.md` + `docs/api/status.example.json` (a host test fails if the firmware's JSON drifts from that file: **API change → update both**). No auth, LAN only. Since 2026-09-26 (ROADMAP 11); the Android app (ROADMAP 12) is a separate repo |
 | JSON parsing | `cJSON` — **not bundled** in this ESP-IDF version (v6.1-dev); pulled via the component manager (`main/idf_component.yml` → `espressif/cjson`), lands in gitignored `managed_components/` |
@@ -173,16 +173,16 @@ Here:
   `mktime()` means *local* time: RTC→epoch conversion uses the TZ-independent
   `utc_to_epoch()` helper instead (verified against glibc `timegm` for
   2000-2100, and the 2026-10-25 / 2027-03-28 switch moments, on the host).
-- **BVG departures**: stop/direction IDs in gitignored `main/bvg_secrets.h`.
-  Direction is filtered with the API's `direction=<next stop id>` (not the
-  destination name, which misses short-turning trains; the maintainer's
-  caveat about trusting it is bvg-rest#29). Source is the community wrapper
-  for now, switching to the official VBB API once the key arrives (ROADMAP
-  4b). **To tell a wrapper outage from a BVG one**, query BVG's backend
-  directly: endpoint + auth in hafas-client's `p/bvg/base.js`
-  (`bvg.hafas.cloud/apps/gate`, `StationBoard` request); on 2026-09-24 it
-  answered in 0.1s while the wrapper 503'd. The wrapper's homepage
-  answering 200 proves nothing: only data requests hit the upstream.
+- **BVG departures**: stop/direction IDs, VBB access ID in gitignored
+  `main/bvg_secrets.h` (the stop IDs from the old community wrapper work
+  unchanged as VBB `extId`s). Direction is filtered with VBB's
+  `direction=<next stop id>` (not the destination name, which misses
+  short-turning trains), line types with `products=<bitmask>` (1 S, 2 U, 4
+  tram, 8 bus, ...). `rtTime` (live, delay included) is used when present,
+  else `time`; `"cancelled": true` trips are skipped. Before 2026-10-17 the
+  source was the community wrapper `v6.bvg.transport.rest`, dropped for its
+  months of 503s (ROADMAP 4b). Quick check of the key/stop from the PC:
+  `curl "<VBB_BASE_URL>/departureBoard?accessId=<id>&id=<stop>&format=json&maxJourneys=3"`.
 - **Weather refresh cadence**: every 15 minutes (`WEATHER_REFRESH_SECONDS` in
   `main/main.c`), decided 2026-09-19 — gentle on the API, fresh enough for a desk
   display.
@@ -267,7 +267,7 @@ files with **no ESP-IDF includes**: that's why JSON parsing lives in
 draws them). New screen = a `screen_t` value + a `layout_*()` + a test. A test that
 needs a second pure source (e.g. `test_screens` → `air_parse.c`) gets it
 from `extra_sources()` in `tools/test.sh`. Fixtures in `test/fixtures/` (see its README:
-`bvg_ok.json` is hand-written, the wrapper was down).
+`vbb_ok.json` is hand-written, for the cases the real capture lacks).
 
 ## Serial monitoring
 `idf.py monitor` doesn't work in Claude Code (no TTY). Use
