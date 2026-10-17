@@ -183,6 +183,16 @@ Here:
   source was the community wrapper `v6.bvg.transport.rest`, dropped for its
   months of 503s (ROADMAP 4b). Quick check of the key/stop from the PC:
   `curl "<VBB_BASE_URL>/departureBoard?accessId=<id>&id=<stop>&format=json&maxJourneys=3"`.
+  Tried to shrink the response (2026-10-17), none worked: `notes=0`,
+  `withNotes=0`, `passlist=0`, `minimal=1` are ignored; `attributes=!`
+  drops every departure; `rtMode` takes only `OFF`/`SERVER_DEFAULT`. On the
+  test system (2026-10-17) `trip` (journey planner) and `arrivalBoard` give
+  data; `himsearch` (disruptions) and `journeyPos` (live vehicle positions)
+  came back empty, unknown whether that's the test system or a quiet day.
+  **Checking a fetch on the board without the knob**: poll
+  `http://desk.local/api/status` every few seconds during the
+  `serial_log.py` capture; polling keeps the BVG fetch active like the
+  screen does (`bvg:` log line).
 - **Weather refresh cadence**: every 15 minutes (`WEATHER_REFRESH_SECONDS` in
   `main/main.c`), decided 2026-09-19 — gentle on the API, fresh enough for a desk
   display.
