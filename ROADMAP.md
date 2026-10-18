@@ -249,12 +249,19 @@ WiFi connect timeout: done 2026-09-25, see Open questions in `CLAUDE.md`.
     soldering plan: measure where the real board's hole grid sits (model
     assumes centred), check the ~0.5 mm plug-to-ESP32 clearance of the
     front sockets. Then test print of `test_front`, see `enclosure/README.md`.
+  - **2026-10-18: the build stays on the DevKit, no battery** (user: "v1
+    of the project", only the day-one parts). `enclosure/enclosure_v4.scad`
+    = v2 `whole` + mukklet's print lessons (front plate, strip on the base,
+    base over the footprint, 4.0 base holes, nut-mounted knob, pre-print
+    asserts in `export.sh`); the case to print. Open before ordering: the
+    female headers' height (sets the USB hole), the perfboard grid's
+    position (both in `enclosure/README.md` "v4").
   - Steps: [x] measure every part (`enclosure/MEASUREMENTS.md`, 2026-09-28)
     -> [x] OpenSCAD model + preview renders (`enclosure/`, see its README;
     2026-09-28: 80 x 84 x 54 mm, knob on top, OLED held by clamp bars, the
     carrier is 60 x 40 mm) -> [x] KY-040 shaft position (~8.6 mm from
     the end away from the pins, not the middle) -> [ ] test
-    print of the front panel only (`test_front` STL: OLED window, knob mount) -> [ ] full print
+    print of the front panel only (v4: the `front` plate itself, + optional `test_knob`) -> [ ] full print
     -> [ ] perfboard layout on a grid, solder -> [ ] assemble, then compare
     BME280 with a reference thermometer with the case open vs closed.
 

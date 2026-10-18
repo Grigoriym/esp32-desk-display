@@ -1,6 +1,8 @@
 # Enclosure (ROADMAP task 15)
 
-OpenSCAD model of the case, written from `MEASUREMENTS.md`. Open
+OpenSCAD model of the case, written from `MEASUREMENTS.md`. **The one to
+print is `enclosure_v4.scad`** (see "v4" below); the sections after it
+(Layout, Parts, Hardware, checklists) describe v1. Open
 `enclosure.scad` in OpenSCAD for the assembled view (modules shown as
 coloured stand-in blocks). `-D cut=40` cuts the printed parts away left of
 x = 40 to show the inside.
@@ -23,6 +25,72 @@ carrier green, DS3231 navy, KY-040 red with a grey cap, sensors purple;
 `show_labels` puts their names over them.
 
 ![front](renders/enclosure-front.png) ![inside](renders/enclosure-inside.png)
+
+## v4: the case to print (`enclosure_v4.scad`, 2026-10-18)
+
+**The current model.** For the project's first finished build: DevKit,
+OLED, KY-040, SCD41, BME280, DS3231, no battery. v2's `whole` layout
+(below; the user's cardboard mock-up is of it) with the fixes mukklet's two
+printed cases taught (`../../esp32-mukklet/enclosure/`):
+
+| | v2 | v4 | why |
+|---|---|---|---|
+| screen panel | part of the shell | own **front plate**, 4 × 2 × 6 from the front, heads visible | no screwdriver reaches the OLED clamps' screws in a one-piece shell (axis runs into the back wall, ~79 mm); a wrong window costs one small plate |
+| strip under the screen | shell | **base** | on the body it's a 76 mm bridge, printed upside down |
+| base | inside the walls | **whole footprint**, the walls stand on it | holes were 0.5 from its edge; mukklet v1 had the same at 0.2 |
+| base screws | 3.4 hole, pilot 11 | 4.0 hole, pilot 13 | the kit's "M3 × 10" is 3.64 × 11.7 |
+| knob | 16 hole, 2 snap hooks | **7.3 hole, its own M7 nut** + 2 anti-turn ribs; moved 3 mm right (x 19) | mukklet v1's hooks didn't hold, v2's nut does |
+| OLED clamps | posts flush with the PCB | posts 0.3 short, so the bars press; 2 × 4 | |
+| carrier standoffs | pilot 1.7 | 1.6, 2 × 6 | 2.3 into 1.9 snapped in mukklet; 2.0 into 1.6 worked |
+| window | chamfer from 0.5 in | 1.2 straight, then the chamfer | hubs.com flags a knife edge |
+
+`export.sh` now also fails on the pre-print asserts in the model (edge
+distances, pilot depth vs screw reach, gaps, thread above the nut), prints
+their margins (`CHECKS:`) and lists every `ASSUMED` value, and clash-checks
+printed parts against each other and stand-ins (plugs included) against
+each other.
+
+```
+enclosure/export.sh enclosure_v4.scad      # -> stl/enclosure_v4/{body,front,base,hood,clamp,test_knob}.stl
+enclosure/cardboard.py 2 enclosure_v4.scad
+```
+
+![v4 exploded](renders/enclosure_v4-exploded.png) ![v4 inside](renders/enclosure_v4-inside.png)
+
+**Parts to print** (PETG preferred, clearance 0.3): `body` (upside down,
+check the USB hole's bridge), `front` (face down), `base` (flat), `hood`
+(roof down), `clamp` (2 in the file). `test_knob` is optional (the top's
+front with the knob mount).
+
+**Hardware**: 4 × M3 × 10 round head, silver kit (base → body); 4 × 2 × 6
+black (front plate → rails); 2 × 2 × 4 black (OLED clamps); 4 × 2 × 6
+black (carrier → standoffs, holes drilled 2.5 in the perfboard); 4 rubber
+feet ≥ 2 mm.
+
+**Assembly**: carrier screwed onto the standoffs *before* the ESP32 goes
+into its sockets (a driver above two of the holes hits the ESP32); DS3231
+into its holder under it first. Sensors into their pockets, hood on. Knob
+up through the top, washer + nut from outside, cap on. OLED onto the plate
+with the two clamp bars (plate on the desk). Cables onto the carrier, plate
+onto the body (4 screws from the front), body down onto the base (4 screws
+from below).
+
+**Before ordering** (gone through the `enclosure-preprint-review`
+checklist 2026-10-18; open items):
+1. **Measure the female headers' height** (`hdr_h` = 8.5 assumed): it sets
+   the ESP32's height and so the USB hole's (8 tall for a ~6.5 plug: ±0.75
+   of margin).
+2. Where the perfboard's hole grid sits (assumed centred): shifts the USB
+   sideways (13 wide for a ~12 plug).
+3. The OLED's lit area (±0.5 from a photo): the window is lit + 0.5 all
+   round. On the printed plate the time (flush left), the date's last digit
+   (flush right) and the bottom row must show in full; else only the plate
+   is reprinted.
+4. The knob's right-angle header (~6 out, from a photo) and its Dupont plug
+   point back over the carrier's KNOB socket; the clash check passes them.
+
+**ESP32 mini later?** `enclosure_v3.scad` still has v2's shell, base and
+snap hooks: it needs the same fixes before it's printed.
 
 ## v2: the carrier is the 4 x 6 cm board (`enclosure_v2.scad`)
 
@@ -64,7 +132,7 @@ ends) are modelled with the cable soldered on, not a Dupont plug.
 
 ## v3: ESP32 mini instead of the DevKit (`enclosure_v3.scad`, 2026-10-03)
 
-The current model. v2's `whole` layout (board uncut, USB-C out the right
+Was the current model until v4 (the build stays on the DevKit). v2's `whole` layout (board uncut, USB-C out the right
 side) with the ESP32 mini (D1 mini layout, 31.5 x 39 mm) in place of the
 DevKit. The mini plugs into four 10-pin female headers (pad lines in rows
 1, 2, 11, 12; pads in cols 10-19), its USB end hangs ~3 mm off the board's

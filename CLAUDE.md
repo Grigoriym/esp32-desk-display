@@ -334,6 +334,13 @@ part dimensions and how each part can be held: its Homebox entry.
 - v1 put the ESP32 across the 4 cm side of the 4 x 6 cm perfboard (14 holes,
   a pin row is 15); the user's cardboard mock-up caught it. v2 places ESP32,
   board outline and sockets on one hole grid.
+- **The case to print is `enclosure_v4.scad`** (2026-10-18): the user's
+  "v1 of the project" = DevKit + the day-one modules, no battery; the ESP32
+  mini (`enclosure_v3.scad`) only if needed, and v3 lacks v4's fixes. v4 =
+  v2 `whole` + what mukklet's printed cases taught (five parts: body,
+  front plate, base, hood, 2 clamps). Before printing, run
+  `enclosure/export.sh enclosure_v4.scad` (pre-print asserts + clash) and
+  close the open items in `enclosure/README.md` "v4".
 
 ## Roadmap
 Next tasks live in `ROADMAP.md` as a checklist, one task per session — read it
