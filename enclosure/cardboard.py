@@ -6,7 +6,6 @@ Print at 100% / "Actual size" and check the 50 mm bar with a ruler.
 
 Usage: enclosure/cardboard.py [cardboard mm, default 2] [file.scad] [var=value ...]
   enclosure/cardboard.py                                   -> cardboard.pdf
-  enclosure/cardboard.py 2 enclosure_v2.scad carrier=whole -> cardboard-enclosure_v2-whole.pdf
 Writes into enclosure/ (gitignored).
 """
 import math

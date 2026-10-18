@@ -331,16 +331,13 @@ OpenSCAD (local 2021.01) in `enclosure/`, see its README. `export.sh
 1:1 A4 mock-up templates from the model. Modelling, clash-check and
 printability lessons: `../grappim-watcher/docs/esp32/ENCLOSURE_PLAYBOOK.md`;
 part dimensions and how each part can be held: its Homebox entry.
-- v1 put the ESP32 across the 4 cm side of the 4 x 6 cm perfboard (14 holes,
-  a pin row is 15); the user's cardboard mock-up caught it. v2 places ESP32,
-  board outline and sockets on one hole grid.
-- **The case to print is `enclosure_v4.scad`** (2026-10-18): the user's
-  "v1 of the project" = DevKit + the day-one modules, no battery; the ESP32
-  mini (`enclosure_v3.scad`) only if needed, and v3 lacks v4's fixes. v4 =
-  v2 `whole` + what mukklet's printed cases taught (five parts: body,
-  front plate, base, hood, 2 clamps). Before printing, run
-  `enclosure/export.sh enclosure_v4.scad` (pre-print asserts + clash) and
-  close the open items in `enclosure/README.md` "v4".
+- **One model, `enclosure.scad`** (since 2026-10-18; the user wants no
+  `_v<n>` files): the user's "v1 of the project" = DevKit + the day-one
+  modules, no battery. Earlier models (ESP32 across the perfboard's 4 cm
+  side, the cut carrier, the ESP32 mini) are in git history only. Five
+  parts: body, front plate, base, hood, 2 clamps, shaped by what
+  mukklet's printed cases taught. Before printing: `enclosure/export.sh`
+  (clash + pre-print asserts) and the open items in `enclosure/README.md`.
 
 ## Roadmap
 Next tasks live in `ROADMAP.md` as a checklist, one task per session — read it

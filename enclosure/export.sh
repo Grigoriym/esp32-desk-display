@@ -4,7 +4,7 @@
 # (gitignored) and preview images to renders/<name>-*.png.
 # Usage: enclosure/export.sh [file.scad] [var=value ...]   (needs openscad)
 #   enclosure/export.sh                                  -> name "enclosure"
-#   enclosure/export.sh enclosure_v2.scad carrier=whole  -> "enclosure_v2-whole"
+#   enclosure/export.sh enclosure.scad cut=40            -> "enclosure-40"
 set -euo pipefail
 cd "$(dirname "$0")"
 scad=${1:-enclosure.scad}
