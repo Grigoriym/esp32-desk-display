@@ -24,7 +24,17 @@ rule: UI, or API with the user's OK, never silently). Rules that span parts:
 `../grappim-watcher/docs/esp32/WIRING_RULES.md`, `ENCLOSURE_PLAYBOOK.md`,
 `FIRMWARE_PLAYBOOK.md` (same folder).
 
-- **Board**: ESP32 DevKit 30-pin, flashes on `/dev/ttyUSB0`. The blue GPIO2
+- **Board moving to the ESP32 mini #2** (user, 2026-10-18: "found a good
+  board for it"; Homebox already reserves unit #2 for this build). Same
+  module, so the firmware and GPIO numbers carry over; it flashes on
+  `/dev/ttyACM0`. Mounting: female headers soldered on the carrier first,
+  then the mini's male headers plugged into them (long pins down, plastic
+  under the mini) and soldered on the can side; the user solders.
+  **`enclosure/enclosure.scad` is still the DevKit**: port the mini's
+  carrier layout (git history, `enclosure_v3.scad` at 8a2acf1: four 10-pin
+  rows in rows 1/2/11/12, sockets stacked at the left end) into it, keeping
+  its fixes, before printing. Until then:
+  ESP32 DevKit 30-pin, flashes on `/dev/ttyUSB0`. The blue GPIO2
   LED is off in this firmware.
 - **Modules in this build**, all I2C ones in parallel on D21 (SDA) / D22 (SCL),
   all on 3V3 (addresses: each part's entry, and `KNOWN_I2C` in `main/main.c`):

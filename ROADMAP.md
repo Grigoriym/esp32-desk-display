@@ -257,6 +257,12 @@ WiFi connect timeout: done 2026-09-25, see Open questions in `CLAUDE.md`.
     nut-mounted knob, pre-print asserts in `export.sh`). Open before
     ordering: the female headers' height (sets the USB hole), the
     perfboard grid's position (`enclosure/README.md` "Before ordering").
+  - **Next (2026-10-18)**: the build goes on the ESP32 mini after all (see
+    CLAUDE.md Hardware): after the user checks the mini's pads against
+    `docs/WIRING.md`, port the mini's carrier layout into
+    `enclosure.scad`. Still unanswered: are the perfboard, JST-XH
+    sockets/plugs, female headers and rubber feet in hand? None has a
+    Homebox entry.
   - Steps: [x] measure every part (`enclosure/MEASUREMENTS.md`, 2026-09-28)
     -> [x] OpenSCAD model + preview renders (`enclosure/`, see its README;
     2026-09-28: 80 x 84 x 54 mm, knob on top, OLED held by clamp bars, the

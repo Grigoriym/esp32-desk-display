@@ -32,6 +32,28 @@ Wire colours: 🟢 green = D21 (SDA), 🟡 yellow = D22 (SCL).
 | | DT | D26 | |
 | | CLK | D25 | |
 
+## On the ESP32 mini (planned, 2026-10-18)
+
+Same GPIOs, so no firmware change. Pads with the can up, antenna end at
+the top, "left" = the RST button's side, counted from the antenna end.
+✓ = confirmed by the mini's Homebox entry; the rest is the standard
+MH-ET LIVE MiniKit pinout, **to check on the board's silkscreen**.
+
+| Function | GPIO | Pad |
+|---|---|---|
+| 3V3 (all modules) | 3V3 | left inner 5th ✓ (the only 3V3 pad) |
+| GND | GND | right inner 7th ✓ or right outer 1st ✓ |
+| SDA | IO21 | right inner 4th |
+| SCL | IO22 | right inner 3rd |
+| Knob CLK | IO25 | right outer 3rd ✓ |
+| Knob DT | IO26 | left inner 3rd |
+| Knob SW | IO27 | right outer 2nd ✓ |
+
+Keep clear: right inner 8th = 5 V (labelled VCC, next to GND), right
+inner 1st/2nd = TXD/RXD (next to IO22). Option, not decided: SW on IO32
+puts the knob on four adjacent right outer pads (GND, 27, 25, 32), as in
+mukklet; two `#define`s in `main/encoder.c`.
+
 - Part facts (module pin order, addresses, current draw, the DevKit's pin order)
   are in each part's Homebox entry (`python3
   ../grappim-watcher/docs/esp32/inventory/parts.py show <part>`); GPIO, power and I2C rules in
