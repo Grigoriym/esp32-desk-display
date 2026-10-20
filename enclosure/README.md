@@ -51,8 +51,12 @@ Inside:
 - **Sensor bay** (BME280, SCD41): low at the front, walled off by the hood.
   Air in through the floor slots, out through the strip and the side
   slots. Nothing warm inside it. Cables out through a notch in the hood's
-  back wall. ~19 mm tall inside: solder the sensor cables straight on or
-  use right-angle pins.
+  back wall. ~19 mm tall inside: the sensor cables are soldered straight
+  onto both boards (decided 2026-10-20), Dupont only at the carrier end.
+  Pins on the sensors don't fit: straight ones + a plug are ~28 tall,
+  right-angle ones + a plug reach ~25 past the board, wider than the bay.
+  For a later version: right-angle pins pointing back, plugs through slots
+  in the hood's back wall, bay ~3 deeper for the SCD41.
 - **Carrier** (built and measured 2026-10-20): the uncut 60 x 40 Miuzei
   perfboard on 4 standoffs, 18 mm tall, socket side up, its soldered
   wires (~5) underneath, white loops ~6 past its back edge. The DS3231
