@@ -1,7 +1,9 @@
-// Desk display enclosure (ROADMAP task 15): DevKit, OLED, KY-040, SCD41,
-// BME280, DS3231, no battery. The uncut 4 x 6 cm perfboard is the carrier,
-// ESP32 left-to-right on it, USB-C out the right side, DS3231 on the floor
-// under the carrier. Fits and fasteners follow what mukklet's printed
+// Desk display enclosure (ROADMAP task 15): ESP32 mini, OLED, KY-040,
+// SCD41, BME280, DS3231, no battery. The uncut 4 x 6 cm perfboard is the
+// carrier, socket side up: the mini plugged into it left-to-right, USB-C
+// out the right side, the modules' pin headers beside it, the soldered
+// wires underneath; DS3231 on the floor under the carrier (carrier built
+// 2026-10-20, measured that day). Fits and fasteners follow what mukklet's printed
 // cases taught (esp32-mukklet, 2026-10-07 and 2026-10-16;
 // ENCLOSURE_PLAYBOOK.md):
 // - the screen panel is its own part (front plate, 4 screws from the
@@ -61,12 +63,13 @@ oled_lit_top = 3.0; // lit area's top edge below the pin edge (ASSUMED: +-0.5, f
 oled_back = 8.25; // header pins + plastic behind the PCB
 oled_dupont = 14; // a plugged-in Dupont connector adds this
 
-esp_l = 51.49;
-esp_w = 28.36;
-esp_t = 1.6; // ASSUMED
-esp_top = 4.78; // tallest part above the board bottom
-esp_usb_z = 3.2; // USB-C centre above the board bottom
-esp_pin_span = 15 * 2.54; // pin rows' length, centred on the board (ASSUMED)
+// ESP32 mini (D1 mini layout), metal can up
+esp_l = 39.02; // antenna edge to the USB end
+esp_w = 31.51; // across the pin rows
+esp_t = 1.49;
+esp_top = 4.66; // board bottom to the top of the metal can
+esp_usb_z = 4.61 - 3.12 / 2; // USB-C centre above the board bottom
+esp_usb_out = 1.22; // USB-C shell past the board edge
 esp_antenna = 6; // antenna end, opposite the USB
 
 ky_l = 26.18;
@@ -110,10 +113,17 @@ scd_h = 7.59;
 perf_w = 60;
 perf_d = 40;
 perf_t = 1.6;
-perf_standoff = 16; // the DS3231 lies on the floor under it
+perf_standoff = 18; // the DS3231 lies on the floor under it, below the wires
 perf_hole_inset = 3.5;
 perf_pilot = 1.6; // 2 x 6 self-tapping, black kit (2.0 into 1.6 worked in mukklet)
-hdr_h = 8.5; // female header the ESP32 plugs into (ASSUMED: standard; sets the USB hole's height)
+hdr_h = 8.35 + 2.42; // carrier to the mini: female socket + the mini's own male header plastic
+wire_h = 5; // soldered wires under the carrier, highest loop (~5, +-)
+wire_clear = 2; // kept free below them
+loop_out = 6; // white wire loops past the carrier's back edge, around cols 9-12
+pin_plastic = 2.42; // module pin headers (standard, straight): plastic on the board
+pin_tip = 8.28; // board to the pin tips
+dupont = 14; // a Dupont jumper housing on the pins (standard, ASSUMED)
+dupont_bend = 5; // straight cable above it before it can bend (ASSUMED)
 
 // ------------------------------------------------------------ case
 wall = 2.0;
@@ -207,25 +217,25 @@ assert(knob_cap_z > knob_nut_z + ky_nut_t + 1, "knob cap sits on the nut");
 // Everything on the carrier sits on its 2.54 hole grid: hole (col, row) is
 // at [grid_x0 + col * p, grid_y0 + row * p]. 20 cols along X, 14 rows
 // across Y, ASSUMED centred on the board (margins 5.87 along, 3.49
-// across). ESP32 pins in cols 5-19, pin rows in rows 2 and 12; cols 0-2
-// and row 0 are free for sockets
+// across). Row 0 at the front. The mini's four 10-pin sockets in rows 1,
+// 2, 11, 12, cols 10-19 (it sits centred across the board); its USB end
+// measured 2.5 past the carrier's right edge. Pin headers in cols 0-4
 p = 2.54;
-usb_gap = 1.5; // ESP32's USB end to the wall
-esp_pin_edge = (esp_l - esp_pin_span) / 2 + p / 2; // board end to the first pin's centre
-esp_row_edge = (esp_w - 10 * p) / 2; // long edge to its pin row's centre
-grid_x0 = W - wall - usb_gap - esp_pin_edge - 19 * p;
+usb_gap = 1.5; // USB-C shell to the wall
+esp_over = 2.5; // mini's board past the carrier's right edge
+esp_x1 = W - wall - usb_gap - esp_usb_out;
+esp_x0 = esp_x1 - esp_l;
+perf_x1 = esp_x1 - esp_over;
+perf_x0 = perf_x1 - perf_w;
+grid_x0 = perf_x0 + 5.87;
 grid_y0 = D - wall - boss_d - 1 - perf_d + 3.49;
-perf_x0 = grid_x0 - 5.87;
 perf_y0 = grid_y0 - 3.49;
-perf_x1 = perf_x0 + perf_w;
 perf_y1 = perf_y0 + perf_d;
 perf_z = base_t + perf_standoff;
-esp_x0 = grid_x0 + 5 * p - esp_pin_edge;
-esp_y0 = grid_y0 + 2 * p - esp_row_edge;
-esp_x1 = esp_x0 + esp_l;
+esp_y0 = grid_y0 + 6.5 * p - esp_w / 2;
 esp_y1 = esp_y0 + esp_w;
-esp_z = perf_z + perf_t + hdr_h; // ESP32 board bottom
-usb_y = (esp_y0 + esp_y1) / 2; // hole in the right wall
+esp_z = perf_z + perf_t + hdr_h; // mini board bottom
+usb_y = (esp_y0 + esp_y1) / 2; // hole in the right wall (socket ~0.25 off centre: ignored)
 usb_z = esp_z + esp_usb_z;
 usb_hole = [13, 8];
 
@@ -237,19 +247,15 @@ ds_b = [26, (perf_y0 + perf_y1) / 2 - ds_w / 2, 26 + ds_l, (perf_y0 + perf_y1) /
 echo(str("case ", W, " x ", D, " x ", H, " mm (W x D x H)"));
 echo(str("usb centre z ", usb_z, ", knob board face z ", ky_face_z));
 assert(perf_x1 < W - wall && perf_y1 < D - wall, "carrier hits a wall");
-assert(esp_x1 < W - wall && esp_y1 < D - wall, "ESP32 hits a wall");
+assert(esp_x1 + esp_usb_out < W - wall && esp_y1 < D - wall, "ESP32 hits a wall");
+assert(perf_y1 + loop_out < D - wall, "wire loops hit the back wall");
 assert(knob_x - ky_w / 2 > wall + rail_w + 1, "knob board too close to the left front rail");
 
-// JST-XH sockets (vertical, 2.5 pitch) on the carrier: [name, pins, col,
-// row of the first pin, pin line along X?]
-xh = [["BME280", 4, 3, 0, true], ["SCD41", 4, 8, 0, true], ["OLED", 4, 13, 0, true],
-      ["RTC", 4, 0, 3, false], ["KNOB", 5, 0, 8, false]];
-xh_h = 7; // socket height
-xh_plug = 12; // mated plug + cable bend above the board (ASSUMED)
-for (c = xh) let(at = hole(c[2], c[3]), e = [at.x - 2.9, at.y - 2.9,
-  at.x + (c[4] ? (c[1] - 1) * p : 0) + 2.9, at.y + (c[4] ? 0 : (c[1] - 1) * p) + 2.9])
-  assert(e[0] > perf_x0 && e[1] > perf_y0 && e[2] < perf_x1 && e[3] < perf_y1, str(c[0], " socket off the carrier"));
-assert(perf_z - 3 > ds_z + ds_h, "no room for the DS3231 under the carrier");
+// straight male pin headers on the carrier, pin line along X: [name, pins,
+// col, row]. KNOB (GND + SW DT CLK) at the back; the four I2C ones (GND
+// VCC SCL SDA) take any I2C module
+hd = [["KNOB", 5, 0, 12], ["I2C", 4, 0, 9], ["I2C", 4, 0, 6], ["I2C", 4, 0, 3], ["I2C", 4, 0, 0]];
+assert(perf_z - wire_h - wire_clear >= ds_z + ds_h, "no room for the DS3231 under the carrier's wires");
 
 // ------------------------------------------------------------ pre-print checks
 // What the clash check can't see (the enclosure-preprint-review skill;
@@ -497,27 +503,28 @@ module hood() difference() {
 }
 
 // ------------------------------------------------------------ stand-ins
-// one JST-XH socket, with its mated plug + cable bend as a see-through block
-module xh_frame(c) {
-  n = c[1];
-  mid = (n - 1) * p / 2;
-  at = hole(c[2], c[3]);
-  translate([at.x, at.y, perf_z + perf_t]) if (c[4]) translate([mid, 0, 0]) children();
-  else translate([0, mid, 0]) rotate([0, 0, 90]) children();
+// one pin header, centred on its pin line, z 0 = the carrier's top
+module hd_frame(c) let(at = hole(c[2], c[3])) translate([at.x + (c[1] - 1) * p / 2, at.y, perf_z + perf_t]) children();
+
+// plastic, and a plugged-in Dupont housing + straight cable as a see-through block
+module hd_header(c) hd_frame(c) {
+  l = c[1] * p;
+  color("dimgray") box([-l / 2, -p / 2, eps], [l / 2, p / 2, pin_plastic]);
+  color("gold", 0.35) box([-l / 2 - 0.2, -p / 2 - 0.2, pin_plastic + eps], [l / 2 + 0.2, p / 2 + 0.2, pin_plastic + dupont + dupont_bend]);
 }
 
-module xh_socket(c) xh_frame(c) {
-  l = (c[1] - 1) * 2.5 + 4.9;
-  color("white") box([-l / 2, -5.75 / 2, eps], [l / 2, 5.75 / 2, xh_h]);
-  color("gold", 0.35) box([-l / 2 - 0.3, -3.2, xh_h + eps], [l / 2 + 0.3, 3.2, xh_plug]);
-}
-
-module xh_label(c) xh_frame(c) color("black") translate([0, 0, xh_plug + 0.3])
+module hd_label(c) hd_frame(c) color("black") translate([0, 0, pin_plastic + dupont + dupont_bend + 0.3])
   linear_extrude(0.3) text(c[0], size = 2, halign = "center", valign = "center");
 
-// ESP32 local coordinates: x 0..esp_w, y 0..esp_l (antenna at y 0, USB at
-// esp_l), world z
-module esp_place() translate([esp_x0, esp_y1, 0]) rotate([0, 0, -90]) children();
+// the soldered wires under the carrier (standoffs left free), and the white
+// loops past its back edge
+module wires_standin() color("white", 0.6) {
+  difference() {
+    box([perf_x0, perf_y0, perf_z - wire_h], [perf_x1, perf_y1, perf_z - eps]);
+    for (q = perf_holes) translate([q.x, q.y, 0]) cylinder(d = 6 + 2 * clr, h = H);
+  }
+  box([hole(9, 0).x - p, perf_y1 + eps, perf_z - wire_h], [hole(12, 0).x + p, perf_y1 + loop_out, perf_z + perf_t]);
+}
 
 module oled_standin() color("steelblue") oled_frame() {
   box([-oled_w / 2, oled_t - oled_pcb_t, -oled_h / 2], [oled_w / 2, oled_t - eps, oled_h / 2]);
@@ -526,13 +533,15 @@ module oled_standin() color("steelblue") oled_frame() {
   color("gold", 0.35) box([-5.1, oled_t + oled_back, oled_h / 2 - 2.54], [5.1, oled_t + oled_back + oled_dupont, oled_h / 2]);
 }
 
-module esp_standin() esp_place() {
-  color("dimgray") for (dx = [0, 25.4])
-    box([esp_row_edge + dx - p / 2, esp_pin_edge - p / 2, perf_z + perf_t], [esp_row_edge + dx + p / 2, esp_pin_edge + 14.5 * p, esp_z]);
-  color("black") box([0, 0, esp_z], [esp_w, esp_l, esp_z + esp_t]);
-  color("silver") box([5, esp_antenna + 1, esp_z + esp_t], [esp_w - 5, 25, esp_z + esp_top]);
-  color("silver") box([esp_w / 2 - 4.45, esp_l - 7, esp_z + esp_t], [esp_w / 2 + 4.45, esp_l + 0.5, esp_z + esp_top]);
-  color("orange", 0.5) box([0, 0, esp_z + esp_t], [esp_w, esp_antenna, esp_z + esp_top]); // antenna: keep clear
+// the mini: its sockets (two 10-pin pairs, rows 1-2 and 11-12) up to its
+// board, can and USB-C on top, antenna end left
+module esp_standin() {
+  color("black") for (r = [1, 11])
+    box([hole(10, r).x - p / 2, hole(10, r).y - p / 2, perf_z + perf_t], [hole(19, r).x + p / 2, hole(10, r + 1).y + p / 2, esp_z]);
+  color("royalblue") box([esp_x0, esp_y0, esp_z], [esp_x1, esp_y1, esp_z + esp_t]);
+  color("silver") box([esp_x0 + esp_antenna + 1, esp_y0 + 6, esp_z + esp_t], [esp_x0 + 26, esp_y1 - 6, esp_z + esp_top]);
+  color("silver") box([esp_x1 - 7, usb_y - 4.45, esp_z + esp_t], [esp_x1 + esp_usb_out, usb_y + 4.45, esp_z + esp_top]);
+  color("orange", 0.5) box([esp_x0, esp_y0, esp_z + esp_t], [esp_x0 + esp_antenna, esp_y1, esp_z + esp_top]); // antenna: keep clear
 }
 
 module ds_standin() ds_place() {
@@ -569,7 +578,8 @@ module knob_standin() {
 module base_standins() {
   color("darkgreen") box([perf_x0, perf_y0, perf_z], [perf_x1, perf_y1, perf_z + perf_t]);
   esp_standin();
-  for (c = xh) xh_socket(c);
+  for (c = hd) hd_header(c);
+  wires_standin();
   ds_standin();
   color("purple") {
     box([bme_xy.x - bme_l / 2, bme_xy.y - bme_w / 2, base_t + ledge_h], [bme_xy.x + bme_l / 2, bme_xy.y + bme_w / 2, base_t + ledge_h + bme_h]);
@@ -594,9 +604,9 @@ module label(txt, p, dz) color("black") translate(p) {
 function panel_pt(x, y, z) = [W / 2 + x, y * cos(tilt) + z * sin(tilt), skirt_h + z * cos(tilt) - y * sin(tilt)];
 
 module labels() {
-  for (c = xh) xh_label(c);
+  for (c = hd) hd_label(c);
   label("OLED", panel_pt(0, wall + oled_t + oled_back, oled_v + oled_h / 2), 13);
-  label("ESP32", [(esp_x0 + esp_x1) / 2, usb_y, esp_z + esp_top], 3);
+  label("ESP32 mini", [(esp_x0 + esp_x1) / 2, usb_y, esp_z + esp_top], 3);
   label("antenna", [esp_x0 + 3, usb_y, esp_z + esp_top], 13);
   label("USB-C", [esp_x1, usb_y, esp_z + esp_top], 18);
   label("carrier", [perf_x0 + 6, perf_y0 + 3, perf_z + perf_t], 8);
@@ -683,13 +693,14 @@ else if (part == "clash") {
     knob_standin();
     base_standins();
   }
-  // sockets and plugs against the ESP32 (and its headers) and the DS3231
+  // headers and plugs against the ESP32 (and its sockets); wires against the DS3231
   intersection() {
-    for (c = xh) xh_socket(c);
-    union() {
-      esp_standin();
-      ds_standin();
-    }
+    for (c = hd) hd_header(c);
+    esp_standin();
+  }
+  intersection() {
+    wires_standin();
+    ds_standin();
   }
 }
 else {

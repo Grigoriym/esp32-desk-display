@@ -1,7 +1,7 @@
 # Enclosure (ROADMAP task 15)
 
 OpenSCAD model of the case, `enclosure.scad`, for the first finished build:
-ESP32 DevKit, OLED, KY-040, SCD41, BME280, DS3231, no battery. Open it in
+ESP32 mini, OLED, KY-040, SCD41, BME280, DS3231, no battery. Open it in
 OpenSCAD for the assembled view (modules as coloured stand-in blocks,
 see-through gold = plugged-in connectors). `-D cut=40` cuts the printed
 parts away left of x = 40; `-D explode=40 -D explode_front=30` pulls the
@@ -53,13 +53,17 @@ Inside:
   slots. Nothing warm inside it. Cables out through a notch in the hood's
   back wall. ~16 mm tall inside: solder the sensor cables straight on or
   use right-angle pins.
-- **Carrier**: the uncut 60 x 40 Miuzei perfboard on 4 standoffs, 16 mm
-  tall: the DS3231 lies on the floor under it (holder, coin cell up, JST
-  cable). The ESP32 plugs into two 15-pin female headers on it, left to
-  right, USB-C out the right side; its antenna end is over the board, under
-  the knob, nothing else above it. Five JST-XH sockets: BME280, SCD41, OLED
-  along the front edge, RTC and KNOB at the left end. The hole grid is
-  ASSUMED centred on the board.
+- **Carrier** (built and measured 2026-10-20): the uncut 60 x 40 Miuzei
+  perfboard on 4 standoffs, 18 mm tall, socket side up, its soldered
+  wires (~5) underneath, white loops ~6 past its back edge. The DS3231
+  lies on the floor under it, 2 below the wires (holder, coin cell up).
+  The ESP32 mini plugs into four 10-pin female sockets (rows 1-2 / 11-12,
+  cols 10-19; 8.35 socket + 2.42 of the mini's own header = 10.77 to its
+  board), can up, USB-C 2.5 + 1.22 past the carrier out the right side,
+  antenna end left. Five straight male pin headers in cols 0-4 (KNOB
+  5-pin at the back, four 4-pin I2C), Dupont jumpers on them (made to
+  length once the case is printed). The hole grid is ASSUMED centred on
+  the board.
 - **OLED**: glass flat on the plate's inner face between 4 corner stops,
   two clamp bars screwed to posts beside it. The posts stop 0.3 short of
   the PCB's back, so the bars press on it. Its corner holes aren't used
@@ -94,7 +98,7 @@ Self-tapping screws from the two kits (Homebox: `parts.py show screws`):
 - 2 × 2 × 4, black kit (OLED clamps; pilot 1.6)
 - 4 × 2 × 6, black kit (carrier → standoffs; pilot 1.6). Lay the perfboard
   in its outline on the base, mark the standoffs through, drill 2.5.
-- 2 × 15-pin female headers, JST-XH sockets + cables, 4 rubber feet ≥ 2 mm
+- Dupont jumpers for the five headers, 4 rubber feet ≥ 2 mm
   (they lift the floor slots off the desk)
 
 ## Assembly
@@ -110,8 +114,10 @@ Self-tapping screws from the two kits (Homebox: `parts.py show screws`):
 
 ## Before ordering
 
-1. **Measure the female headers' height** (`hdr_h` = 8.5 assumed): it sets
-   the ESP32's height and so the USB hole's (8 tall for a ~6.5 plug: ±0.75).
+1. **The front two I2C headers are under the knob** (rows 0 and 3, the
+   KY-040 board and its plug above them): a Dupont plug + 5 of straight
+   cable ends 0.1 under the knob board and ~1 under its plug, so those
+   cables must bend away at once. Not decided yet.
 2. Where the perfboard's hole grid sits (assumed centred): shifts the USB
    sideways (hole 13 wide for a ~12 plug).
 3. Check in OpenSCAD and against the cardboard mock-up.
