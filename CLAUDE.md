@@ -341,8 +341,9 @@ OpenSCAD (local 2021.01) in `enclosure/`, see its README. `export.sh
 printability lessons: `../grappim-watcher/docs/esp32/ENCLOSURE_PLAYBOOK.md`;
 part dimensions and how each part can be held: its Homebox entry.
 - **One model, `enclosure.scad`** (since 2026-10-18; the user wants no
-  `_v<n>` files): the user's "v1 of the project" = DevKit + the day-one
-  modules, no battery. Earlier models (ESP32 across the perfboard's 4 cm
+  `_v<n>` files): the user's "v1 of the project" = the day-one modules,
+  no battery, on the ESP32 mini carrier (modelled 2026-10-20; was the
+  DevKit until then). Earlier models (ESP32 across the perfboard's 4 cm
   side, the cut carrier, the ESP32 mini) are in git history only. Five
   parts: body, front plate, base, hood, 2 clamps, shaped by what
   mukklet's printed cases taught. Before printing: `enclosure/export.sh`

@@ -263,6 +263,16 @@ WiFi connect timeout: done 2026-09-25, see Open questions in `CLAUDE.md`.
     `enclosure.scad`. Still unanswered: are the perfboard, JST-XH
     sockets/plugs, female headers and rubber feet in hand? None has a
     Homebox entry.
+  - **2026-10-20: carrier built and modelled.** The user soldered it:
+    mini in four 10-pin female sockets, straight male pin headers + Dupont
+    jumpers (not JST-XH) for the modules, wires underneath. Measured
+    (caliper guide artifact, see memory) and ported into `enclosure.scad`:
+    standoffs 18 (DS3231 under the wires), case 3 taller (57) so the front
+    headers' plugs clear the knob, DS3231 3 right for a Dupont on its 6-pin
+    end. BME280/SCD41 cables soldered straight on (pins don't fit the bay).
+    **Next**: the user double-checks the model in OpenSCAD (said
+    2026-10-20), then the test print. Still assumed: the DS3231's
+    right-angle pins (~6), the hole grid centred on the board.
   - Steps: [x] measure every part (`enclosure/MEASUREMENTS.md`, 2026-09-28)
     -> [x] OpenSCAD model + preview renders (`enclosure/`, see its README;
     2026-09-28: 80 x 84 x 54 mm, knob on top, OLED held by clamp bars, the
