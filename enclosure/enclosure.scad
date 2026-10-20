@@ -122,7 +122,7 @@ wire_clear = 2; // kept free below them
 loop_out = 6; // white wire loops past the carrier's back edge, around cols 9-12
 pin_plastic = 2.42; // module pin headers (standard, straight): plastic on the board
 pin_tip = 8.28; // board to the pin tips
-dupont = 14; // a Dupont jumper housing on the pins (standard, ASSUMED)
+dupont = 14; // a Dupont jumper housing on the pins (user, 2026-10-20)
 dupont_bend = 5; // straight cable above it before it can bend (ASSUMED)
 
 // ------------------------------------------------------------ case
