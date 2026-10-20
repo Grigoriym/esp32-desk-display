@@ -30,7 +30,7 @@ thread above the knob nut). It prints those margins (`CHECKS:`) and every
 
 ## Layout
 
-80 x 84 x 54 mm (W x D x H). A wedge: the OLED on a panel tilted 20° back,
+80 x 84 x 57 mm (W x D x H). A wedge: the OLED on a panel tilted 20° back,
 a vented strip under it, the knob on top (left), USB-C out the right side.
 
 Five printed parts:
@@ -51,7 +51,7 @@ Inside:
 - **Sensor bay** (BME280, SCD41): low at the front, walled off by the hood.
   Air in through the floor slots, out through the strip and the side
   slots. Nothing warm inside it. Cables out through a notch in the hood's
-  back wall. ~16 mm tall inside: solder the sensor cables straight on or
+  back wall. ~19 mm tall inside: solder the sensor cables straight on or
   use right-angle pins.
 - **Carrier** (built and measured 2026-10-20): the uncut 60 x 40 Miuzei
   perfboard on 4 standoffs, 18 mm tall, socket side up, its soldered
@@ -114,10 +114,9 @@ Self-tapping screws from the two kits (Homebox: `parts.py show screws`):
 
 ## Before ordering
 
-1. **The front two I2C headers are under the knob** (rows 0 and 3, the
-   KY-040 board and its plug above them): a Dupont plug + 5 of straight
-   cable ends 0.1 under the knob board and ~1 under its plug, so those
-   cables must bend away at once. Not decided yet.
+1. The front two I2C headers are under the knob (rows 0 and 3): the
+   case was made 3 taller for them (2026-10-20), a Dupont plug + 5 of
+   straight cable now ends ~3 under the knob board.
 2. Where the perfboard's hole grid sits (assumed centred): shifts the USB
    sideways (hole 13 wide for a ~12 plug).
 3. Check in OpenSCAD and against the cardboard mock-up.

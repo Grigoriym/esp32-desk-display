@@ -128,7 +128,7 @@ dupont_bend = 5; // straight cable above it before it can bend (ASSUMED)
 // ------------------------------------------------------------ case
 wall = 2.0;
 tilt = 20; // screen panel, back from vertical
-skirt_h = 22; // vented strip under the screen, in front of the sensor bay
+skirt_h = 25; // vented strip under the screen, in front of the sensor bay (22 until 2026-10-20: +3 so the front pin headers' plugs clear the knob)
 panel_margin = 4; // screen panel beyond the OLED board, top and bottom
 W = 80;
 D = 84;
