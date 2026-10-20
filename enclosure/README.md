@@ -60,7 +60,8 @@ Inside:
 - **Carrier** (built and measured 2026-10-20): the uncut 60 x 40 Miuzei
   perfboard on 4 standoffs, 18 mm tall, socket side up, its soldered
   wires (~5) underneath, white loops ~6 past its back edge. The DS3231
-  lies on the floor under it, 2 below the wires (holder, coin cell up).
+  lies on the floor under it, 2 below the wires (holder, coin cell up),
+  a Dupont on its 6-pin end, the cable up past the carrier's left edge.
   The ESP32 mini plugs into four 10-pin female sockets (rows 1-2 / 11-12,
   cols 10-19; 8.35 socket + 2.42 of the mini's own header = 10.77 to its
   board), can up, USB-C 2.5 + 1.22 past the carrier out the right side,

@@ -96,7 +96,7 @@ ky_dupont = 14; // a plugged-in 5-pin Dupont housing + cable bend, past the pins
 ds_l = 31.93;
 ds_w = 21.79;
 ds_h = 9.39;
-ds_pins6 = 14; // 6-pin end: right-angle pins + cable soldered on, bent away (ASSUMED)
+ds_pins6 = 6 + 14 + 5; // 6-pin end: right-angle pins (~6, ASSUMED) + a Dupont plug (14) + straight cable (5)
 ds_pins4 = 8; // pass-through 4-pin end: right-angle pins (ASSUMED)
 
 bme_l = 13.15;
@@ -242,7 +242,7 @@ usb_hole = [13, 8];
 // DS3231, on the floor in a holder, coin cell up, long axis left-to-right
 // under the carrier, 6-pin end to the left. Box ds_b = [x0, y0, x1, y1]
 ds_z = base_t + ledge_h;
-ds_b = [26, (perf_y0 + perf_y1) / 2 - ds_w / 2, 26 + ds_l, (perf_y0 + perf_y1) / 2 + ds_w / 2];
+ds_b = [29, (perf_y0 + perf_y1) / 2 - ds_w / 2, 29 + ds_l, (perf_y0 + perf_y1) / 2 + ds_w / 2];
 
 echo(str("case ", W, " x ", D, " x ", H, " mm (W x D x H)"));
 echo(str("usb centre z ", usb_z, ", knob board face z ", ky_face_z));
