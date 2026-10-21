@@ -271,15 +271,15 @@ WiFi connect timeout: done 2026-09-25, see Open questions in `CLAUDE.md`.
     headers' plugs clear the knob, DS3231 3 right for a Dupont on its 6-pin
     end. BME280/SCD41 cables soldered straight on (pins don't fit the bay).
     **Next**: the user double-checks the model in OpenSCAD (said
-    2026-10-20), then the test print. Checked 2026-10-21: the hole grid is centred on the board (equal
+    2026-10-20), then the full print. Checked 2026-10-21: the hole grid is centred on the board (equal
     margins all round), the DS3231's right-angle pins are its factory
     ones (standard ~6).
   - Steps: [x] measure every part (`enclosure/MEASUREMENTS.md`, 2026-09-28)
     -> [x] OpenSCAD model + preview renders (`enclosure/`, see its README;
     2026-09-28: 80 x 84 x 54 mm, knob on top, OLED held by clamp bars, the
     carrier is 60 x 40 mm) -> [x] KY-040 shaft position (~8.6 mm from
-    the end away from the pins, not the middle) -> [ ] test
-    print of the front panel only (now the `front` plate itself, + optional `test_knob`) -> [ ] full print
+    the end away from the pins, not the middle) -> [ ] full print
+    (no test print: v1 goes straight to all five parts, 2026-10-21)
     -> [ ] perfboard layout on a grid, solder -> [ ] assemble, then compare
     BME280 with a reference thermometer with the case open vs closed.
 

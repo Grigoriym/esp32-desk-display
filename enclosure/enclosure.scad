@@ -35,7 +35,7 @@
 // print orientation, "assembly" shows everything in place with stand-in
 // blocks for the modules, "clash" is empty when nothing overlaps.
 
-part = "assembly"; // [assembly, body, front, base, hood, clamp, test_knob, clash, dims]
+part = "assembly"; // [assembly, body, front, base, hood, clamp, clash, dims]
 cut = -1; // assembly only: >= 0 cuts the printed parts away left of this x
 show_body = true; // assembly only: untick to see inside
 show_front = true;
@@ -617,12 +617,6 @@ module labels() {
 }
 
 // ------------------------------------------------------------ output
-// optional test print: the front of the top, with the knob mount
-module test_knob() intersection() {
-  body();
-  box([-1, -1, H - 14], [W / 2, ky_y0 + ky_l + 3, H + 1]);
-}
-
 // assembly only: the printed parts cut away left of x = cut
 module cutaway() intersection() {
   children();
@@ -633,7 +627,6 @@ module cutaway() intersection() {
 module clamps() oled_frame() for (m = [0, 1]) mirror([m, 0, 0]) clamp_bar();
 
 if (part == "body") translate([0, D, H]) rotate([180, 0, 0]) body();
-else if (part == "test_knob") translate([0, D, H]) rotate([180, 0, 0]) test_knob();
 else if (part == "front") rotate([90, 0, 0]) rotate([tilt, 0, 0]) translate([-W / 2, 0, -skirt_h]) front(); // face down
 else if (part == "base") base();
 else if (part == "clamp") for (i = [0, 1]) translate([i * 12, 0, 0])

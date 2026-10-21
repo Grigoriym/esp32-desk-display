@@ -15,7 +15,7 @@ case only. Earlier models (v1-v3: the ESP32 across the 4 cm side, the cut
 carrier, the ESP32 mini) are in git history before 2026-10-18.
 
 ```
-enclosure/export.sh      # checks, then stl/enclosure/{body,front,base,hood,clamp,test_knob}.stl (gitignored) + renders/
+enclosure/export.sh      # checks, then stl/enclosure/{body,front,base,hood,clamp}.stl (gitignored) + renders/
 enclosure/cardboard.py   # 1:1 A4 templates -> enclosure/cardboard.pdf (gitignored)
 ```
 
@@ -90,7 +90,6 @@ Inside:
 | `base` | 1 | flat | |
 | `hood` | 1 | roof on the bed | |
 | `clamp` | 2 (file has both) | flat | |
-| `test_knob` | optional | like the body | the top's front with the knob mount |
 
 Material: PETG preferred (PLA softens ~55 °C). Fit clearance 0.3 (`clr`).
 
