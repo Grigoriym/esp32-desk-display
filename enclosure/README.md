@@ -118,10 +118,17 @@ Self-tapping screws from the two kits (Homebox: `parts.py show screws`):
 
 ## Before ordering
 
-1. The front two I2C headers are under the knob (rows 0 and 3): the
-   case was made 3 taller for them (2026-10-20), a Dupont plug + 5 of
-   straight cable now ends ~3 under the knob board.
-2. Check in OpenSCAD and against the cardboard mock-up.
+Done for v1 (sent to print 2026-10-21). For a later version: `export.sh`
+passes, then the user checks the model in OpenSCAD. The front two I2C
+headers are under the knob (rows 0 and 3): a Dupont plug + 5 of straight
+cable ends ~3 under the knob board (why the case is 57 tall).
+
+Not reconciled: the hole-grid margin was measured as 3.75 to the first
+hole's near side on all four sides, but the model's 20 x 14 grid on the
+60 x 40 board gives ~5.4 along / ~3.0 across. Only "equal on opposite
+sides" was used (it keeps the grid centred, so the USB hole doesn't move).
+If the carrier sits off on the printed standoffs, recount the holes per
+row and column and remeasure the board.
 
 ## Printed-part checklist
 

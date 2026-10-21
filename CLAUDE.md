@@ -346,7 +346,9 @@ part dimensions and how each part can be held: its Homebox entry.
   DevKit until then). Earlier models (ESP32 across the perfboard's 4 cm
   side, the cut carrier, the ESP32 mini) are in git history only. Five
   parts: body, front plate, base, hood, 2 clamps, shaped by what
-  mukklet's printed cases taught. Before printing: `enclosure/export.sh`
+  mukklet's printed cases taught. **v1 sent to print 2026-10-21** (the
+  five STLs in `enclosure/stl/enclosure/`, which holds exactly what to
+  print). Before a reprint: `enclosure/export.sh`
   (clash + pre-print asserts) and the open items in `enclosure/README.md`.
 
 ## Roadmap
