@@ -122,9 +122,7 @@ Self-tapping screws from the two kits (Homebox: `parts.py show screws`):
 1. The front two I2C headers are under the knob (rows 0 and 3): the
    case was made 3 taller for them (2026-10-20), a Dupont plug + 5 of
    straight cable now ends ~3 under the knob board.
-2. Where the perfboard's hole grid sits (assumed centred): shifts the USB
-   sideways (hole 13 wide for a ~12 plug).
-3. Check in OpenSCAD and against the cardboard mock-up.
+2. Check in OpenSCAD and against the cardboard mock-up.
 
 ## Printed-part checklist
 

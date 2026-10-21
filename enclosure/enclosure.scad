@@ -216,8 +216,8 @@ assert(knob_cap_z > knob_nut_z + ky_nut_t + 1, "knob cap sits on the nut");
 
 // Everything on the carrier sits on its 2.54 hole grid: hole (col, row) is
 // at [grid_x0 + col * p, grid_y0 + row * p]. 20 cols along X, 14 rows
-// across Y, ASSUMED centred on the board (margins 5.87 along, 3.49
-// across). Row 0 at the front. The mini's four 10-pin sockets in rows 1,
+// across Y, centred on the board (margins 5.87 along, 3.49 across; the
+// user measured equal margins on all four sides, 2026-10-21). Row 0 at the front. The mini's four 10-pin sockets in rows 1,
 // 2, 11, 12, cols 10-19 (it sits centred across the board); its USB end
 // measured 2.5 past the carrier's right edge. Pin headers in cols 0-4
 p = 2.54;
