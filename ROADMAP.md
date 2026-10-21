@@ -271,8 +271,8 @@ WiFi connect timeout: done 2026-09-25, see Open questions in `CLAUDE.md`.
     headers' plugs clear the knob, DS3231 3 right for a Dupont on its 6-pin
     end. BME280/SCD41 cables soldered straight on (pins don't fit the bay).
     **Next**: the user double-checks the model in OpenSCAD (said
-    2026-10-20), then the test print. Still assumed: the DS3231's
-    right-angle pins (~6), the hole grid centred on the board.
+    2026-10-20), then the test print. Still assumed: the hole grid centred on the board (the DS3231's
+    right-angle pins are its factory ones, 2026-10-21: standard ~6).
   - Steps: [x] measure every part (`enclosure/MEASUREMENTS.md`, 2026-09-28)
     -> [x] OpenSCAD model + preview renders (`enclosure/`, see its README;
     2026-09-28: 80 x 84 x 54 mm, knob on top, OLED held by clamp bars, the

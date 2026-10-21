@@ -96,8 +96,8 @@ ky_dupont = 14; // a plugged-in 5-pin Dupont housing + cable bend, past the pins
 ds_l = 31.93;
 ds_w = 21.79;
 ds_h = 9.39;
-ds_pins6 = 6 + 14 + 5; // 6-pin end: right-angle pins (~6, ASSUMED) + a Dupont plug (14) + straight cable (5)
-ds_pins4 = 8; // pass-through 4-pin end: right-angle pins (ASSUMED)
+ds_pins6 = 6 + 14 + 5; // 6-pin end: factory right-angle pins (standard ~6 mating length; the plug slides over them, so on the safe side) + a Dupont plug (14) + straight cable (5)
+ds_pins4 = 8; // pass-through 4-pin end: factory right-angle pins
 
 bme_l = 13.15;
 bme_w = 10.66;
