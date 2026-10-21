@@ -67,8 +67,8 @@ Inside:
   board), can up, USB-C 2.5 + 1.22 past the carrier out the right side,
   antenna end left. Five straight male pin headers in cols 0-4 (KNOB
   5-pin at the back, four 4-pin I2C), Dupont jumpers on them (made to
-  length once the case is printed). The hole grid is ASSUMED centred on
-  the board.
+  length once the case is printed). The hole grid is centred on the board
+  (measured 2026-10-21).
 - **OLED**: glass flat on the plate's inner face between 4 corner stops,
   two clamp bars screwed to posts beside it. The posts stop 0.3 short of
   the PCB's back, so the bars press on it. Its corner holes aren't used
