@@ -350,6 +350,10 @@ part dimensions and how each part can be held: its Homebox entry.
   five STLs in `enclosure/stl/enclosure/`, which holds exactly what to
   print). Before a reprint: `enclosure/export.sh`
   (clash + pre-print asserts) and the open items in `enclosure/README.md`.
+  **Printed parts back 2026-10-23**: all fit except the OLED's window
+  (off toward the pin edge) and clamp bars (on SMD parts); the front
+  plate + clamps get reprinted (ROADMAP 15 "Next"). `enclosure/assembly.html`
+  = assembly order + every screw, for the user.
 
 ## Roadmap
 Next tasks live in `ROADMAP.md` as a checklist, one task per session — read it

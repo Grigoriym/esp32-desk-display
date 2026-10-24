@@ -274,14 +274,35 @@ WiFi connect timeout: done 2026-09-25, see Open questions in `CLAUDE.md`.
     the DS3231's right-angle pins are its factory ones (standard ~6), the
     hole grid is centred (3.75 from each edge to the first hole's near
     side, all four sides). **The five STLs went to the printer.**
-    **Next**: assemble when the parts are back, go through the
-    "Printed-part checklist" in `enclosure/README.md`.
+  - **2026-10-23: printed parts back.** Everything fits except the OLED
+    (photos of the plate and the module's back, 2026-10-23):
+    - the window is ~3-4 mm too close to the pin edge: pins up, the
+      board's GND/VCC/SCL/SDA label strip shows in it and the far side of
+      the picture is cut; flipped, the driver chip and flex show. The
+      `oled_lit_top = 3.0` guess (from a photo) is wrong.
+    - the clamp bars can't go on: SMD parts (C6 ... C3, U2, the GND/VCC
+      pads) run almost edge to edge across the middle of the back, right
+      where the bars' 3 mm side overlap presses. The 4 corners round the
+      mounting holes are free (the flex wraps the bottom edge between the
+      two lower ones).
+    - Carrier: two of the four standoffs lined up with the board's holes,
+      the other two didn't (drill at the post). DS3231 holder only stops
+      sliding; nothing holds it down (thin tape on its ledges).
+    **Next (2026-10-24)**: reprint the front plate + 2 clamps:
+    1. the user measures, display running, pins up, from the pin-side
+       board edge to the top and to the bottom of the lit picture (put
+       it in the OLED's Homebox entry, with the free corners);
+    2. move the window to it (`oled_lit_top`), maybe 1-2 mm more margin;
+    3. clamps press only on the 4 corners, relieved over the SMD band;
+    4. `export.sh`, user checks in OpenSCAD, print those two STLs only.
+    Until then: hot glue at two corners holds the OLED.
   - Steps: [x] measure every part (`enclosure/MEASUREMENTS.md`, 2026-09-28)
     -> [x] OpenSCAD model + preview renders (`enclosure/`, see its README;
     2026-09-28: 80 x 84 x 54 mm, knob on top, OLED held by clamp bars, the
     carrier is 60 x 40 mm) -> [x] KY-040 shaft position (~8.6 mm from
     the end away from the pins, not the middle) -> [x] sent to print
-    (2026-10-21, no test print: all five parts at once) -> [ ] parts back
+    (2026-10-21, no test print: all five parts at once) -> [x] parts back
+    (2026-10-23) -> [ ] front plate + clamps reprint
     -> [ ] perfboard layout on a grid, solder -> [ ] assemble, then compare
     BME280 with a reference thermometer with the case open vs closed.
 

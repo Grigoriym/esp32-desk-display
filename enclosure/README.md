@@ -95,6 +95,7 @@ Material: PETG preferred (PLA softens ~55 °C). Fit clearance 0.3 (`clr`).
 
 ## Hardware
 
+Assembly order with every screw, as a page: `assembly.html`.
 Self-tapping screws from the two kits (Homebox: `parts.py show screws`):
 - 4 × M3 × 10 round head, silver kit (base → body; 3.64 × 11.7 measured:
   4.0 holes, pilot 2.5, 13 deep)
@@ -129,8 +130,15 @@ hole's near side on all four sides, but the model's 20 x 14 grid on the
 sides" was used (it keeps the grid centred, so the USB hole doesn't move).
 If the carrier sits off on the printed standoffs, recount the holes per
 row and column and remeasure the board.
+On the print (2026-10-23) two of the four holes met their standoffs and
+two didn't: drill those at the post (2.5).
 
 ## Printed-part checklist
+
+Result of the v1 print (2026-10-23): all fits except the OLED's window
+(~3-4 mm toward the pin edge) and the clamp bars (they land on SMD parts);
+both redone in a front plate + clamp reprint, see ROADMAP 15. The DS3231
+holder doesn't hold it down: thin double-sided tape on its ledges.
 
 1. **Front plate**: the OLED sits flat between the stops, the clamp bars
    screw down without bending it. The window is the lit area + 0.5 all
