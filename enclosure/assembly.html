@@ -70,11 +70,11 @@ ul.check li { margin-bottom: 6px; }
 <p>All self-tapping, from the two kits (<code>parts.py show screws</code>). 14 in total.</p>
 <div class="wrap">
 <table>
-  <tr><th>Qty</th><th>Screw</th><th>Kit</th><th>Where</th><th>Hole / pilot</th></tr>
-  <tr><td class="qty">4</td><td>M3 × 10 round head<br><small>(measured 3.64 × 11.7)</small></td><td>silver</td><td><b>Base → body</b>, from below into the 4 corner bosses</td><td>4.0 through the base (2 mm counterbore for the head), 2.5 pilot, 13 deep</td></tr>
-  <tr><td class="qty">4</td><td>2 × 6 pan head</td><td>black</td><td><b>Front plate → side rails</b>, from the front (heads visible)</td><td>2.4 in the plate, 1.6 pilot in the rail</td></tr>
-  <tr><td class="qty">2</td><td>2 × 4</td><td>black</td><td><b>OLED clamp bars → posts</b> on the plate, one each side of the OLED</td><td>1.6 pilot in the post</td></tr>
-  <tr><td class="qty">4</td><td>2 × 6</td><td>black</td><td><b>Carrier → standoffs</b> on the base (18 mm tall)</td><td>drill 2.5 through the perfboard yourself (see step 1)</td></tr>
+  <tr><th>Qty</th><th>Screw</th><th>Kit</th><th>Where</th></tr>
+  <tr><td class="qty">4</td><td>M3 × 10 round head</td><td>silver</td><td><b>Base to body.</b> Turn the case over; one screw in each corner of the base, up into the body. The holes are printed, just screw in.</td></tr>
+  <tr><td class="qty">4</td><td>2 × 6</td><td>black</td><td><b>Front plate to body.</b> Two screws down each side of the screen plate, from the front, into the ledges on the side walls. Holes printed.</td></tr>
+  <tr><td class="qty">2</td><td>2 × 4</td><td>black</td><td><b>OLED clamp bars.</b> One small bar each side of the OLED, on the back of the screen plate; one screw per bar into the round post next to the OLED. Holes printed.</td></tr>
+  <tr><td class="qty">4</td><td>2 × 6</td><td>black</td><td><b>Carrier board to base.</b> One in each corner of the perfboard, into the 4 tall posts on the base. <b>The perfboard has no holes for these yet:</b> drill one 2.5 mm hole in each corner, 3.5 mm in from both edges, before the ESP32 is plugged in. Easiest: lay the board on the 4 posts, mark through where they are, drill.</td></tr>
 </table>
 </div>
 
@@ -92,7 +92,7 @@ ul.check li { margin-bottom: 6px; }
 <h2>Before assembling: dry fit</h2>
 <div class="note">Do these with nothing wired. If something is off, only that part gets reprinted.</div>
 <ul class="check">
-  <li><b>Carrier on the standoffs</b>, bare (no ESP32). The hole-grid margin was never reconciled with the model; if it sits off, recount the holes and remeasure the board.</li>
+  <li><b>Carrier on the 4 tall posts</b>, bare (no ESP32): its corners sit on the posts and the ESP32's USB lines up with the side hole.</li>
   <li><b>OLED in the front plate</b>: flat between the 4 corner stops; the clamp bars screw down without bending it. With it running, the time (left), the date's last digit (right) and the bottom row show in full.</li>
   <li><b>Front plate</b> drops in between the side walls; its holes meet the rail pilots.</li>
   <li><b>Knob</b>: the collar passes the 7.3 hole (else drill 7.5); the board sits between the two ribs; the nut tightens with thread to spare.</li>
@@ -103,7 +103,7 @@ ul.check li { margin-bottom: 6px; }
 <h2>Assembly order</h2>
 <ol class="steps">
   <li><b>DS3231 into its holder on the base</b>coin cell up, Dupont on its 6-pin end; the cable goes up past the carrier's left edge.</li>
-  <li><b>Carrier onto the standoffs, before the ESP32 goes in</b>Lay the perfboard in its outline on the base, mark the 4 standoffs through, drill 2.5, screw it down. The ESP32 would block the screwdriver on two holes.<span class="screw">4 × 2×6 black</span></li>
+  <li><b>Carrier onto the 4 tall posts, before the ESP32 goes in</b>Drill a 2.5 mm hole in each corner of the perfboard, 3.5 mm in from both edges (lay it on the posts and mark first). Screw it down. Then plug the ESP32 in: with it in, the screwdriver can't reach two of the screws.<span class="screw">4 × 2×6 black</span></li>
   <li><b>ESP32 mini into its sockets</b>can up, USB-C pointing out the right side, antenna end left.</li>
   <li><b>Sensors into their pockets, hood on</b>BME280 and SCD41 in the low bay at the front; cables out through the notch in the hood's back wall. The hood sits on the base between two ribs.</li>
   <li><b>Knob up through the top from inside</b>pins to the back, board between the ribs; washer + nut from outside, then the cap.</li>
