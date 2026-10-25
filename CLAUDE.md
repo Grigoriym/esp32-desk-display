@@ -32,8 +32,9 @@ rule: UI, or API with the user's OK, never silently). Rules that span parts:
   under the mini) and soldered on the can side; the user solders.
   The carrier is built (2026-10-20: mini in four 10-pin sockets, straight
   pin headers for the modules, Dupont jumpers) and `enclosure/enclosure.scad`
-  models it (measurements: `enclosure/README.md`, Carrier). Until the
-  firmware runs on it: ESP32 DevKit 30-pin, flashes on `/dev/ttyUSB0`. The blue GPIO2
+  models it (measurements: `enclosure/README.md`, Carrier). Since
+  2026-10-25 the mini #2 is this build's board in Homebox; the DevKit 30-pin
+  it replaces (`/dev/ttyUSB0`) is free again. The blue GPIO2
   LED is off in this firmware.
 - **Modules in this build**, all I2C ones in parallel on D21 (SDA) / D22 (SCL),
   all on 3V3 (addresses: each part's entry, and `KNOWN_I2C` in `main/main.c`):
@@ -56,7 +57,7 @@ rule: UI, or API with the user's OK, never silently). Rules that span parts:
   logged), arrived and tested 2026-09-19 via `esp32-hw-checks`: no DOA units,
   no substitutions. Milestones 1-4 were built on this hardware.
 - **Not part of this build**: ESP32-WROVER-B DevKit (not ordered; the Freenove
-  kit's WROVER is held in reserve for a future colour-TFT/LVGL project),
+  kit's WROVER is free, no longer held for anything, 2026-10-25),
   MQ-135 (air quality) and RC522 (RFID) discussed as optional future adds, a
   2.4"-3.5" ILI9341/ILI9488 touch TFT as a future colour version.
 
