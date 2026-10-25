@@ -106,17 +106,33 @@ ky_dupont = 14; // a plugged-in 5-pin Dupont housing + cable bend, past the pins
 
 ds_l = 31.93;
 ds_w = 21.79;
-ds_h = 9.39;
+ds_h = 9.39; // overall, chips under the board to the coin cell's top
+ds_t = 1.57; // board alone
+ds_chip = 4.00 - ds_t; // DS3231SN on the underside: the tallest part there
+ds_hole_d = 2.40;
+ds_hole_side = 0.50 + ds_hole_d / 2; // centre in from each long edge (both holes at the 6-pin end)
+ds_hole_end = 6.52 + ds_hole_d / 2; // centre in from the 6-pin end. The third hole (4-pin end) has a resistor ~0.4 from it on the back: not used
 ds_pins6 = 6 + 14 + 5; // 6-pin end: factory right-angle pins (standard ~6 mating length; the plug slides over them, so on the safe side) + a Dupont plug (14) + straight cable (5)
 ds_pins4 = 8; // pass-through 4-pin end: factory right-angle pins
 
 bme_l = 13.15;
 bme_w = 10.66;
 bme_h = 3;
+bme_t = 1.6; // board, not measured (standard)
+// one hole, at the corner away from the pins on the front (-y) side: centre
+// in from the -x edge and the -y edge (pins at +x; caliper, 2026-10-25)
+bme_hole = [0.53 + 1.5, 0.89 + 1.5]; // hole ~3.0
 
 scd_l = 21.81;
 scd_w = 13.49;
 scd_h = 7.59;
+scd_t = 1.62; // board alone
+// pins at the -x end, sensor at +x; bare board (caliper, 2026-10-25): at the
+// pin end 1.97 from the back (+y) edge to the GND pad and 1.50 from the
+// front edge to the SDA pad; 1.44 from the +x end to the sensor
+scd_free = [1.50, 1.97]; // front, back
+scd_end_free = 1.44;
+scd_sensor_l = 10.7; // the sensor's green carrier along x (from the photo; only the stand-in uses it)
 
 // carrier board: the Miuzei 4 x 6 cm perfboard (20 x 14 holes), uncut,
 // on 4 standoffs. Holes drilled to match them: lay it on the printed base
@@ -183,6 +199,17 @@ hood_top = skirt_h - 1;
 bme_xy = [24, 12];
 scd_xy = [52, 12];
 ledge_h = 1.5; // sensors sit on corner ledges, air flows underneath
+// module hold-downs (v1 had none): DS3231 2 x 5 into posts, BME280 2.6 x 6
+// into a post with the pilot open through the floor, SCD41 under two lips
+// at its pin end (as mukklet's ESP32) and a finger from the hood's roof
+// on its other end
+ds_screw_l = 5;
+ds_post_d = 4.4; // its back has parts ~1.4 past the holes' edges
+bme_screw_l = 6;
+bme_pilot = 2.1; // for the 2.6
+bme_post_d = 5;
+scd_lip = [4, 1.5]; // along x from the pin end, thickness
+scd_lip_gap = 0.4; // above the board: lets it tilt in
 rim = 1.2;
 
 // OLED: glass flat against the front plate's inner face, located by 4
@@ -249,9 +276,13 @@ usb_y = (esp_y0 + esp_y1) / 2; // hole in the right wall (socket ~0.25 off centr
 usb_z = esp_z + esp_usb_z;
 usb_hole = [13, 8];
 
-// DS3231, on the floor in a holder, coin cell up, long axis left-to-right
-// under the carrier, 6-pin end to the left. Box ds_b = [x0, y0, x1, y1]
-ds_z = base_t + ledge_h;
+// DS3231, coin cell up, long axis left-to-right under the carrier, 6-pin
+// end to the left, screwed through its two holes at that end into posts
+// that hold its chips (underneath) off the floor; the 4-pin end rests on
+// two corner ledges. Box ds_b = [x0, y0, x1, y1]
+ds_post_h = ds_chip + 0.6;
+ds_z = base_t + ds_post_h; // board's underside
+ds_top = ds_z - ds_chip + ds_h;
 ds_b = [29, (perf_y0 + perf_y1) / 2 - ds_w / 2, 29 + ds_l, (perf_y0 + perf_y1) / 2 + ds_w / 2];
 
 echo(str("case ", W, " x ", D, " x ", H, " mm (W x D x H)"));
@@ -265,7 +296,7 @@ assert(knob_x - ky_w / 2 > wall + rail_w + 1, "knob board too close to the left 
 // col, row]. KNOB (GND + SW DT CLK) at the back; the four I2C ones (GND
 // VCC SCL SDA) take any I2C module
 hd = [["KNOB", 5, 0, 12], ["I2C", 4, 0, 9], ["I2C", 4, 0, 6], ["I2C", 4, 0, 3], ["I2C", 4, 0, 0]];
-assert(perf_z - wire_h - wire_clear >= ds_z + ds_h, "no room for the DS3231 under the carrier's wires");
+assert(perf_z - wire_h - wire_clear >= ds_top, "no room for the DS3231 under the carrier's wires");
 
 // ------------------------------------------------------------ pre-print checks
 // What the clash check can't see (the enclosure-preprint-review skill;
@@ -290,6 +321,9 @@ assert(oled_hole_z - (oled_h / 2 - oled_glass_top - clr) >= oled_pilot / 2 + 0.6
 assert(-oled_hole_z + oled_post_d / 2 < oled_h / 2 - oled_glass_bot - clr, "OLED bottom posts reach the glass");
 assert(pin_pocket + oled_pin_h - glass_h < wall - 1, "OLED pin pocket leaves less than 1 of plate");
 assert(perf_standoff - (6 - perf_t) >= 1, "carrier screw bottoms out in its standoff");
+assert(ds_post_h + base_t - 0.8 - (ds_screw_l - ds_t) >= 1, "DS3231 screw bottoms out in its pilot");
+assert(bme_screw_l - bme_t <= ledge_h + base_t, "BME280 screw pokes out under the base");
+assert(scd_free[0] - 0.4 > 0.5 && scd_free[1] - 0.4 > 0.5, "SCD41 lips too narrow");
 // gaps that aren't meant to touch: print tolerance + screw-hole play
 assert(front_gap + strip_drop >= 0.8, "front plate too close to the base's strip");
 assert(win_w > oled_lit_w && win_h > oled_lit_h, "window smaller than the lit area");
@@ -468,11 +502,37 @@ module pocket(xy, l, w) translate([xy.x, xy.y, base_t - eps]) {
 // z 0 = board bottom; placed in ds_b
 module ds_place() translate([ds_b[0], ds_b[3], 0]) rotate([0, 0, -90]) children();
 
-// rails along the long edges and 4 corner ledges; the ends stay open for the pins
+// rails along the long edges, 2 screw posts at the 6-pin end, 2 corner
+// ledges at the 4-pin end; the ends stay open for the pins
+ds_holes = [for (x = [ds_hole_side, ds_w - ds_hole_side]) [x, ds_hole_end]];
 module ds_holder() ds_place() translate([0, 0, base_t - eps]) {
-  h = ledge_h + 1.6 + 1;
+  h = ds_post_h + ds_t + 1;
   for (x = [-clr - rim, ds_w + clr]) box([x, 2, 0], [x + rim, ds_l - 2, h]);
-  for (x = [0, ds_w - 2.5], y = [0, ds_l - 2.5]) box([x, y, 0], [x + 2.5, y + 2.5, ledge_h]);
+  for (q = ds_holes) translate([q.x, q.y, 0]) cylinder(d = ds_post_d, h = ds_post_h);
+  for (x = [0, ds_w - 2.5]) box([x, ds_l - 2.5, 0], [x + 2.5, ds_l, ds_post_h]);
+}
+module ds_pilots() ds_place() for (q = ds_holes) translate([q.x, q.y, 0.8]) cylinder(d = 1.6, h = base_t + ds_post_h);
+
+// BME280: a post under its hole; the pilot runs out through the floor
+module bme_post() translate([bme_xy.x - bme_l / 2 + bme_hole.x, bme_xy.y - bme_w / 2 + bme_hole.y, base_t - eps])
+  cylinder(d = bme_post_d, h = ledge_h);
+module bme_pilot_hole() translate([bme_xy.x - bme_l / 2 + bme_hole.x, bme_xy.y - bme_w / 2 + bme_hole.y, -1])
+  cylinder(d = bme_pilot, h = base_t + ledge_h + 2);
+
+// SCD41: lips over the two corners at its pin end (-x), standing on the
+// pocket's walls; the board tilts in under them, then its sensor end drops
+// onto the ledges and the hood's finger holds it there
+scd_lip_z = base_t + ledge_h + scd_t + scd_lip_gap;
+module scd_lips() translate([scd_xy.x, scd_xy.y, 0]) {
+  ix = scd_l / 2 + clr;
+  iy = scd_w / 2 + clr;
+  for (sy = [-1, 1]) {
+    reach = scd_free[sy > 0 ? 1 : 0] - 0.4; // over the board, short of the pad
+    y0 = sy * (scd_w / 2 - reach);
+    y1 = sy * (iy + rim);
+    box([-ix - rim, min(sy * iy, y1), base_t - eps], [-ix + scd_lip[0], max(sy * iy, y1), scd_lip_z + scd_lip[1]]); // wall up to it
+    box([-ix - rim, min(y0, y1), scd_lip_z], [-ix + scd_lip[0], max(y0, y1), scd_lip_z + scd_lip[1]]);
+  }
 }
 
 perf_holes = [for (x = [perf_x0 + perf_hole_inset, perf_x1 - perf_hole_inset])
@@ -484,7 +544,14 @@ module strip() difference() {
   slots(14, W - 14, -1, wall + 1, 6, skirt_h - 5);
 }
 
-module base() {
+// the screw pilots cut through whatever stands on the floor
+module base() difference() {
+  base_parts();
+  bme_pilot_hole();
+  ds_pilots();
+}
+
+module base_parts() {
   x0 = wall + clr;
   difference() {
     box([0, 0, 0], [W, D, base_t]);
@@ -499,6 +566,8 @@ module base() {
   pocket(bme_xy, bme_l, bme_w);
   pocket(scd_xy, scd_l, scd_w);
   ds_holder();
+  bme_post();
+  scd_lips();
   for (p = perf_holes) translate([p.x, p.y, base_t - eps]) difference() {
     cylinder(d = 6, h = perf_standoff);
     cylinder(d = perf_pilot, h = perf_standoff + 1);
@@ -512,11 +581,23 @@ module base() {
 module hood() difference() {
   x0 = wall + clr;
   union() {
+    scd_finger();
     box([x0, bay_back, base_t + eps], [W - x0, bay_back + hood_t, hood_top]);
     box([x0, wall + clr, hood_top - hood_t], [W - x0, bay_back + hood_t, hood_top]);
   }
   for (p = boss_xy) translate([p.x - boss_d / 2 - 0.5, p.y - boss_d / 2 - 0.5, 0]) cube([boss_d + 1, boss_d + 1, H]);
   box([W / 2 - 8, bay_back - 1, base_t - 1], [W / 2 + 8, bay_back + hood_t + 1, base_t + 6]); // sensor cables
+}
+
+// finger from the hood's roof onto the SCD41's bare end strip: a thin foot
+// over the board inside the pocket, wider above the pocket's wall
+scd_finger_z = base_t + ledge_h + scd_t + 0.1; // just clear of the board: print tolerance
+module scd_finger() translate([scd_xy.x, scd_xy.y, 0]) {
+  x1 = scd_l / 2; // board end
+  wall_top = base_t - eps + ledge_h + 1.6 + 1; // pocket() wall height
+  y = scd_w / 2 - 1;
+  box([x1 - (scd_end_free - 0.3), -y, scd_finger_z], [x1 + clr - 0.1, y, wall_top + 0.6]);
+  box([x1 - (scd_end_free - 0.3), -y, wall_top + 0.6], [x1 + clr + rim + 2, y, hood_top - hood_t + eps]);
 }
 
 // ------------------------------------------------------------ stand-ins
@@ -563,7 +644,8 @@ module esp_standin() {
 }
 
 module ds_standin() ds_place() {
-  color("navy") box([0, 0, ds_z], [ds_w, ds_l, ds_z + ds_h]);
+  color("navy") box([0, 0, ds_z], [ds_w, ds_l, ds_top]);
+  color("black") box([ds_w / 2 - 1, 13, ds_z - ds_chip], [ds_w - 2.5, 26, ds_z - eps]); // DS3231SN, from the back photo
   color("dimgray", 0.6) {
     box([ds_w / 2 - 7.6, -ds_pins6, ds_z + 1.6], [ds_w / 2 + 7.6, -eps, ds_z + 4.1]); // 6-pin + cable
     box([ds_w / 2 - 5.1, ds_l + eps, ds_z + 1.6], [ds_w / 2 + 5.1, ds_l + ds_pins4, ds_z + 4.1]); // 4-pin
@@ -601,7 +683,8 @@ module base_standins() {
   ds_standin();
   color("purple") {
     box([bme_xy.x - bme_l / 2, bme_xy.y - bme_w / 2, base_t + ledge_h], [bme_xy.x + bme_l / 2, bme_xy.y + bme_w / 2, base_t + ledge_h + bme_h]);
-    box([scd_xy.x - scd_l / 2, scd_xy.y - scd_w / 2, base_t + ledge_h], [scd_xy.x + scd_l / 2, scd_xy.y + scd_w / 2, base_t + ledge_h + scd_h]);
+    box([scd_xy.x - scd_l / 2, scd_xy.y - scd_w / 2, base_t + ledge_h], [scd_xy.x + scd_l / 2, scd_xy.y + scd_w / 2, base_t + ledge_h + scd_t]);
+    box([scd_xy.x + scd_l / 2 - scd_end_free - scd_sensor_l, scd_xy.y - scd_w / 2 + 0.5, base_t + ledge_h + scd_t], [scd_xy.x + scd_l / 2 - scd_end_free, scd_xy.y + scd_w / 2 - 0.5, base_t + ledge_h + scd_h]);
   }
 }
 

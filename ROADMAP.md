@@ -296,8 +296,13 @@ WiFi connect timeout: done 2026-09-25, see Open questions in `CLAUDE.md`.
     behind into posts at the OLED's corner holes (the user's idea, as
     mukklet's TFT), and a pocket for the pins' soldered ends (1.68, past
     the 1.52 glass: they held v1's OLED off the plate). A 2 x 4 passes
-    the holes, its head ends at the flex (tried). Next: the user checks in
-    OpenSCAD, then prints `front.stl`.
+    the holes, its head ends at the flex (tried); the user checked it in
+    OpenSCAD. Also nothing held the DS3231, BME280, SCD41 (checklist:
+    `enclosure/holders.html`, measurements in their Homebox entries):
+    DS3231 and BME280 now screwed through their own holes into posts,
+    SCD41 under two lips at its pin end + a finger from the hood (as
+    mukklet's ESP32 cradle). Next: the user checks base + hood in
+    OpenSCAD, then prints front + base + hood.
     Until then: hot glue at two corners holds the OLED.
   - Steps: [x] measure every part (`enclosure/MEASUREMENTS.md`, 2026-09-28)
     -> [x] OpenSCAD model + preview renders (`enclosure/`, see its README;

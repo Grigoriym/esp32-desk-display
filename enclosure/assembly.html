@@ -67,7 +67,7 @@ ul.check li { margin-bottom: 6px; }
 </div>
 
 <h2>Screws</h2>
-<p>All self-tapping, from the two kits (<code>parts.py show screws</code>). 16 in total.</p>
+<p>All self-tapping, from the two kits (<code>parts.py show screws</code>). 19 in total.</p>
 <div class="wrap">
 <table>
   <tr><th>Qty</th><th>Screw</th><th>Kit</th><th>Where</th></tr>
@@ -75,6 +75,8 @@ ul.check li { margin-bottom: 6px; }
   <tr><td class="qty">4</td><td>2 × 6</td><td>black</td><td><b>Front plate to body.</b> Two screws down each side of the screen plate, from the front, into the ledges on the side walls. Holes printed.</td></tr>
   <tr><td class="qty">4</td><td>2 × 4</td><td>black</td><td><b>OLED to the front plate.</b> From behind, through the OLED's 4 corner holes into the posts under them. Holes printed.</td></tr>
   <tr><td class="qty">4</td><td>2 × 6</td><td>black</td><td><b>Carrier board to base.</b> One in each corner of the perfboard, into the 4 tall posts on the base. <b>The perfboard has no holes for these yet:</b> drill one 2.5 mm hole in each corner, 3.5 mm in from both edges, before the ESP32 is plugged in. Easiest: lay the board on the 4 posts, mark through where they are, drill.</td></tr>
+  <tr><td class="qty">2</td><td>2 × 5</td><td>black</td><td><b>DS3231 to the base.</b> Through its two holes at the 6-pin end into the posts under them. Holes printed.</td></tr>
+  <tr><td class="qty">1</td><td>2.6 × 6</td><td>black</td><td><b>BME280 to the base.</b> Through its one hole into the post under it. Hole printed.</td></tr>
 </table>
 </div>
 
@@ -102,10 +104,10 @@ ul.check li { margin-bottom: 6px; }
 
 <h2>Assembly order</h2>
 <ol class="steps">
-  <li><b>DS3231 into its holder on the base</b>coin cell up, Dupont on its 6-pin end; the cable goes up past the carrier's left edge.</li>
+  <li><b>DS3231 onto its posts on the base</b>coin cell up, 6-pin end left; a screw through each of the two holes at that end. Dupont on its 6-pin end; the cable goes up past the carrier's left edge.<span class="screw">2 × 2×5 black</span></li>
   <li><b>Carrier onto the 4 tall posts, before the ESP32 goes in</b>Drill a 2.5 mm hole in each corner of the perfboard, 3.5 mm in from both edges (lay it on the posts and mark first). Screw it down. Then plug the ESP32 in: with it in, the screwdriver can't reach two of the screws.<span class="screw">4 × 2×6 black</span></li>
   <li><b>ESP32 mini into its sockets</b>can up, USB-C pointing out the right side, antenna end left.</li>
-  <li><b>Sensors into their pockets, hood on</b>BME280 and SCD41 in the low bay at the front; cables out through the notch in the hood's back wall. The hood sits on the base between two ribs.</li>
+  <li><b>Sensors into their pockets, hood on</b>BME280: one screw through its hole into the post under it. SCD41: pin end first, tilted, under the two lips, then let the sensor end down onto the ledges. Both in the low bay at the front; cables out through the notch in the hood's back wall. The hood sits on the base between two ribs.</li>
   <li><b>Knob up through the top from inside</b>pins to the back, board between the ribs; washer + nut from outside, then the cap.</li>
   <li><b>OLED onto the front plate</b>plate face-down on the desk, glass flat between the stops, pins at the top; a screw through each corner hole.<span class="screw">4 × 2×4 black</span><div class="note">v1 print: no posts, the window is off. A new plate is coming; until then, a dab of hot glue at two corners.</div></li>
   <li><b>Cables onto the carrier</b>KNOB at the back, the four I2C headers in front (two of them under the knob).</li>

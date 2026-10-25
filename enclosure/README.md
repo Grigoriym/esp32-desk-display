@@ -59,8 +59,9 @@ Inside:
 - **Carrier** (built and measured 2026-10-20): the uncut 60 x 40 Miuzei
   perfboard on 4 standoffs, 18 mm tall, socket side up, its soldered
   wires (~5) underneath, white loops ~6 past its back edge. The DS3231
-  lies on the floor under it, 2 below the wires (holder, coin cell up),
-  a Dupont on its 6-pin end, the cable up past the carrier's left edge.
+  lies under it below the wires, coin cell up, screwed through its two
+  holes at the 6-pin end onto posts 3.0 tall (its chips hang underneath),
+  the 4-pin end on two ledges; a Dupont on its 6-pin end, the cable up past the carrier's left edge.
   The ESP32 mini plugs into four 10-pin female sockets (rows 1-2 / 11-12,
   cols 10-19; 8.35 socket + 2.42 of the mini's own header = 10.77 to its
   board), can up, USB-C 2.5 + 1.22 past the carrier out the right side,
@@ -103,15 +104,22 @@ Self-tapping screws from the two kits (Homebox: `parts.py show screws`):
   of post + plate: the screw reaches 2.88, 0.6 of plate left in front)
 - 4 × 2 × 6, black kit (carrier → standoffs; pilot 1.6). Lay the perfboard
   in its outline on the base, mark the standoffs through, drill 2.5.
+- 2 × 2 × 5, black kit (DS3231 → its posts; pilot 1.6)
+- 1 × 2.6 × 6, black kit (BME280 → its post; pilot 2.1, open through the
+  floor: the tip ends about flush with the base's underside)
+- the SCD41 has no holes: its pin end tilts in under two lips on its
+  pocket, the other end drops onto the ledges; a finger from the hood's
+  roof holds that end once the hood is on
 - Dupont jumpers for the five headers, 4 rubber feet ≥ 2 mm
   (they lift the floor slots off the desk)
 
 ## Assembly
 
-1. DS3231 into its holder, then the carrier onto the standoffs *before*
+1. DS3231 onto its posts (2 screws), then the carrier onto the standoffs *before*
    the ESP32 goes into its headers (a driver above two of the holes hits
    the ESP32).
-2. Sensors into their pockets, hood on.
+2. BME280 onto its post (1 screw); SCD41 pin end first under its lips,
+   then down; hood on (its finger holds the SCD41).
 3. Knob up through the top from inside, washer + nut from outside, cap on.
 4. OLED onto the plate (plate on the desk), 4 screws from behind.
 5. Cables onto the carrier; plate onto the body (4 screws from the front);
@@ -138,8 +146,9 @@ two didn't: drill those at the post (2.5).
 Result of the v1 print (2026-10-23): all fits except the OLED's window
 (~3-4 mm toward the pin edge) and the clamp bars (they land on SMD parts);
 the reprint has the window on the measured glow and screws instead of
-clamps (front plate only), see ROADMAP 15. The DS3231
-holder doesn't hold it down: thin double-sided tape on its ledges.
+clamps, see ROADMAP 15. Nothing held the DS3231, BME280 or SCD41
+down: the reprint screws the first two through their holes and puts the
+SCD41 under lips + a hood finger (base + hood reprinted too).
 
 1. **Front plate**: the OLED sits flat between the stops, its 4 screws
    pull it flat (a 2 × 4 passes its holes, tried 2026-10-25). The
