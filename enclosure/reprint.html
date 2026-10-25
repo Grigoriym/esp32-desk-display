@@ -157,24 +157,12 @@ svg.big { max-width: 520px; margin: 8px 0 16px; }
   <li>
     <label><input type="checkbox"><span><span class="who">You</span><b>5b. Room round the top holes (front)</b></span></label>
     <p class="how">Why: the screws come in from the back, into 4 posts on the plate. A post sits on the board's <b>front</b> round its hole, next to the glass, so it must not touch the glass. The bottom two holes are well below the glass (it ends at 20.40). The top two are close to it.</p>
-    <p class="how">Front side, pins up. From the <b>edge of the top-left hole</b> to the <b>nearest edge of the glass</b> (F1), and the same for the top-right hole (F2). If the glass covers part of a hole, say so.</p>
-    <svg class="big" style="margin-left:28px" viewBox="0 0 440 300" role="img" aria-label="OLED front, pins up: F1 and F2 go from the edge of each top hole to the nearest glass edge">
-      <rect class="pcb" x="110" y="40" width="220" height="220" rx="4"/>
-      <circle class="pin" cx="190" cy="48" r="3"/><circle class="pin" cx="210" cy="48" r="3"/><circle class="pin" cx="230" cy="48" r="3"/><circle class="pin" cx="250" cy="48" r="3"/>
-      <rect class="glass" x="122" y="62" width="196" height="150" rx="2"/>
-      <rect class="glow" x="128" y="85" width="183" height="93"/>
-      <circle class="hole" cx="127" cy="59" r="7" stroke="#bbb" stroke-width="3"/>
-      <circle class="hole" cx="313" cy="59" r="7" stroke="#bbb" stroke-width="3"/>
-      <circle class="hole" cx="127" cy="241" r="7" stroke="#bbb" stroke-width="3"/>
-      <circle class="hole" cx="313" cy="241" r="7" stroke="#bbb" stroke-width="3"/>
-      <line class="d" x1="134" y1="62" x2="145" y2="62" marker-end="url(#a)" style="stroke-width:2.5"/>
-      <line class="d" x1="306" y1="62" x2="295" y2="62" marker-end="url(#a)" style="stroke-width:2.5"/>
-      <text class="t" x="60" y="40" style="font-size:16px">F1</text><line class="lead" x1="80" y1="40" x2="136" y2="58"/>
-      <text class="t" x="360" y="40" style="font-size:16px">F2</text><line class="lead" x1="358" y1="40" x2="302" y2="58"/>
-      <text class="lab" x="220" y="200" text-anchor="middle" style="fill:#ccc">glass</text>
-      <text class="lab" x="220" y="136" text-anchor="middle" style="fill:#10161c">glow</text>
-      <text class="lab" x="40" y="246">bottom holes:</text><text class="lab" x="40" y="262">clear, skip</text>
-      <text class="lab" x="340" y="78">where exactly</text><text class="lab" x="340" y="92">the glass starts:</text><text class="lab" x="340" y="106">a guess here</text>
+    <p class="how">Front side, pins up (your photo). Straight down from the <b>edge of the top-left hole</b> (the hole, not the silver ring) to the <b>top edge of the glass</b>: F1. Same for the top-right hole: F2.</p>
+    <svg class="big" style="margin-left:28px;max-width:560px" viewBox="0 0 950 980" role="img" aria-label="Photo of the OLED front with F1 and F2 from each top hole's edge straight down to the glass">
+      <defs><marker id="af" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="3" markerHeight="3" orient="auto-start-reverse"><path fill="#ff4d1a" d="M0 0L10 5L0 10z"/></marker></defs>
+      <image href="img/oled_front.jpg" x="0" y="0" width="950" height="980"/>
+      <line x1="90" y1="126" x2="90" y2="162" stroke="#ff4d1a" stroke-width="5" marker-start="url(#af)" marker-end="url(#af)"/><text x="110" y="215" fill="#ff4d1a" stroke="#000" stroke-width="2" paint-order="stroke" style="font:700 46px system-ui,sans-serif">F1</text>
+      <line x1="855" y1="126" x2="855" y2="162" stroke="#ff4d1a" stroke-width="5" marker-start="url(#af)" marker-end="url(#af)"/><text x="770" y="215" fill="#ff4d1a" stroke="#000" stroke-width="2" paint-order="stroke" style="font:700 46px system-ui,sans-serif">F2</text>
     </svg>
   </li>
   <li>
