@@ -155,6 +155,29 @@ svg.big { max-width: 520px; margin: 8px 0 16px; }
     <p class="how"><code>oled_lit_top</code> = 5.27, height 10.83. The measurements are rough: window 1 mm bigger than the glow on every side (was 0.5), so ±1 still shows the whole picture. <b>Done:</b> window centred on the measured glow (~2 mm away from the pin edge, 0.3 left), clash check OK.</p>
   </li>
   <li>
+    <label><input type="checkbox"><span><span class="who">You</span><b>5b. Room round the top holes (front)</b></span></label>
+    <p class="how">Why: the screws come in from the back, into 4 posts on the plate. A post sits on the board's <b>front</b> round its hole, next to the glass, so it must not touch the glass. The bottom two holes are well below the glass (it ends at 20.40). The top two are close to it.</p>
+    <p class="how">Front side, pins up. From the <b>edge of the top-left hole</b> to the <b>nearest edge of the glass</b> (F1), and the same for the top-right hole (F2). If the glass covers part of a hole, say so.</p>
+    <svg class="big" style="margin-left:28px" viewBox="0 0 440 300" role="img" aria-label="OLED front, pins up: F1 and F2 go from the edge of each top hole to the nearest glass edge">
+      <rect class="pcb" x="110" y="40" width="220" height="220" rx="4"/>
+      <circle class="pin" cx="190" cy="48" r="3"/><circle class="pin" cx="210" cy="48" r="3"/><circle class="pin" cx="230" cy="48" r="3"/><circle class="pin" cx="250" cy="48" r="3"/>
+      <rect class="glass" x="122" y="62" width="196" height="150" rx="2"/>
+      <rect class="glow" x="128" y="85" width="183" height="93"/>
+      <circle class="hole" cx="127" cy="59" r="7" stroke="#bbb" stroke-width="3"/>
+      <circle class="hole" cx="313" cy="59" r="7" stroke="#bbb" stroke-width="3"/>
+      <circle class="hole" cx="127" cy="241" r="7" stroke="#bbb" stroke-width="3"/>
+      <circle class="hole" cx="313" cy="241" r="7" stroke="#bbb" stroke-width="3"/>
+      <line class="d" x1="134" y1="62" x2="145" y2="62" marker-end="url(#a)" style="stroke-width:2.5"/>
+      <line class="d" x1="306" y1="62" x2="295" y2="62" marker-end="url(#a)" style="stroke-width:2.5"/>
+      <text class="t" x="60" y="40" style="font-size:16px">F1</text><line class="lead" x1="80" y1="40" x2="136" y2="58"/>
+      <text class="t" x="360" y="40" style="font-size:16px">F2</text><line class="lead" x1="358" y1="40" x2="302" y2="58"/>
+      <text class="lab" x="220" y="200" text-anchor="middle" style="fill:#ccc">glass</text>
+      <text class="lab" x="220" y="136" text-anchor="middle" style="fill:#10161c">glow</text>
+      <text class="lab" x="40" y="246">bottom holes:</text><text class="lab" x="40" y="262">clear, skip</text>
+      <text class="lab" x="340" y="78">where exactly</text><text class="lab" x="340" y="92">the glass starts:</text><text class="lab" x="340" y="106">a guess here</text>
+    </svg>
+  </li>
+  <li>
     <label><input type="checkbox"><span><span class="who">Claude</span><b>6. Screw the OLED on (like mukklet), no clamps</b></span></label>
     <p class="how">Posts on the plate at the 4 holes, screws from the back. Needs: room on the front between the top holes and the glass; screw head vs the flex at the bottom holes (0.77).</p>
   </li>
