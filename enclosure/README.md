@@ -19,6 +19,13 @@ enclosure/export.sh      # checks, then stl/enclosure/{body,front,base,hood}.stl
 enclosure/cardboard.py   # 1:1 A4 templates -> enclosure/cardboard.pdf (gitignored)
 ```
 
+Every set of STLs actually sent to print is committed under
+`printed/<date>-v<n>/` (only the parts printed that time), so a fault
+found on a print can be checked against exactly what was printed:
+`2026-10-21-v1` (all five, from commit adc231b), `2026-10-25-v2` (front,
+base, hood). `stl/` stays the gitignored working output of `export.sh`;
+copy it into a new `printed/` folder when a set goes to the printer.
+
 `export.sh` fails if a printed part overlaps a stand-in or another printed
 part, if two stand-ins (plugs included) overlap, or if a pre-print assert
 in the model fails (plastic round holes, pilot depth vs screw reach, gaps,
