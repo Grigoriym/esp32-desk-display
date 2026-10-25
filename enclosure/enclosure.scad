@@ -57,10 +57,20 @@ oled_w = 26.00;
 oled_h = 26.04; // pin edge at the top
 oled_t = 2.64; // incl. glass
 oled_pcb_t = 1.0; // ASSUMED, only used for the stand-in: rest of oled_t is glass
-oled_lit_w = 21.93;
-oled_lit_h = 11.32;
-oled_lit_top = 3.0; // lit area's top edge below the pin edge (ASSUMED: +-0.5, from a photo)
+// lit area: caliper, all pixels on, front, pins up (2026-10-25; v1 used a
+// photo guess and its window came out ~2 mm off toward the pin edge)
+oled_lit_w = 21.69;
+oled_lit_h = 11.03;
+oled_lit_top = 5.27; // lit area's top edge below the pin edge
+oled_lit_left = 1.86; // lit area's left edge from the board's left edge (seen from the front)
 oled_back = 8.25; // header pins + plastic behind the PCB
+// mounting holes, centred on the board; the back is full of SMD parts, pads
+// and the flex: from each hole's edge to the nearest one (caliper,
+// 2026-10-25) top-left 4.07, top-right 1.25, both bottom 0.77
+oled_hole_x = 11.00; // centres 22.00 apart left-right
+oled_hole_z = 10.76; // 21.52 apart top-bottom
+oled_hole_d = 1.70;
+oled_hole_room = 0.77; // the smallest of the four
 oled_dupont = 14; // a plugged-in Dupont connector adds this
 
 // ESP32 mini (D1 mini layout), metal can up
@@ -190,8 +200,10 @@ clamp_screw_l = 4;
 clamp_overlap = 3; // how far a bar reaches over the board's back, along its side edge
 post_h = oled_t - clamp_press; // above the plate's inner face
 lit_dz = oled_h / 2 - oled_lit_top - oled_lit_h / 2; // lit centre above board centre
-win_w = oled_lit_w + 1; // lit area + 0.5 all round
-win_h = oled_lit_h + 1;
+lit_dx = -oled_w / 2 + oled_lit_left + oled_lit_w / 2; // lit centre right of board centre (front view: +x = right)
+win_margin = 1; // per side: covers the hand measurements (+-0.5) and print/fit play
+win_w = oled_lit_w + 2 * win_margin;
+win_h = oled_lit_h + 2 * win_margin;
 win_edge = 1.2; // straight before the chamfer: a knife edge reads as a thin wall (hubs.com)
 
 // knob on top, left: KY-040 board flat under the top, shaft end to the
@@ -343,7 +355,7 @@ module clamp_bar() difference() {
 // a straight cut through, and a 45 degree chamfer outwards that starts
 // win_edge in front of the inner face (no eps-thin slabs: hubs.com's
 // checker saw a skin across mukklet's window built from those)
-module oled_window() oled_frame() translate([0, 0, lit_dz]) {
+module oled_window() oled_frame() translate([lit_dx, 0, lit_dz]) {
   c = wall - win_edge + 1; // the chamfer's spread 1 mm in front of the face
   translate([0, -wall / 2, 0]) cube([win_w, wall + 2, win_h], center = true);
   hull() {

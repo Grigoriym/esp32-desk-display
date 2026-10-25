@@ -150,13 +150,13 @@ svg.big { max-width: 520px; margin: 8px 0 16px; }
     <label><input type="checkbox"><span><span class="who">You</span><b>4. Into the OLED's Homebox entry</b></span></label>
     <p class="how">A, B and the free corners. <b>Done 2026-10-25</b> (via the API): "Lit area" rewritten, new field "Back: room round the holes".</p>
   </li>
-  <li>
+  <li data-done>
     <label><input type="checkbox"><span><span class="who">Claude</span><b>5. Move the window</b></span></label>
-    <p class="how"><code>oled_lit_top</code> = 5.27, height 10.83. The measurements are rough: window 1 mm bigger than the glow on every side (was 0.5), so ±1 still shows the whole picture.</p>
+    <p class="how"><code>oled_lit_top</code> = 5.27, height 10.83. The measurements are rough: window 1 mm bigger than the glow on every side (was 0.5), so ±1 still shows the whole picture. <b>Done:</b> window centred on the measured glow (~2 mm away from the pin edge, 0.3 left), clash check OK.</p>
   </li>
   <li>
-    <label><input type="checkbox"><span><span class="who">Claude</span><b>6. Clamps on the 4 corners only</b></span></label>
-    <p class="how">Relieved over the SMD band.</p>
+    <label><input type="checkbox"><span><span class="who">Claude</span><b>6. Screw the OLED on (like mukklet), no clamps</b></span></label>
+    <p class="how">Posts on the plate at the 4 holes, screws from the back. Needs: room on the front between the top holes and the glass; screw head vs the flex at the bottom holes (0.77).</p>
   </li>
   <li>
     <label><input type="checkbox"><span><span class="who">Claude</span><b>7. <code>export.sh</code></b></span></label>
