@@ -167,9 +167,50 @@ svg.big { max-width: 520px; margin: 8px 0 16px; }
     
     
   </li>
-  <li>
+  <li data-done>
     <label><input type="checkbox"><span><span class="who">You</span><b>P0. Carrier: photo with its holes</b></span></label>
     <p class="how">Why: the perfboard's own 4 corner holes don't all sit over the standoffs (two do, two don't): the model assumed 60 × 40 with the holes 3.5 in from every edge. The base is reprinted anyway, so the standoffs move to where the holes really are. Send a straight photo of the bare side of the carrier (whole board in the picture); then I mark what to measure.</p>
+    <p class="how"><b>Done</b>: photo in, holes marked below.</p>
+  </li>
+  <li>
+    <label><input type="checkbox"><span><span class="who">You</span><b>P1. Carrier corner hole diameter</b></span></label>
+    <p class="how">Any one of the 4 big corner holes (not the small grid holes): across the hole, <b>d</b>.</p>
+    <svg class="big" style="margin-left:28px;max-width:560px" viewBox="0 0 1140 790" role="img" aria-label="Carrier: d across the top-left corner hole">
+      <image href="img/carrier_top.jpg" x="0" y="0" width="1140" height="790"/>
+      <line x1="65" y1="88" x2="99" y2="88" stroke="#ff4d1a" stroke-width="5" marker-start="url(#ah)" marker-end="url(#ah)"/><text x="110" y="140" fill="#ff4d1a" stroke="#000" stroke-width="2" paint-order="stroke" style="font:700 44px system-ui,sans-serif">d</text>
+    </svg>
+  </li>
+  <li>
+    <label><input type="checkbox"><span><span class="who">You</span><b>P2. Carrier top-left (by the A column) hole: where</b></span></label>
+    <p class="how">Socket side up as in the photo. <b>S</b>: from the left edge of the board to the edge of the hole. <b>E</b>: from the top edge to the edge of the hole.</p>
+    <svg class="big" style="margin-left:28px;max-width:560px" viewBox="0 0 1140 790" role="img" aria-label="Carrier: S and E for the top-left (by the A column) hole">
+      <image href="img/carrier_top.jpg" x="0" y="0" width="1140" height="790"/>
+      <line x1="32" y1="88" x2="65" y2="88" stroke="#ff4d1a" stroke-width="5" marker-start="url(#ah)" marker-end="url(#ah)"/><line x1="82" y1="35" x2="82" y2="71" stroke="#ff4d1a" stroke-width="5" marker-start="url(#ah)" marker-end="url(#ah)"/><text x="112" y="158" fill="#ff4d1a" stroke="#000" stroke-width="2" paint-order="stroke" style="font:700 44px system-ui,sans-serif">S</text><text x="107" y="68.0" fill="#ff4d1a" stroke="#000" stroke-width="2" paint-order="stroke" style="font:700 44px system-ui,sans-serif">E</text>
+    </svg>
+  </li>
+  <li>
+    <label><input type="checkbox"><span><span class="who">You</span><b>P3. Carrier top-right (by the T column) hole: where</b></span></label>
+    <p class="how">Socket side up as in the photo. <b>S</b>: from the right edge of the board to the edge of the hole. <b>E</b>: from the top edge to the edge of the hole.</p>
+    <svg class="big" style="margin-left:28px;max-width:560px" viewBox="0 0 1140 790" role="img" aria-label="Carrier: S and E for the top-right (by the T column) hole">
+      <image href="img/carrier_top.jpg" x="0" y="0" width="1140" height="790"/>
+      <line x1="1105" y1="62" x2="1069" y2="62" stroke="#ff4d1a" stroke-width="5" marker-start="url(#ah)" marker-end="url(#ah)"/><line x1="1052" y1="22" x2="1052" y2="45" stroke="#ff4d1a" stroke-width="5" marker-start="url(#ah)" marker-end="url(#ah)"/><text x="962" y="132" fill="#ff4d1a" stroke="#000" stroke-width="2" paint-order="stroke" style="font:700 44px system-ui,sans-serif">S</text><text x="982" y="48.5" fill="#ff4d1a" stroke="#000" stroke-width="2" paint-order="stroke" style="font:700 44px system-ui,sans-serif">E</text>
+    </svg>
+  </li>
+  <li>
+    <label><input type="checkbox"><span><span class="who">You</span><b>P4. Carrier bottom-left hole: where</b></span></label>
+    <p class="how">Socket side up as in the photo. <b>S</b>: from the left edge of the board to the edge of the hole. <b>E</b>: from the bottom edge to the edge of the hole.</p>
+    <svg class="big" style="margin-left:28px;max-width:560px" viewBox="0 0 1140 790" role="img" aria-label="Carrier: S and E for the bottom-left hole">
+      <image href="img/carrier_top.jpg" x="0" y="0" width="1140" height="790"/>
+      <line x1="34" y1="688" x2="65" y2="688" stroke="#ff4d1a" stroke-width="5" marker-start="url(#ah)" marker-end="url(#ah)"/><line x1="82" y1="736" x2="82" y2="705" stroke="#ff4d1a" stroke-width="5" marker-start="url(#ah)" marker-end="url(#ah)"/><text x="112" y="648" fill="#ff4d1a" stroke="#000" stroke-width="2" paint-order="stroke" style="font:700 44px system-ui,sans-serif">S</text><text x="107" y="695.5" fill="#ff4d1a" stroke="#000" stroke-width="2" paint-order="stroke" style="font:700 44px system-ui,sans-serif">E</text>
+    </svg>
+  </li>
+  <li>
+    <label><input type="checkbox"><span><span class="who">You</span><b>P5. Carrier bottom-right (under the ESP32 socket's corner) hole: where</b></span></label>
+    <p class="how">Socket side up as in the photo. <b>S</b>: from the right edge of the board to the edge of the hole. <b>E</b>: from the bottom edge to the edge of the hole. If the socket covers its edge, measure from the back.</p>
+    <svg class="big" style="margin-left:28px;max-width:560px" viewBox="0 0 1140 790" role="img" aria-label="Carrier: S and E for the bottom-right (under the ESP32 socket's corner) hole">
+      <image href="img/carrier_top.jpg" x="0" y="0" width="1140" height="790"/>
+      <line x1="1116" y1="700" x2="1081" y2="700" stroke="#ff4d1a" stroke-width="5" marker-start="url(#ah)" marker-end="url(#ah)"/><line x1="1064" y1="744" x2="1064" y2="717" stroke="#ff4d1a" stroke-width="5" marker-start="url(#ah)" marker-end="url(#ah)"/><text x="974" y="660" fill="#ff4d1a" stroke="#000" stroke-width="2" paint-order="stroke" style="font:700 44px system-ui,sans-serif">S</text><text x="994" y="705.5" fill="#ff4d1a" stroke="#000" stroke-width="2" paint-order="stroke" style="font:700 44px system-ui,sans-serif">E</text>
+    </svg>
   </li>
   <li>
     <label><input type="checkbox"><span><span class="who">You</span><b>Print the base + hood (with the front plate)</b></span></label>
