@@ -353,9 +353,11 @@ part dimensions and how each part can be held: its Homebox entry.
   mistakes; the model itself stays one file). Before a reprint: `enclosure/export.sh`
   (clash + pre-print asserts) and the open items in `enclosure/README.md`.
   **Printed parts back 2026-10-23**: all fit except the OLED's window
-  (off toward the pin edge) and clamp bars (on SMD parts); the front
-  plate gets reprinted with the OLED screwed on instead (ROADMAP 15,
-  `enclosure/reprint.html`). `enclosure/assembly.html`
+  (off toward the pin edge) and clamp bars (on SMD parts); v2 (front, base,
+  hood) sent to print 2026-10-25: OLED screwed on through its holes, window
+  on the measured glow, DS3231/BME280 screwed down, SCD41 under lips + a
+  hood finger, carrier standoffs under its measured holes (ROADMAP 15;
+  measuring checklists `enclosure/reprint.html`, `enclosure/holders.html`). `enclosure/assembly.html`
   = assembly order + every screw, for the user.
 
 ## Roadmap
