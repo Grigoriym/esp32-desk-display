@@ -102,8 +102,8 @@ Self-tapping screws from the two kits (Homebox: `parts.py show screws`):
 - 4 × 2 × 6, black kit (front plate → rails; pilot 1.6)
 - 4 × 2 × 4, black kit (OLED → its posts, from behind; pilot 1.6, 1.40
   of post + plate: the screw reaches 2.88, 0.6 of plate left in front)
-- 4 × 2 × 6, black kit (carrier → standoffs; pilot 1.6). Lay the perfboard
-  in its outline on the base, mark the standoffs through, drill 2.5.
+- 4 × 2 × 6, black kit (carrier → standoffs; pilot 1.6), through the
+  perfboard's own corner holes (1.85, a 2 × 6 goes in)
 - 2 × 2 × 5, black kit (DS3231 → its posts; pilot 1.6)
 - 1 × 2.6 × 6, black kit (BME280 → its post; pilot 2.1, open through the
   floor: the tip ends about flush with the base's underside)
@@ -138,8 +138,10 @@ hole's near side on all four sides, but the model's 20 x 14 grid on the
 sides" was used (it keeps the grid centred, so the USB hole doesn't move).
 If the carrier sits off on the printed standoffs, recount the holes per
 row and column and remeasure the board.
-On the print (2026-10-23) two of the four holes met their standoffs and
-two didn't: drill those at the post (2.5).
+On the v1 print (2026-10-23) two of the four corner holes met their
+standoffs and two didn't: the model assumed 3.5 in from every edge. The
+holes were measured on 2026-10-25 (`perf_hole_xy`, ~2.4-2.8 in) and the
+reprinted base has the standoffs under them.
 
 ## Printed-part checklist
 

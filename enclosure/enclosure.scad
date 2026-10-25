@@ -135,13 +135,17 @@ scd_end_free = 1.44;
 scd_sensor_l = 10.7; // the sensor's green carrier along x (from the photo; only the stand-in uses it)
 
 // carrier board: the Miuzei 4 x 6 cm perfboard (20 x 14 holes), uncut,
-// on 4 standoffs. Holes drilled to match them: lay it on the printed base
-// in its outline, mark through, drill 2.5 (2 x 6 screws pass)
+// on 4 standoffs under its own corner holes (1.85: a 2 x 6 goes in, tried)
 perf_w = 60;
 perf_d = 40;
 perf_t = 1.6;
 perf_standoff = 18; // the DS3231 lies on the floor under it, below the wires
-perf_hole_inset = 3.5;
+// corner hole centres from the board's front-left corner, socket side up
+// (caliper, 2026-10-25; v1 assumed 3.5 in from every edge and two of the
+// four missed their standoffs)
+perf_hole_d = 1.85;
+perf_hole_xy = [[1.70, 1.42], [perf_w - 1.68, 1.52], [1.60, perf_d - 1.89], [perf_w - 1.60, perf_d - 1.62]]
+  + [for (i = [0:3]) [i % 2 ? -perf_hole_d / 2 : perf_hole_d / 2, i < 2 ? perf_hole_d / 2 : -perf_hole_d / 2]];
 perf_pilot = 1.6; // 2 x 6 self-tapping, black kit (2.0 into 1.6 worked in mukklet)
 hdr_h = 8.35 + 2.42; // carrier to the mini: female socket + the mini's own male header plastic
 wire_h = 5; // soldered wires under the carrier, highest loop (~5, +-)
@@ -535,8 +539,7 @@ module scd_lips() translate([scd_xy.x, scd_xy.y, 0]) {
   }
 }
 
-perf_holes = [for (x = [perf_x0 + perf_hole_inset, perf_x1 - perf_hole_inset])
-    for (y = [perf_y0 + perf_hole_inset, perf_y1 - perf_hole_inset]) [x, y]];
+perf_holes = [for (q = perf_hole_xy) [perf_x0 + q.x, perf_y0 + q.y]];
 
 // the vented strip under the screen, between the side walls
 module strip() difference() {
