@@ -65,8 +65,9 @@ svg.big { max-width: 520px; margin: 8px 0 16px; }
   <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="3" markerHeight="3" orient="auto-start-reverse"><path fill="#ff4d1a" d="M0 0L10 5L0 10z"/></marker></defs>
 </svg>
 <ol class="steps" id="steps">
-  <li>
+  <li data-done>
     <label><input type="checkbox"><span><span class="who">You</span><b>D0. DS3231: photo of the back</b></span></label>
+    <p class="how"><b>Done.</b> The two holes at the 6-pin end are clear on the back (parts ≥ ~1.4 from them). The one at the 4-pin end has a resistor ~0.4 from it: no post there, 2 screws are enough. The chips hang underneath, so the posts must be taller than the big chip (D5).</p>
     <p class="how">Why: the screws go into short posts under its holes; the posts must not land on anything on the back. Take it out and send a straight photo of the <b>back</b>, like the top one below.</p>
     
   </li>
@@ -95,12 +96,13 @@ svg.big { max-width: 520px; margin: 8px 0 16px; }
     
   </li>
   <li>
-    <label><input type="checkbox"><span><span class="who">You</span><b>D4. DS3231 bottom-left hole: where</b></span></label>
-    <p class="how">Board as in the photo (coin cell up, 6-pin end at the top). <b>S</b>: from the long side edge to the edge of the hole. <b>E</b>: from the short end edge (4-pin end) to the edge of the hole.</p><svg class="big" style="margin-left:28px;max-width:420px" viewBox="0 0 650 910" role="img" aria-label="DS3231 top: S and E for the bottom-left hole">
-      <image href="img/ds3231_top.jpg" x="0" y="0" width="650" height="910"/>
-      <line x1="70" y1="778" x2="108" y2="778" stroke="#ff4d1a" stroke-width="4" marker-start="url(#ah)" marker-end="url(#ah)"/><line x1="133" y1="860" x2="133" y2="803" stroke="#ff4d1a" stroke-width="4" marker-start="url(#ah)" marker-end="url(#ah)"/><text x="72" y="740" fill="#ff4d1a" stroke="#000" stroke-width="2" paint-order="stroke" style="font:700 34px system-ui,sans-serif">S</text><text x="145" y="843.5" fill="#ff4d1a" stroke="#000" stroke-width="2" paint-order="stroke" style="font:700 34px system-ui,sans-serif">E</text>
+    <label><input type="checkbox"><span><span class="who">You</span><b>D5. DS3231: tallest part on the back</b></span></label>
+    <p class="how">Back side up: from the board to the top of the big black chip (DS3231SN), <b>C</b>. The posts hold the board above it.</p>
+    <svg class="big" style="margin-left:28px;max-width:300px" viewBox="0 0 620 1340" role="img" aria-label="DS3231 back: the big chip whose height is C">
+      <image href="img/ds3231_back.jpg" x="0" y="0" width="620" height="1340"/>
+      <rect x="305" y="460" width="215" height="300" fill="none" stroke="#ff4d1a" stroke-width="6"/>
+      <text x="395" y="830" fill="#ff4d1a" stroke="#000" stroke-width="2" paint-order="stroke" style="font:700 60px system-ui,sans-serif">C</text>
     </svg>
-    
   </li>
   <li>
     <label><input type="checkbox"><span><span class="who">You</span><b>B0. BME280: photo of the back</b></span></label>
