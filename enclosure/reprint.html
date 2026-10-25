@@ -118,7 +118,19 @@ svg.big { max-width: 520px; margin: 8px 0 16px; }
   </li>
   <li>
     <label><input type="checkbox"><span><span class="who">You</span><b>2b. Glow size and left-right position</b></span></label>
-    <p class="how">Recorded: width 21.69, height 11.03. Still needed: from the <b>left</b> board edge (pins up, front) to the left edge of the glow.</p>
+    <p class="how">Recorded: width 21.69, height 11.03. Still needed: from the <b>left</b> board edge (pins up, front) to the left edge of the glow (L). Like A, just sideways.</p>
+    <svg viewBox="0 0 300 220" role="img" aria-label="OLED front, pins up: L goes from the left board edge to the left edge of the glow">
+      <rect class="pcb" x="60" y="30" width="180" height="180" rx="4"/>
+      <circle class="pin" cx="126" cy="36" r="3"/><circle class="pin" cx="142" cy="36" r="3"/><circle class="pin" cx="158" cy="36" r="3"/><circle class="pin" cx="174" cy="36" r="3"/>
+      <rect class="glass" x="62" y="42" width="176" height="130" rx="2"/>
+      <rect class="glow" x="75" y="66" width="150" height="76"/>
+      <line class="d" x1="60" y1="104" x2="75" y2="104" marker-start="url(#a)" marker-end="url(#a)"/>
+      <line x1="60" y1="20" x2="60" y2="104" stroke="var(--dim)" stroke-dasharray="3 3"/>
+      <line x1="75" y1="20" x2="75" y2="66" stroke="var(--dim)" stroke-dasharray="3 3"/>
+      <text class="t" x="62" y="16" style="font-size:15px">L</text>
+      <text class="lab" x="150" y="108" text-anchor="middle" style="fill:#10161c">glow</text>
+      <text class="lab" x="250" y="40">pins up</text>
+    </svg>
   </li>
   <li data-done>
     <label><input type="checkbox"><span><span class="who">You</span><b>3. Free room round each mounting hole (back)</b></span></label>
