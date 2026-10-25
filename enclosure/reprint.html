@@ -119,29 +119,14 @@ svg.big { max-width: 520px; margin: 8px 0 16px; }
   <li>
     <label><input type="checkbox"><span><span class="who">You</span><b>3. Free room round each mounting hole (back)</b></span></label>
     <p class="how">Back side, pins up, as in your photo. The clamps will press on a small ring round each of the 4 holes. For each hole: from the <b>edge of the hole</b>, the shortest distance to the nearest thing that sticks up (part, solder pad, header plastic, flex). Silkscreen text doesn't count.</p>
-    <p class="how"><b>E1</b> top-left hole, <b>E2</b> top-right hole (the round GND/VCC pads are near), <b>E3</b> bottom-left hole, <b>E4</b> bottom-right hole (the flex is near).</p>
-    <svg class="big" style="margin-left:28px" viewBox="0 0 440 300" role="img" aria-label="OLED back as in the photo: header top centre, GND VCC pads top right, row of SMD parts, flex at the bottom between the lower holes; E1 to E4 from each hole edge to the nearest part">
-      <rect class="pcb" x="110" y="40" width="220" height="220" rx="4" style="fill:#14181b"/>
-      <rect fill="#20262a" stroke="#555" x="170" y="34" width="90" height="16"/>
-      <rect class="smd" x="140" y="90" width="22" height="8"/>
-      <circle class="smd" cx="292" cy="80" r="6"/><circle class="smd" cx="310" cy="80" r="6"/>
-      <circle class="smd" cx="292" cy="96" r="6"/><circle class="smd" cx="310" cy="96" r="6"/>
-      <rect class="smd" x="268" y="70" width="8" height="18"/>
-      <rect class="smd" x="120" y="130" width="200" height="16" rx="2"/>
-      <rect class="pin" x="135" y="190" width="170" height="12"/>
-      <path class="flex" d="M132 202 H308 V230 L290 260 H150 L132 230 Z"/>
-      <circle class="hole" cx="125" cy="55" r="5" stroke="#bbb" stroke-width="3"/>
-      <circle class="hole" cx="315" cy="55" r="5" stroke="#bbb" stroke-width="3"/>
-      <circle class="hole" cx="122" cy="245" r="5" stroke="#bbb" stroke-width="3"/>
-      <circle class="hole" cx="318" cy="245" r="5" stroke="#bbb" stroke-width="3"/>
-      <line class="d" x1="129" y1="60" x2="140" y2="90" marker-end="url(#a)"/><text class="t" x="96" y="84" style="font-size:15px">E1</text>
-      <line class="d" x1="313" y1="61" x2="311" y2="73" marker-end="url(#a)"/><text class="t" x="340" y="68" style="font-size:15px">E2</text>
-      <line class="d" x1="128" y1="244" x2="140" y2="232" marker-end="url(#a)"/><text class="t" x="82" y="250" style="font-size:15px">E3</text>
-      <line class="d" x1="312" y1="244" x2="300" y2="232" marker-end="url(#a)"/><text class="t" x="336" y="250" style="font-size:15px">E4</text>
-      <text class="lab" x="215" y="28" text-anchor="middle">header</text>
-      <text class="lab" x="350" y="92">GND/VCC pads</text>
-      <text class="lab" x="220" y="142" text-anchor="middle" style="fill:#fff">SMD row</text>
-      <text class="lab" x="220" y="236" text-anchor="middle">flex</text>
+    <p class="how">Each arrow: from the edge of the hole (not the silver ring) to the first thing that sticks up.<br><b>E1</b> top-left hole → the small resistor next to "0x7B"<br><b>E2</b> top-right hole → the round solder pad under it (GND/VCC)<br><b>E3</b> bottom-left hole → the yellow flex<br><b>E4</b> bottom-right hole → the yellow flex</p>
+    <svg class="big" style="margin-left:28px;max-width:560px" viewBox="0 0 940 1030" role="img" aria-label="Photo of the OLED back with arrows E1 to E4 from each hole's edge to the nearest part">
+      <defs><marker id="ab" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="4" markerHeight="4" orient="auto"><path fill="#ff4d1a" d="M0 0L10 5L0 10z"/></marker></defs>
+      <image href="img/oled_back.jpg" x="0" y="0" width="940" height="1030"/>
+      <line x1="119" y1="163" x2="160" y2="278" stroke="#ff4d1a" stroke-width="5" marker-end="url(#ab)"/><text x="150" y="240" fill="#ff4d1a" stroke="#000" stroke-width="2" paint-order="stroke" style="font:700 46px system-ui,sans-serif">E1</text>
+      <line x1="766" y1="162" x2="759" y2="202" stroke="#ff4d1a" stroke-width="5" marker-end="url(#ab)"/><text x="825" y="195" fill="#ff4d1a" stroke="#000" stroke-width="2" paint-order="stroke" style="font:700 46px system-ui,sans-serif">E2</text>
+      <line x1="96" y1="818" x2="116" y2="786" stroke="#ff4d1a" stroke-width="5" marker-end="url(#ab)"/><text x="20" y="770" fill="#ff4d1a" stroke="#000" stroke-width="2" paint-order="stroke" style="font:700 46px system-ui,sans-serif">E3</text>
+      <line x1="800" y1="818" x2="790" y2="786" stroke="#ff4d1a" stroke-width="5" marker-end="url(#ab)"/><text x="845" y="770" fill="#ff4d1a" stroke="#000" stroke-width="2" paint-order="stroke" style="font:700 46px system-ui,sans-serif">E4</text>
     </svg>
   </li>
   <li>
@@ -169,7 +154,7 @@ svg.big { max-width: 520px; margin: 8px 0 16px; }
 </ol>
 </main>
 <script>
-const KEY = "reprint-checklist";
+const KEY = "reprint-checklist-v2"; // v1 kept a tick on step 3 after it was reopened
 const boxes = [...document.querySelectorAll("#steps input")];
 let saved = [];
 try { saved = JSON.parse(localStorage.getItem(KEY)) || []; } catch (e) {}
