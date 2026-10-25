@@ -93,7 +93,7 @@ svg.big { max-width: 520px; margin: 8px 0 16px; }
   <line class="no" x1="390" y1="30" x2="390" y2="188"/><text class="tno" x="396" y="112">not</text><text class="tno" x="396" y="126">this</text><text class="tno" x="396" y="140">(20.40)</text>
 </svg>
 <ol class="steps" id="steps">
-  <li>
+  <li data-done>
     <label><input type="checkbox"><span><span class="who">You</span><b>1. Pin edge to the top of the picture</b></span></label>
     <p class="how">Display running, pins up. From the board's pin-side edge down to the top of the lit picture (A). <b>Recorded: 5.27</b> (to the glow, all pixels on)</p>
     <svg viewBox="0 0 260 200" role="img" aria-label="OLED front, distance A from pin edge to top of picture">
@@ -105,7 +105,7 @@ svg.big { max-width: 520px; margin: 8px 0 16px; }
       <text class="t" x="100" y="16" style="fill:var(--muted)">pin edge</text>
     </svg>
   </li>
-  <li>
+  <li data-done>
     <label><input type="checkbox"><span><span class="who">You</span><b>2. Pin edge to the bottom of the picture</b></span></label>
     <p class="how">Same edge, to the bottom of the lit picture (B). <b>Recorded: 16.10</b> (glow 10.83 tall)</p>
     <svg viewBox="0 0 260 200" role="img" aria-label="OLED front, distance B from pin edge to bottom of picture">
@@ -174,7 +174,11 @@ const KEY = "reprint-checklist";
 const boxes = [...document.querySelectorAll("#steps input")];
 let saved = [];
 try { saved = JSON.parse(localStorage.getItem(KEY)) || []; } catch (e) {}
-boxes.forEach((b, i) => { b.checked = !!saved[i]; b.addEventListener("change", update); });
+boxes.forEach((b, i) => {
+  // data-done = finished and recorded in this file, not just ticked in this browser
+  if (b.closest("li").hasAttribute("data-done")) { b.checked = true; b.disabled = true; return; }
+  b.checked = !!saved[i]; b.addEventListener("change", update);
+});
 function update() {
   const items = [...document.querySelectorAll("#steps > li")];
   const first = boxes.findIndex(b => !b.checked);
