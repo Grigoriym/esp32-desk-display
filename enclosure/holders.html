@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Module Holders</title>
+<style>
+:root {
+  --bg: #fafaf7; --fg: #1d1d1b; --muted: #6b6b66; --line: #ddddd6;
+  --card: #ffffff; --accent: #2f6f5e; --now: #c4511f;
+  --pcb: #2f5fa8; --lit: #e8f4ff; --smd: #8a949a; --pin: #c9a227; --dim: #c4511f;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #161615; --fg: #ececE8; --muted: #9a9a93; --line: #33332f;
+    --card: #1f1f1d; --accent: #7cc4ad; --now: #ff8a5c;
+    --pcb: #3a6cb8; --lit: #cfe6ff; --smd: #6c767b; --pin: #c9a227; --dim: #ff8a5c;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #161615; --fg: #ececE8; --muted: #9a9a93; --line: #33332f;
+  --card: #1f1f1d; --accent: #7cc4ad; --now: #ff8a5c;
+  --pcb: #3a6cb8; --lit: #cfe6ff; --smd: #6c767b; --pin: #c9a227; --dim: #ff8a5c;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--fg);
+  font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+main { max-width: 760px; margin: 0 auto; padding: 24px 16px 64px; }
+h1 { font-size: 1.6rem; margin: 0 0 4px; }
+.sub { color: var(--muted); margin: 0 0 20px; }
+ol.steps { padding: 0; list-style: none; }
+ol.steps > li {
+  background: var(--card); border: 1px solid var(--line); border-radius: 8px;
+  padding: 12px 14px; margin-bottom: 10px;
+}
+ol.steps > li.now { border: 2px solid var(--now); }
+ol.steps > li.done { opacity: 0.6; }
+label { display: flex; gap: 10px; align-items: baseline; cursor: pointer; }
+label b { display: block; }
+input[type=checkbox] { width: 18px; height: 18px; flex: none; transform: translateY(3px); }
+.who { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+.how { margin: 6px 0 0 28px; color: var(--muted); font-size: 0.95rem; }
+svg { width: 100%; max-width: 360px; height: auto; display: block; margin: 8px 0 0 28px; }
+.pcb { fill: var(--pcb); } .lit { fill: var(--lit); } .smd { fill: var(--smd); }
+.pin { fill: var(--pin); } .hole { fill: var(--card); }
+.d { stroke: var(--dim); stroke-width: 1.5; fill: none; }
+.t { fill: var(--dim); font: 600 12px system-ui, sans-serif; }
+.c { fill: none; stroke: var(--dim); stroke-width: 1.5; stroke-dasharray: 4 3; }
+svg.big { max-width: 520px; margin: 8px 0 16px; }
+.glass { fill: #10161c; } .edge { fill: #1c2630; } .ledge { fill: #3a4650; }
+.glow { fill: #6fc3ff; } .flex { fill: #d98a2b; }
+.lab { fill: var(--fg); font: 500 12px system-ui, sans-serif; }
+.lead { stroke: var(--muted); stroke-width: 1; }
+.no { stroke: var(--muted); stroke-width: 1.5; stroke-dasharray: 3 3; fill: none; }
+.tno { fill: var(--muted); font: 600 12px system-ui, sans-serif; }
+</style>
+</head>
+<body>
+<main>
+<h1>Module holders</h1>
+<p class="sub">DS3231, BME280 and SCD41 sit loose in their spots on the base. DS3231 and BME280 get screwed through their own holes; the SCD41 (no holes) slides under two lips, mukklet-style, and the hood holds its other end. Values in mm; measure the module, not the photo.</p>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="3" markerHeight="3" orient="auto-start-reverse"><path fill="#ff4d1a" d="M0 0L10 5L0 10z"/></marker></defs>
+</svg>
+<ol class="steps" id="steps">
+  <li>
+    <label><input type="checkbox"><span><span class="who">You</span><b>D0. DS3231: photo of the back</b></span></label>
+    <p class="how">Why: the screws go into short posts under its holes; the posts must not land on anything on the back. Take it out and send a straight photo of the <b>back</b>, like the top one below.</p>
+    
+  </li>
+  <li>
+    <label><input type="checkbox"><span><span class="who">You</span><b>D1. DS3231 hole diameter</b></span></label>
+    <p class="how">Any one of its 3 holes: across the hole (the hole itself, not the ring round it).</p><svg class="big" style="margin-left:28px;max-width:420px" viewBox="0 0 650 910" role="img" aria-label="DS3231 top: d across the top-left hole">
+      <image href="img/ds3231_top.jpg" x="0" y="0" width="650" height="910"/>
+      <line x1="99" y1="220" x2="145" y2="220" stroke="#ff4d1a" stroke-width="4" marker-start="url(#ah)" marker-end="url(#ah)"/><text x="150" y="180" fill="#ff4d1a" stroke="#000" stroke-width="2" paint-order="stroke" style="font:700 34px system-ui,sans-serif">d</text>
+    </svg>
+    
+  </li>
+  <li>
+    <label><input type="checkbox"><span><span class="who">You</span><b>D2. DS3231 top-left hole: where</b></span></label>
+    <p class="how">Board as in the photo (coin cell up, 6-pin end at the top). <b>S</b>: from the long side edge to the edge of the hole. <b>E</b>: from the short end edge (6-pin end) to the edge of the hole.</p><svg class="big" style="margin-left:28px;max-width:420px" viewBox="0 0 650 910" role="img" aria-label="DS3231 top: S and E for the top-left hole">
+      <image href="img/ds3231_top.jpg" x="0" y="0" width="650" height="910"/>
+      <line x1="70" y1="220" x2="97" y2="220" stroke="#ff4d1a" stroke-width="4" marker-start="url(#ah)" marker-end="url(#ah)"/><line x1="122" y1="40" x2="122" y2="195" stroke="#ff4d1a" stroke-width="4" marker-start="url(#ah)" marker-end="url(#ah)"/><text x="72" y="282" fill="#ff4d1a" stroke="#000" stroke-width="2" paint-order="stroke" style="font:700 34px system-ui,sans-serif">S</text><text x="134" y="129.5" fill="#ff4d1a" stroke="#000" stroke-width="2" paint-order="stroke" style="font:700 34px system-ui,sans-serif">E</text>
+    </svg>
+    
+  </li>
+  <li>
+    <label><input type="checkbox"><span><span class="who">You</span><b>D3. DS3231 top-right hole: where</b></span></label>
+    <p class="how">Board as in the photo (coin cell up, 6-pin end at the top). <b>S</b>: from the long side edge to the edge of the hole. <b>E</b>: from the short end edge (6-pin end) to the edge of the hole.</p><svg class="big" style="margin-left:28px;max-width:420px" viewBox="0 0 650 910" role="img" aria-label="DS3231 top: S and E for the top-right hole">
+      <image href="img/ds3231_top.jpg" x="0" y="0" width="650" height="910"/>
+      <line x1="545" y1="215" x2="518" y2="215" stroke="#ff4d1a" stroke-width="4" marker-start="url(#ah)" marker-end="url(#ah)"/><line x1="493" y1="40" x2="493" y2="190" stroke="#ff4d1a" stroke-width="4" marker-start="url(#ah)" marker-end="url(#ah)"/><text x="513" y="277" fill="#ff4d1a" stroke="#000" stroke-width="2" paint-order="stroke" style="font:700 34px system-ui,sans-serif">S</text><text x="505" y="127.0" fill="#ff4d1a" stroke="#000" stroke-width="2" paint-order="stroke" style="font:700 34px system-ui,sans-serif">E</text>
+    </svg>
+    
+  </li>
+  <li>
+    <label><input type="checkbox"><span><span class="who">You</span><b>D4. DS3231 bottom-left hole: where</b></span></label>
+    <p class="how">Board as in the photo (coin cell up, 6-pin end at the top). <b>S</b>: from the long side edge to the edge of the hole. <b>E</b>: from the short end edge (4-pin end) to the edge of the hole.</p><svg class="big" style="margin-left:28px;max-width:420px" viewBox="0 0 650 910" role="img" aria-label="DS3231 top: S and E for the bottom-left hole">
+      <image href="img/ds3231_top.jpg" x="0" y="0" width="650" height="910"/>
+      <line x1="70" y1="778" x2="108" y2="778" stroke="#ff4d1a" stroke-width="4" marker-start="url(#ah)" marker-end="url(#ah)"/><line x1="133" y1="860" x2="133" y2="803" stroke="#ff4d1a" stroke-width="4" marker-start="url(#ah)" marker-end="url(#ah)"/><text x="72" y="740" fill="#ff4d1a" stroke="#000" stroke-width="2" paint-order="stroke" style="font:700 34px system-ui,sans-serif">S</text><text x="145" y="843.5" fill="#ff4d1a" stroke="#000" stroke-width="2" paint-order="stroke" style="font:700 34px system-ui,sans-serif">E</text>
+    </svg>
+    
+  </li>
+  <li>
+    <label><input type="checkbox"><span><span class="who">You</span><b>B0. BME280: photo of the back</b></span></label>
+    <p class="how">Same reason: a post goes under its hole. A straight photo of the <b>back</b>.</p>
+    
+  </li>
+  <li>
+    <label><input type="checkbox"><span><span class="who">You</span><b>B1. BME280 hole: size and where</b></span></label>
+    <p class="how"><b>d</b>: across the hole. <b>S</b>: from the left edge (away from the pins) to the edge of the hole. <b>E</b>: from the bottom edge (the VIN end) to the edge of the hole.</p><svg class="big" style="margin-left:28px;max-width:420px" viewBox="0 0 570 460" role="img" aria-label="BME280 top: d, S and E for its hole">
+      <image href="img/bme280_top.jpg" x="0" y="0" width="570" height="460"/>
+      <line x1="101" y1="300" x2="224" y2="300" stroke="#ff4d1a" stroke-width="4" marker-start="url(#ah)" marker-end="url(#ah)"/><text x="150" y="290" fill="#ff4d1a" stroke="#000" stroke-width="2" paint-order="stroke" style="font:700 34px system-ui,sans-serif">d</text><line x1="84" y1="335" x2="101" y2="335" stroke="#ff4d1a" stroke-width="4" marker-start="url(#ah)" marker-end="url(#ah)"/><text x="40" y="345" fill="#ff4d1a" stroke="#000" stroke-width="2" paint-order="stroke" style="font:700 34px system-ui,sans-serif">S</text><line x1="162" y1="415" x2="162" y2="384" stroke="#ff4d1a" stroke-width="4" marker-start="url(#ah)" marker-end="url(#ah)"/><text x="176" y="412" fill="#ff4d1a" stroke="#000" stroke-width="2" paint-order="stroke" style="font:700 34px system-ui,sans-serif">E</text>
+    </svg>
+    
+  </li>
+  <li>
+    <label><input type="checkbox"><span><span class="who">You</span><b>C1. SCD41 board thickness</b></span></label>
+    <p class="how">The blue board alone, at an edge (not the sensor): <b>T</b>. The lips sit just above it.</p>
+    
+  </li>
+  <li>
+    <label><input type="checkbox"><span><span class="who">You</span><b>C2. SCD41: room for the lips at the pin end</b></span></label>
+    <p class="how">Two lips go over the corners at the pin end. <b>A</b>: from the top edge down to the GND pad. <b>B</b>: from the bottom edge up to the SDA pad.</p><svg class="big" style="margin-left:28px;max-width:420px" viewBox="0 0 720 460" role="img" aria-label="SCD41 top: A and B, edge to the GND and SDA pads">
+      <image href="img/scd41_top.jpg" x="0" y="0" width="720" height="460"/>
+      <line x1="92" y1="70" x2="92" y2="126" stroke="#ff4d1a" stroke-width="4" marker-start="url(#ah)" marker-end="url(#ah)"/><text x="110" y="112" fill="#ff4d1a" stroke="#000" stroke-width="2" paint-order="stroke" style="font:700 34px system-ui,sans-serif">A</text><line x1="92" y1="444" x2="92" y2="396" stroke="#ff4d1a" stroke-width="4" marker-start="url(#ah)" marker-end="url(#ah)"/><text x="110" y="436" fill="#ff4d1a" stroke="#000" stroke-width="2" paint-order="stroke" style="font:700 34px system-ui,sans-serif">B</text>
+    </svg>
+    
+  </li>
+  <li>
+    <label><input type="checkbox"><span><span class="who">You</span><b>C3. SCD41: room at the other end</b></span></label>
+    <p class="how">The hood's finger presses there. <b>R</b>: from the right edge to the green edge of the sensor.</p><svg class="big" style="margin-left:28px;max-width:420px" viewBox="0 0 720 460" role="img" aria-label="SCD41 top: R, right edge to the sensor">
+      <image href="img/scd41_top.jpg" x="0" y="0" width="720" height="460"/>
+      <line x1="622" y1="250" x2="665" y2="250" stroke="#ff4d1a" stroke-width="4" marker-start="url(#ah)" marker-end="url(#ah)"/><text x="600" y="230" fill="#ff4d1a" stroke="#000" stroke-width="2" paint-order="stroke" style="font:700 34px system-ui,sans-serif">R</text>
+    </svg>
+    
+  </li>
+  <li>
+    <label><input type="checkbox"><span><span class="who">Claude</span><b>Model the screw posts (DS3231, BME280), SCD41 lips + hood finger</b></span></label>
+    <p class="how">2 × 5 black screws; posts replace the ledges under the holes.</p>
+    
+  </li>
+  <li>
+    <label><input type="checkbox"><span><span class="who">Claude</span><b><code>export.sh</code></b></span></label>
+    <p class="how">Clash check + asserts.</p>
+    
+  </li>
+  <li>
+    <label><input type="checkbox"><span><span class="who">You</span><b>Check in OpenSCAD</b></span></label>
+    
+    
+  </li>
+  <li>
+    <label><input type="checkbox"><span><span class="who">You</span><b>Print the base + hood (with the front plate)</b></span></label>
+    
+    
+  </li>
+</ol>
+</main>
+<script>
+const KEY = "holders-checklist";
+const boxes = [...document.querySelectorAll("#steps input")];
+let saved = [];
+try { saved = JSON.parse(localStorage.getItem(KEY)) || []; } catch (e) {}
+boxes.forEach((b, i) => {
+  // data-done = finished and recorded in this file, not just ticked in this browser
+  if (b.closest("li").hasAttribute("data-done")) { b.checked = true; b.disabled = true; return; }
+  b.checked = !!saved[i]; b.addEventListener("change", update);
+});
+function update() {
+  const items = [...document.querySelectorAll("#steps > li")];
+  const first = boxes.findIndex(b => !b.checked);
+  items.forEach((li, i) => {
+    li.classList.toggle("done", boxes[i].checked);
+    li.classList.toggle("now", i === first);
+  });
+  try { localStorage.setItem(KEY, JSON.stringify(boxes.map(b => b.checked))); } catch (e) {}
+}
+update();
+</script>
+</body>
+</html>
