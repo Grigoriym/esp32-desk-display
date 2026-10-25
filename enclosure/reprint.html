@@ -166,8 +166,9 @@ svg.big { max-width: 520px; margin: 8px 0 16px; }
       <line x1="855" y1="126" x2="855" y2="162" stroke="#ff4d1a" stroke-width="5" marker-start="url(#af)" marker-end="url(#af)"/><text x="770" y="215" fill="#ff4d1a" stroke="#000" stroke-width="2" paint-order="stroke" style="font:700 46px system-ui,sans-serif">F2</text>
     </svg>
   </li>
-  <li>
+  <li data-done>
     <label><input type="checkbox"><span><span class="who">You</span><b>5c. Board thickness (without the glass)</b></span></label>
+    <p class="how"><b>Recorded:</b> G 1.12, so the glass stands 1.52 off the board = post height.</p>
     <p class="how">Why: the posts fill the gap between the plate and the board's front, which is as high as the glass sticks out. The whole thing is 2.64 (board + glass); the board alone is a guess (1.0) so far.</p>
     <p class="how">Caliper jaws on a bottom corner, where there's no glass (round a bottom hole): the black board's thickness, G.</p>
     <svg viewBox="0 0 300 140" role="img" aria-label="Side view: board, glass on top of it; G is the board alone">
@@ -181,6 +182,24 @@ svg.big { max-width: 520px; margin: 8px 0 16px; }
       <line class="d" x1="284" y1="98" x2="284" y2="84" marker-end="url(#a)"/>
       <text class="t" x="258" y="116" style="font-size:15px">G</text>
       <text class="lab" x="40" y="116">side view, front up</text>
+    </svg>
+  </li>
+  <li>
+    <label><input type="checkbox"><span><span class="who">You</span><b>5d. Soldered pin ends on the front</b></span></label>
+    <p class="how">Why (you noticed on v1): the header's short pin ends + solder poke out of the board's <b>front</b>, beside the glass, at the GND/VCC/SCL/SDA pads. The plate needs a pocket there, or they hold the OLED off the plate.</p>
+    <p class="how">Front side: from the board's front surface to the <b>highest pin tip / solder blob</b> (P). If it's lower than the glass (1.52), say so: then no pocket is needed.</p>
+    <svg viewBox="0 0 300 140" role="img" aria-label="Side view: board, glass, pin stub with solder on the front; P from the board's front to the pin tip">
+      <rect class="pcb" x="30" y="70" width="240" height="14"/>
+      <rect class="glass" x="90" y="46" width="170" height="24"/>
+      <path d="M44 70 Q50 58 56 70 Z" fill="#bbb"/><rect x="48" y="44" width="4" height="26" fill="#bbb"/>
+      <rect x="47" y="84" width="6" height="40" fill="#20262a"/>
+      <text class="lab" x="175" y="62" text-anchor="middle" style="fill:#ccc">glass</text>
+      <text class="lab" x="150" y="81" text-anchor="middle" style="fill:#fff">board</text>
+      <line x1="20" y1="44" x2="46" y2="44" stroke="var(--dim)" stroke-dasharray="3 3"/>
+      <line class="d" x1="24" y1="70" x2="24" y2="44" marker-start="url(#a)" marker-end="url(#a)"/>
+      <text class="t" x="8" y="62" style="font-size:15px">P</text>
+      <text class="lab" x="62" y="40">pin + solder</text>
+      <text class="lab" x="62" y="116">header (back)</text>
     </svg>
   </li>
   <li>
