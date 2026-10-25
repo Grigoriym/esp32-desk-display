@@ -116,34 +116,32 @@ svg.big { max-width: 520px; margin: 8px 0 16px; }
       <text class="t" x="218" y="74">B</text>
     </svg>
   </li>
-  <li data-done>
-    <label><input type="checkbox"><span><span class="who">You</span><b>3. Free corners on the back</b></span></label>
-    <p class="how"><b>Done from the back photo (2026-10-25):</b> the only spot free in all 4 corners is the silver ring round each mounting hole (~3 mm across). Top-right is the tightest: the GND/VCC pads start ~2 mm below its hole. Clamps press there with ~3.5 mm round pads, centred on the holes.</p>
-    <p class="how">Turn the OLED over (back side, pins still up). The clamps will press only on the 4 corners, so I need how big the empty corner is: from the board's corner, go inward until you hit the first part (SMD part, header, flex).</p>
-    <p class="how"><b>C</b> = sideways: from the left (or right) board edge to the first part.<br><b>D</b> = up/down: from the top (or bottom) board edge to the first part.<br>One corner is enough if all four look about the same; otherwise say which is smaller. Rough is fine.</p>
-    <svg class="big" style="margin-left:28px" viewBox="0 0 440 300" role="img" aria-label="OLED back: header at top, SMD band across the middle, flex at the bottom; the free top-left corner is C wide and D tall">
-      <rect class="pcb" x="110" y="50" width="220" height="220" rx="4"/>
-      <rect fill="#20262a" x="175" y="56" width="90" height="16"/>
-      <circle class="pin" cx="190" cy="64" r="3"/><circle class="pin" cx="210" cy="64" r="3"/><circle class="pin" cx="230" cy="64" r="3"/><circle class="pin" cx="250" cy="64" r="3"/>
-      <rect class="smd" x="150" y="110" width="140" height="100" rx="3"/>
-      <rect class="flex" x="190" y="240" width="60" height="30"/>
-      <circle class="hole" cx="127" cy="67" r="6"/><circle class="hole" cx="313" cy="67" r="6"/>
-      <circle class="hole" cx="127" cy="253" r="6"/><circle class="hole" cx="313" cy="253" r="6"/>
-      <rect class="c" x="110" y="50" width="40" height="60"/>
-      <rect class="c" x="290" y="50" width="40" height="60"/>
-      <rect class="c" x="110" y="210" width="40" height="60"/>
-      <rect class="c" x="290" y="210" width="40" height="60"/>
-      <line class="d" x1="110" y1="34" x2="150" y2="34" marker-start="url(#a)" marker-end="url(#a)"/>
-      <text class="t" x="124" y="26" style="font-size:16px">C</text>
-      <line class="d" x1="94" y1="50" x2="94" y2="110" marker-start="url(#a)" marker-end="url(#a)"/>
-      <text class="t" x="74" y="86" style="font-size:16px">D</text>
-      <line class="ext" x1="150" y1="30" x2="150" y2="110" style="stroke:var(--dim);stroke-dasharray:3 3"/>
-      <line class="ext" x1="90" y1="110" x2="150" y2="110" style="stroke:var(--dim);stroke-dasharray:3 3"/>
-      <text class="lab" x="220" y="164" text-anchor="middle" style="fill:#fff">SMD parts</text>
-      <text class="lab" x="340" y="68">header</text>
-      <text class="lab" x="260" y="290">flex</text>
-      <text class="lab" x="340" y="84" style="fill:var(--dim)">dashed =</text>
-      <text class="lab" x="340" y="98" style="fill:var(--dim)">free corner</text>
+  <li>
+    <label><input type="checkbox"><span><span class="who">You</span><b>3. Free room round each mounting hole (back)</b></span></label>
+    <p class="how">Back side, pins up, as in your photo. The clamps will press on a small ring round each of the 4 holes. For each hole: from the <b>edge of the hole</b>, the shortest distance to the nearest thing that sticks up (part, solder pad, header plastic, flex). Silkscreen text doesn't count.</p>
+    <p class="how"><b>E1</b> top-left hole, <b>E2</b> top-right hole (the round GND/VCC pads are near), <b>E3</b> bottom-left hole, <b>E4</b> bottom-right hole (the flex is near).</p>
+    <svg class="big" style="margin-left:28px" viewBox="0 0 440 300" role="img" aria-label="OLED back as in the photo: header top centre, GND VCC pads top right, row of SMD parts, flex at the bottom between the lower holes; E1 to E4 from each hole edge to the nearest part">
+      <rect class="pcb" x="110" y="40" width="220" height="220" rx="4" style="fill:#14181b"/>
+      <rect fill="#20262a" stroke="#555" x="170" y="34" width="90" height="16"/>
+      <rect class="smd" x="140" y="90" width="22" height="8"/>
+      <circle class="smd" cx="292" cy="80" r="6"/><circle class="smd" cx="310" cy="80" r="6"/>
+      <circle class="smd" cx="292" cy="96" r="6"/><circle class="smd" cx="310" cy="96" r="6"/>
+      <rect class="smd" x="268" y="70" width="8" height="18"/>
+      <rect class="smd" x="120" y="130" width="200" height="16" rx="2"/>
+      <rect class="pin" x="135" y="190" width="170" height="12"/>
+      <path class="flex" d="M132 202 H308 V230 L290 260 H150 L132 230 Z"/>
+      <circle class="hole" cx="125" cy="55" r="5" stroke="#bbb" stroke-width="3"/>
+      <circle class="hole" cx="315" cy="55" r="5" stroke="#bbb" stroke-width="3"/>
+      <circle class="hole" cx="122" cy="245" r="5" stroke="#bbb" stroke-width="3"/>
+      <circle class="hole" cx="318" cy="245" r="5" stroke="#bbb" stroke-width="3"/>
+      <line class="d" x1="129" y1="60" x2="140" y2="90" marker-end="url(#a)"/><text class="t" x="96" y="84" style="font-size:15px">E1</text>
+      <line class="d" x1="313" y1="61" x2="311" y2="73" marker-end="url(#a)"/><text class="t" x="340" y="68" style="font-size:15px">E2</text>
+      <line class="d" x1="128" y1="244" x2="140" y2="232" marker-end="url(#a)"/><text class="t" x="82" y="250" style="font-size:15px">E3</text>
+      <line class="d" x1="312" y1="244" x2="300" y2="232" marker-end="url(#a)"/><text class="t" x="336" y="250" style="font-size:15px">E4</text>
+      <text class="lab" x="215" y="28" text-anchor="middle">header</text>
+      <text class="lab" x="350" y="92">GND/VCC pads</text>
+      <text class="lab" x="220" y="142" text-anchor="middle" style="fill:#fff">SMD row</text>
+      <text class="lab" x="220" y="236" text-anchor="middle">flex</text>
     </svg>
   </li>
   <li>
