@@ -346,9 +346,10 @@ part dimensions and how each part can be held: its Homebox entry.
   DevKit until then). Earlier models (ESP32 across the perfboard's 4 cm
   side, the cut carrier, the ESP32 mini) are in git history only. Four
   parts: body, front plate, base, hood (v1 also had 2 OLED clamps), shaped by what
-  mukklet's printed cases taught. **v1 sent to print 2026-10-21** (the
-  STLs in `enclosure/stl/enclosure/`, which holds exactly what to
-  print). Before a reprint: `enclosure/export.sh`
+  mukklet's printed cases taught. **v1 sent to print 2026-10-21**. `enclosure/stl/` = gitignored
+  working output; each set sent to print is committed under
+  `enclosure/printed/<date>-v<n>/` (the user wants to see past prints'
+  mistakes; the model itself stays one file). Before a reprint: `enclosure/export.sh`
   (clash + pre-print asserts) and the open items in `enclosure/README.md`.
   **Printed parts back 2026-10-23**: all fit except the OLED's window
   (off toward the pin edge) and clamp bars (on SMD parts); the front
