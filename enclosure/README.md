@@ -142,7 +142,7 @@ clamps (front plate only), see ROADMAP 15. The DS3231
 holder doesn't hold it down: thin double-sided tape on its ledges.
 
 1. **Front plate**: the OLED sits flat between the stops, its 4 screws
-   pass its holes (1.70 measured: try one first) and pull it flat. The
+   pull it flat (a 2 × 4 passes its holes, tried 2026-10-25). The
    window is the lit area + 1 all round, lit area measured with all
    pixels on (2026-10-25): the time (flush left), the date's
    last digit (flush right) and the bottom row must show in full; else only
