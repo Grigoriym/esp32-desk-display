@@ -67,13 +67,13 @@ ul.check li { margin-bottom: 6px; }
 </div>
 
 <h2>Screws</h2>
-<p>All self-tapping, from the two kits (<code>parts.py show screws</code>). 14 in total.</p>
+<p>All self-tapping, from the two kits (<code>parts.py show screws</code>). 16 in total.</p>
 <div class="wrap">
 <table>
   <tr><th>Qty</th><th>Screw</th><th>Kit</th><th>Where</th></tr>
   <tr><td class="qty">4</td><td>M3 × 10 round head</td><td>silver</td><td><b>Base to body.</b> Turn the case over; one screw in each corner of the base, up into the body. The holes are printed, just screw in.</td></tr>
   <tr><td class="qty">4</td><td>2 × 6</td><td>black</td><td><b>Front plate to body.</b> Two screws down each side of the screen plate, from the front, into the ledges on the side walls. Holes printed.</td></tr>
-  <tr><td class="qty">2</td><td>2 × 4</td><td>black</td><td><b>OLED clamp bars.</b> One small bar each side of the OLED, on the back of the screen plate; one screw per bar into the round post next to the OLED. Holes printed.</td></tr>
+  <tr><td class="qty">4</td><td>2 × 4</td><td>black</td><td><b>OLED to the front plate.</b> From behind, through the OLED's 4 corner holes into the posts under them. Holes printed.</td></tr>
   <tr><td class="qty">4</td><td>2 × 6</td><td>black</td><td><b>Carrier board to base.</b> One in each corner of the perfboard, into the 4 tall posts on the base. <b>The perfboard has no holes for these yet:</b> drill one 2.5 mm hole in each corner, 3.5 mm in from both edges, before the ESP32 is plugged in. Easiest: lay the board on the 4 posts, mark through where they are, drill.</td></tr>
 </table>
 </div>
@@ -93,7 +93,7 @@ ul.check li { margin-bottom: 6px; }
 <div class="note">Do these with nothing wired. If something is off, only that part gets reprinted.</div>
 <ul class="check">
   <li><b>Carrier on the 4 tall posts</b>, bare (no ESP32): its corners sit on the posts and the ESP32's USB lines up with the side hole.</li>
-  <li><b>OLED in the front plate</b>: flat between the 4 corner stops; the clamp bars screw down without bending it. With it running, the time (left), the date's last digit (right) and the bottom row show in full.</li>
+  <li><b>OLED in the front plate</b>: flat between the 4 corner stops; its 4 screws pull it flat without bending it. With it running, the time (left), the date's last digit (right) and the bottom row show in full.</li>
   <li><b>Front plate</b> drops in between the side walls; its holes meet the rail pilots.</li>
   <li><b>Knob</b>: the collar passes the 7.3 hole (else drill 7.5); the board sits between the two ribs; the nut tightens with thread to spare.</li>
   <li><b>Base</b>: the vented strip sits ~1 mm below the plate's bottom edge; the screws go in without forcing.</li>
@@ -107,7 +107,7 @@ ul.check li { margin-bottom: 6px; }
   <li><b>ESP32 mini into its sockets</b>can up, USB-C pointing out the right side, antenna end left.</li>
   <li><b>Sensors into their pockets, hood on</b>BME280 and SCD41 in the low bay at the front; cables out through the notch in the hood's back wall. The hood sits on the base between two ribs.</li>
   <li><b>Knob up through the top from inside</b>pins to the back, board between the ribs; washer + nut from outside, then the cap.</li>
-  <li><b>OLED onto the front plate</b>plate face-down on the desk, glass flat between the stops, pins at the top; the two clamp bars over the PCB edges.<span class="screw">2 × 2×4 black</span><div class="note">v1 print: the clamp bars land on the OLED's small parts and the window is off. A new plate + clamps are coming; until then, a dab of hot glue at two corners.</div></li>
+  <li><b>OLED onto the front plate</b>plate face-down on the desk, glass flat between the stops, pins at the top; a screw through each corner hole.<span class="screw">4 × 2×4 black</span><div class="note">v1 print: no posts, the window is off. A new plate is coming; until then, a dab of hot glue at two corners.</div></li>
   <li><b>Cables onto the carrier</b>KNOB at the back, the four I2C headers in front (two of them under the knob).</li>
   <li><b>Front plate onto the body</b>drop it onto the rails between the side walls, screw from the front.<span class="screw">4 × 2×6 black</span></li>
   <li><b>Body down onto the base</b>screw from below into the corner bosses, then the rubber feet.<span class="screw">4 × M3×10 silver</span></li>

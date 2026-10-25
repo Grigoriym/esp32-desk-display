@@ -15,7 +15,7 @@ case only. Earlier models (v1-v3: the ESP32 across the 4 cm side, the cut
 carrier, the ESP32 mini) are in git history before 2026-10-18.
 
 ```
-enclosure/export.sh      # checks, then stl/enclosure/{body,front,base,hood,clamp}.stl (gitignored) + renders/
+enclosure/export.sh      # checks, then stl/enclosure/{body,front,base,hood}.stl (gitignored) + renders/
 enclosure/cardboard.py   # 1:1 A4 templates -> enclosure/cardboard.pdf (gitignored)
 ```
 
@@ -33,11 +33,11 @@ thread above the knob nut). It prints those margins (`CHECKS:`) and every
 80 x 84 x 57 mm (W x D x H). A wedge: the OLED on a panel tilted 20° back,
 a vented strip under it, the knob on top (left), USB-C out the right side.
 
-Five printed parts:
+Four printed parts:
 - **body**: side walls, top, back; open at the bottom and the front.
 - **front plate**: the tilted screen panel, dropped in between the side
   walls onto a rail along each, 4 screws from the front (heads visible).
-  Its own part so the OLED's clamp screws can be driven with the plate on
+  Its own part so the OLED's screws can be driven with the plate on
   the desk; a wrong window costs one small plate.
 - **base**: floor over the whole footprint (the body's walls stand on it),
   with the vented strip under the screen, sensor pockets, the carrier's
@@ -45,7 +45,6 @@ Five printed parts:
   corner bosses, so the case opens without touching the wiring.
 - **hood**: roof + back wall of the sensor bay, sits on the base between
   two ribs.
-- **clamp** × 2: bars that press the OLED onto the plate.
 
 Inside:
 - **Sensor bay** (BME280, SCD41): low at the front, walled off by the hood.
@@ -70,9 +69,10 @@ Inside:
   length once the case is printed). The hole grid is centred on the board
   (measured 2026-10-21).
 - **OLED**: glass flat on the plate's inner face between 4 corner stops,
-  two clamp bars screwed to posts beside it. The posts stop 0.3 short of
-  the PCB's back, so the bars press on it. Its corner holes aren't used
-  (the glass reaches almost to them). Pins at the top. Upside-down picture
+  screwed from behind through its 4 corner holes into posts as tall as
+  the glass (1.52), flattened on the glass's side; a pocket in the plate
+  for the pins' soldered ends (1.68 off the board, past the glass). v1's
+  clamp bars landed on SMD parts. Pins at the top. Upside-down picture
   → flip the two orientation bytes in `display.c`, not the board.
 - **Knob**: the KY-040 flat under the top, pins (right-angle header) to the
   back, its plug pointing at the carrier's KNOB socket. The M7 collar goes
@@ -89,7 +89,6 @@ Inside:
 | `front` | 1 | screen face on the bed | window chamfered, no supports |
 | `base` | 1 | flat | |
 | `hood` | 1 | roof on the bed | |
-| `clamp` | 2 (file has both) | flat | |
 
 Material: PETG preferred (PLA softens ~55 °C). Fit clearance 0.3 (`clr`).
 
@@ -100,7 +99,8 @@ Self-tapping screws from the two kits (Homebox: `parts.py show screws`):
 - 4 × M3 × 10 round head, silver kit (base → body; 3.64 × 11.7 measured:
   4.0 holes, pilot 2.5, 13 deep)
 - 4 × 2 × 6, black kit (front plate → rails; pilot 1.6)
-- 2 × 2 × 4, black kit (OLED clamps; pilot 1.6)
+- 4 × 2 × 4, black kit (OLED → its posts, from behind; pilot 1.6, 1.40
+  of post + plate: the screw reaches 2.88, 0.6 of plate left in front)
 - 4 × 2 × 6, black kit (carrier → standoffs; pilot 1.6). Lay the perfboard
   in its outline on the base, mark the standoffs through, drill 2.5.
 - Dupont jumpers for the five headers, 4 rubber feet ≥ 2 mm
@@ -113,7 +113,7 @@ Self-tapping screws from the two kits (Homebox: `parts.py show screws`):
    the ESP32).
 2. Sensors into their pockets, hood on.
 3. Knob up through the top from inside, washer + nut from outside, cap on.
-4. OLED onto the plate (plate on the desk), the two clamp bars.
+4. OLED onto the plate (plate on the desk), 4 screws from behind.
 5. Cables onto the carrier; plate onto the body (4 screws from the front);
    body down onto the base (4 screws from below).
 
@@ -137,12 +137,14 @@ two didn't: drill those at the post (2.5).
 
 Result of the v1 print (2026-10-23): all fits except the OLED's window
 (~3-4 mm toward the pin edge) and the clamp bars (they land on SMD parts);
-both redone in a front plate + clamp reprint, see ROADMAP 15. The DS3231
+the reprint has the window on the measured glow and screws instead of
+clamps (front plate only), see ROADMAP 15. The DS3231
 holder doesn't hold it down: thin double-sided tape on its ledges.
 
-1. **Front plate**: the OLED sits flat between the stops, the clamp bars
-   screw down without bending it. The window is the lit area + 0.5 all
-   round, lit area ±0.5 (from a photo): the time (flush left), the date's
+1. **Front plate**: the OLED sits flat between the stops, its 4 screws
+   pass its holes (1.70 measured: try one first) and pull it flat. The
+   window is the lit area + 1 all round, lit area measured with all
+   pixels on (2026-10-25): the time (flush left), the date's
    last digit (flush right) and the bottom row must show in full; else only
    the plate is reprinted. The plate drops in between the side walls and
    its holes meet the rails' pilots.

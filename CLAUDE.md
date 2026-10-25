@@ -344,15 +344,16 @@ part dimensions and how each part can be held: its Homebox entry.
   `_v<n>` files): the user's "v1 of the project" = the day-one modules,
   no battery, on the ESP32 mini carrier (modelled 2026-10-20; was the
   DevKit until then). Earlier models (ESP32 across the perfboard's 4 cm
-  side, the cut carrier, the ESP32 mini) are in git history only. Five
-  parts: body, front plate, base, hood, 2 clamps, shaped by what
+  side, the cut carrier, the ESP32 mini) are in git history only. Four
+  parts: body, front plate, base, hood (v1 also had 2 OLED clamps), shaped by what
   mukklet's printed cases taught. **v1 sent to print 2026-10-21** (the
-  five STLs in `enclosure/stl/enclosure/`, which holds exactly what to
+  STLs in `enclosure/stl/enclosure/`, which holds exactly what to
   print). Before a reprint: `enclosure/export.sh`
   (clash + pre-print asserts) and the open items in `enclosure/README.md`.
   **Printed parts back 2026-10-23**: all fit except the OLED's window
   (off toward the pin edge) and clamp bars (on SMD parts); the front
-  plate + clamps get reprinted (ROADMAP 15 "Next"). `enclosure/assembly.html`
+  plate gets reprinted with the OLED screwed on instead (ROADMAP 15,
+  `enclosure/reprint.html`). `enclosure/assembly.html`
   = assembly order + every screw, for the user.
 
 ## Roadmap

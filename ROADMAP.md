@@ -288,13 +288,16 @@ WiFi connect timeout: done 2026-09-25, see Open questions in `CLAUDE.md`.
     - Carrier: two of the four standoffs lined up with the board's holes,
       the other two didn't (drill at the post). DS3231 holder only stops
       sliding; nothing holds it down (thin tape on its ledges).
-    **Next (2026-10-24)**: reprint the front plate + 2 clamps:
-    1. the user measures, display running, pins up, from the pin-side
-       board edge to the top and to the bottom of the lit picture (put
-       it in the OLED's Homebox entry, with the free corners);
-    2. move the window to it (`oled_lit_top`), maybe 1-2 mm more margin;
-    3. clamps press only on the 4 corners, relieved over the SMD band;
-    4. `export.sh`, user checks in OpenSCAD, print those two STLs only.
+    **Reprint, front plate only** (2026-10-25; checklist with every
+    measurement: `enclosure/reprint.html`): the OLED's glow, glass, board
+    and pins measured with a caliper, all pixels lit (spare ESP32 with
+    `esp32-hw-checks` `OLED_FULL_FILL`), into its Homebox entry; window
+    moved onto the glow (+1 all round); clamps dropped for 4 screws from
+    behind into posts at the OLED's corner holes (the user's idea, as
+    mukklet's TFT), and a pocket for the pins' soldered ends (1.68, past
+    the 1.52 glass: they held v1's OLED off the plate). Open: screw head
+    vs the flex at the bottom holes (0.77 of room), then the user checks
+    in OpenSCAD and prints `front.stl`.
     Until then: hot glue at two corners holds the OLED.
   - Steps: [x] measure every part (`enclosure/MEASUREMENTS.md`, 2026-09-28)
     -> [x] OpenSCAD model + preview renders (`enclosure/`, see its README;
@@ -302,7 +305,7 @@ WiFi connect timeout: done 2026-09-25, see Open questions in `CLAUDE.md`.
     carrier is 60 x 40 mm) -> [x] KY-040 shaft position (~8.6 mm from
     the end away from the pins, not the middle) -> [x] sent to print
     (2026-10-21, no test print: all five parts at once) -> [x] parts back
-    (2026-10-23) -> [ ] front plate + clamps reprint
+    (2026-10-23) -> [ ] front plate reprint
     -> [ ] perfboard layout on a grid, solder -> [ ] assemble, then compare
     BME280 with a reference thermometer with the case open vs closed.
 

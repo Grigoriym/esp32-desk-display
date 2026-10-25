@@ -7,7 +7,7 @@
 // cases taught (esp32-mukklet, 2026-10-07 and 2026-10-16;
 // ENCLOSURE_PLAYBOOK.md):
 // - the screen panel is its own part (front plate, 4 screws from the
-//   front): in a one-piece shell no screwdriver reaches the OLED clamps'
+//   front): in a one-piece shell no screwdriver reaches the OLED's
 //   screws (their axis runs into the back wall)
 // - the strip under the screen is on the base: on the body it would be a
 //   76 mm bridge when printed upside down
@@ -25,23 +25,21 @@
 //   body  - side walls, top with the knob's hole, back; open at the bottom
 //           and the front
 //   front - the tilted screen panel, a flat plate between the side walls on
-//           two rails; the OLED is clamped onto it while it lies on the desk
+//           two rails; the OLED is screwed onto it while it lies on the desk
 //   base  - floor over the whole footprint, the vented strip under the
 //           screen, sensor pockets, carrier standoffs, DS3231 holder;
 //           4 screws up into the body's corner bosses
 //   hood  - roof + back wall of the sensor bay, sits on the base
-//   clamp - bar holding the OLED against the front plate, print 2
 // Pick one with -D 'part="body"' (see export.sh). Single parts come out in
 // print orientation, "assembly" shows everything in place with stand-in
 // blocks for the modules, "clash" is empty when nothing overlaps.
 
-part = "assembly"; // [assembly, body, front, base, hood, clamp, clash, dims]
+part = "assembly"; // [assembly, body, front, base, hood, clash, dims]
 cut = -1; // assembly only: >= 0 cuts the printed parts away left of this x
 show_body = true; // assembly only: untick to see inside
 show_front = true;
 show_base = true;
 show_hood = true;
-show_clamps = true;
 show_labels = true; // names over the module stand-ins
 explode = 0; // assembly only: lifts the body, with the knob and the front plate, this far off the base
 explode_front = 0; // ... and pulls the front plate, with the OLED on it, this far forward
@@ -56,7 +54,10 @@ clr = 0.3; // fit clearance between printed parts / around boards
 oled_w = 26.00;
 oled_h = 26.04; // pin edge at the top
 oled_t = 2.64; // incl. glass
-oled_pcb_t = 1.0; // ASSUMED, only used for the stand-in: rest of oled_t is glass
+oled_pcb_t = 1.12; // the board alone: the glass stands oled_t - this off its front
+oled_glass_top = 4.19; // glass top edge below the pin edge (top holes' edge + 1.08 to the glass)
+oled_glass_bot = 20.40; // glass bottom edge below the pin edge; the glass spans the full width
+oled_pin_h = 1.68; // header pins' soldered ends, above the board's front: past the glass
 // lit area: caliper, all pixels on, front, pins up (2026-10-25; v1 used a
 // photo guess and its window came out ~2 mm off toward the pin edge)
 oled_lit_w = 21.69;
@@ -70,7 +71,7 @@ oled_back = 8.25; // header pins + plastic behind the PCB
 oled_hole_x = 11.00; // centres 22.00 apart left-right
 oled_hole_z = 10.76; // 21.52 apart top-bottom
 oled_hole_d = 1.70;
-oled_hole_room = 0.77; // the smallest of the four
+oled_hole_room = 0.77; // the smallest of the four, on the back
 oled_dupont = 14; // a plugged-in Dupont connector adds this
 
 // ESP32 mini (D1 mini layout), metal can up
@@ -185,20 +186,17 @@ ledge_h = 1.5; // sensors sit on corner ledges, air flows underneath
 rim = 1.2;
 
 // OLED: glass flat against the front plate's inner face, located by 4
-// corner stops, pressed on by two printed clamp bars (part "clamp", print
-// 2), each screwed to a post beside the board with a 2 x 4 (black kit).
-// The posts stop clamp_press short of the PCB's back, so the bar presses
-// on the board. Its corner holes aren't used: the glass reaches almost to
-// them, no room for a screw post
+// corner stops, screwed from behind through its 4 corner holes into posts
+// on the plate (2 x 4, black kit; as mukklet's TFT). The posts are as tall
+// as the glass and flattened on the glass's side (v1 used clamp bars: they
+// landed on SMD parts). The pins' soldered ends get a pocket in the plate
 oled_v = panel_len / 2; // board centre, up the slope from the skirt's edge
-oled_post_x = oled_w / 2 + clr + 2.5; // clamp posts, left and right of the board
+glass_h = oled_t - oled_pcb_t; // post height: the board's front above the plate
 oled_post_d = 5.5;
 oled_pilot = 1.6;
-clamp_press = 0.3;
-clamp_t = 2;
-clamp_screw_l = 4;
-clamp_overlap = 3; // how far a bar reaches over the board's back, along its side edge
-post_h = oled_t - clamp_press; // above the plate's inner face
+oled_screw_l = 4;
+oled_skin = 0.6; // plate left in front of the pilot
+pin_pocket = 0.6; // past the pins' tips
 lit_dz = oled_h / 2 - oled_lit_top - oled_lit_h / 2; // lit centre above board centre
 lit_dx = -oled_w / 2 + oled_lit_left + oled_lit_w / 2; // lit centre right of board centre (front view: +x = right)
 win_margin = 1; // per side: covers the hand measurements (+-0.5) and print/fit play
@@ -285,9 +283,12 @@ assert(front_screw_x - front_pilot / 2 >= W / 2 - wall - rail_w + 1, "front pilo
 base_screw_tip = boss_cb_h + base_screw_l; // the head sits at the counterbore's top
 assert(base_t - 1 + boss_pilot_h - base_screw_tip >= 1, "base screw bottoms out in its pilot");
 assert(front_pilot_depth - (front_screw_l - wall) >= 1, "front plate screw bottoms out in its pilot");
-clamp_reach = clamp_screw_l - clamp_t + clamp_press; // into the post
-clamp_pilot_h = post_h + wall - 0.8; // 0.8 of plate left in front of it
-assert(clamp_pilot_h - clamp_reach >= 1, "OLED clamp screw bottoms out in its pilot");
+oled_reach = oled_screw_l - oled_pcb_t; // into the post
+oled_pilot_h = glass_h + wall - oled_skin;
+assert(oled_pilot_h - oled_reach >= 0, "OLED screw longer than its pilot"); // as mukklet's TFT
+assert(oled_hole_z - (oled_h / 2 - oled_glass_top - clr) >= oled_pilot / 2 + 0.6, "OLED post flat cuts into the pilot");
+assert(-oled_hole_z + oled_post_d / 2 < oled_h / 2 - oled_glass_bot - clr, "OLED bottom posts reach the glass");
+assert(pin_pocket + oled_pin_h - glass_h < wall - 1, "OLED pin pocket leaves less than 1 of plate");
 assert(perf_standoff - (6 - perf_t) >= 1, "carrier screw bottoms out in its standoff");
 // gaps that aren't meant to touch: print tolerance + screw-hole play
 assert(front_gap + strip_drop >= 0.8, "front plate too close to the base's strip");
@@ -295,7 +296,7 @@ assert(win_w > oled_lit_w && win_h > oled_lit_h, "window smaller than the lit ar
 echo(str("CHECKS: base hole plastic ", min(boss_in, boss_front) - boss_hole / 2, ", counterbore ", min(boss_in, boss_front) - boss_cb_d / 2,
          "; plate hole to side ", W / 2 - wall - clr - front_screw_x - front_screw_d / 2, ", to bottom ", front_screw_v[0] - plate_bottom_v - front_screw_d / 2,
          "; pilot spare: base ", base_t - 1 + boss_pilot_h - base_screw_tip, ", front ", front_pilot_depth - (front_screw_l - wall),
-         ", clamp ", clamp_pilot_h - clamp_reach, "; plate over strip ", front_gap + strip_drop,
+         ", OLED ", oled_pilot_h - oled_reach, "; plate over strip ", front_gap + strip_drop,
          "; thread above the knob nut ", ky_collar_h - wall - ky_washer_t - ky_nut_t));
 
 // ------------------------------------------------------------ helpers
@@ -331,10 +332,14 @@ module stadium(w, h, len) // along y, centred in x/z
 function hole(col, row) = [grid_x0 + col * p, grid_y0 + row * p];
 
 // ------------------------------------------------------------ front plate
-// two posts beside the board for the clamp bars, and L-shaped corner stops;
-// the flex cable passes between the bottom two
+// a post at each corner hole, cut flat clr short of the glass, and
+// L-shaped corner stops; the flex cable passes between the bottom two
 module oled_mount() oled_frame() {
-  for (sx = [-1, 1]) translate([sx * oled_post_x, -0.5, 0]) rotate([-90, 0, 0]) cylinder(d = oled_post_d, h = post_h + 0.5);
+  for (sx = [-1, 1], sz = [-1, 1]) intersection() {
+    translate([sx * oled_hole_x, -0.5, sz * oled_hole_z]) rotate([-90, 0, 0]) cylinder(d = oled_post_d, h = glass_h + 0.5);
+    if (sz > 0) box([-oled_w, -1, oled_h / 2 - oled_glass_top + clr], [oled_w, glass_h + 1, oled_h]);
+    else box([-oled_w, -1, -oled_h], [oled_w, glass_h + 1, oled_h / 2 - oled_glass_bot - clr]);
+  }
   for (sx = [-1, 1], sz = [-1, 1]) {
     ex = oled_w / 2 + clr;
     ez = oled_h / 2 + clr;
@@ -343,14 +348,13 @@ module oled_mount() oled_frame() {
   }
 }
 
-module oled_pilots() oled_frame() for (sx = [-1, 1])
-  translate([sx * oled_post_x, post_h + eps, 0]) rotate([90, 0, 0]) cylinder(d = oled_pilot, h = clamp_pilot_h);
+module oled_pilots() oled_frame() for (sx = [-1, 1], sz = [-1, 1])
+  translate([sx * oled_hole_x, glass_h + eps, sz * oled_hole_z]) rotate([90, 0, 0]) cylinder(d = oled_pilot, h = oled_pilot_h);
 
-// clamp bar, in oled_frame coordinates for the right side (mirrored for the left)
-module clamp_bar() difference() {
-  box([oled_w / 2 - clamp_overlap, oled_t, -oled_h / 2 + 1], [oled_post_x + oled_post_d / 2, oled_t + clamp_t, oled_h / 2 - 1]);
-  translate([oled_post_x, oled_t - 1, 0]) rotate([-90, 0, 0]) cylinder(d = 2.4, h = clamp_t + 2);
-}
+// the 4 header pins' soldered ends, centred, in the strip above the glass
+module oled_pin_pocket() oled_frame()
+  box([-6, -(oled_pin_h - glass_h) - pin_pocket, oled_h / 2 - oled_glass_top + 0.8], [6, 1, oled_h / 2 + clr]);
+
 
 // a straight cut through, and a 45 degree chamfer outwards that starts
 // win_edge in front of the inner face (no eps-thin slabs: hubs.com's
@@ -378,6 +382,7 @@ module front() difference() {
   }
   oled_window();
   oled_pilots();
+  oled_pin_pocket();
   front_holes(front_screw_d, wall + 2);
 }
 
@@ -539,8 +544,9 @@ module wires_standin() color("white", 0.6) {
 }
 
 module oled_standin() color("steelblue") oled_frame() {
-  box([-oled_w / 2, oled_t - oled_pcb_t, -oled_h / 2], [oled_w / 2, oled_t - eps, oled_h / 2]);
-  translate([0, 0, lit_dz]) box([-oled_w / 2, eps, -8], [oled_w / 2, oled_t - oled_pcb_t, 8]);
+  box([-oled_w / 2, glass_h + eps, -oled_h / 2], [oled_w / 2, oled_t - eps, oled_h / 2]);
+  box([-oled_w / 2, eps, oled_h / 2 - oled_glass_bot], [oled_w / 2, glass_h, oled_h / 2 - oled_glass_top]);
+  color("silver") box([-4.8, glass_h - oled_pin_h, oled_h / 2 - 2.2], [4.8, glass_h, oled_h / 2 - 0.2]); // pins' soldered ends
   box([-5.1, oled_t + eps, oled_h / 2 - 2.54], [5.1, oled_t + oled_back, oled_h / 2]);
   color("gold", 0.35) box([-5.1, oled_t + oled_back, oled_h / 2 - 2.54], [5.1, oled_t + oled_back + oled_dupont, oled_h / 2]);
 }
@@ -636,13 +642,9 @@ module cutaway() intersection() {
   else box([-10, -10, -10], [W + 10, D + 10, H + 10]);
 }
 
-module clamps() oled_frame() for (m = [0, 1]) mirror([m, 0, 0]) clamp_bar();
-
 if (part == "body") translate([0, D, H]) rotate([180, 0, 0]) body();
 else if (part == "front") rotate([90, 0, 0]) rotate([tilt, 0, 0]) translate([-W / 2, 0, -skirt_h]) front(); // face down
 else if (part == "base") base();
-else if (part == "clamp") for (i = [0, 1]) translate([i * 12, 0, 0])
-  translate([0, 0, -oled_t]) rotate([90, 0, 0]) clamp_bar();
 else if (part == "hood") translate([0, 0, hood_top]) rotate([180, 0, 0]) hood();
 else if (part == "dims") echo(W = W, D = D, H = H, wall = wall, tilt = tilt, skirt_h = skirt_h, run = run,
   panel_len = panel_len, oled_w = oled_w, oled_h = oled_h, oled_v = oled_v, lit_dz = lit_dz, win_w = win_w,
@@ -661,7 +663,6 @@ else if (part == "clash") {
       front();
       base();
       hood();
-      clamps();
     }
     stand_ins();
   }
@@ -672,7 +673,6 @@ else if (part == "clash") {
       front();
       base();
       hood();
-      clamps();
     }
   }
   intersection() {
@@ -717,7 +717,6 @@ else {
     knob_standin();
     translate([0, -explode_front, 0]) {
       if (show_front) cutaway() color("gainsboro") front();
-      if (show_clamps) color("dimgray") clamps();
       oled_standin();
     }
     if (show_labels) labels();

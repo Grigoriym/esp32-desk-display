@@ -59,8 +59,8 @@ svg.big { max-width: 520px; margin: 8px 0 16px; }
 </head>
 <body>
 <main>
-<h1>Front plate + clamps reprint</h1>
-<p class="sub">The v1 print's OLED window is ~3-4 mm off toward the pin edge, and the clamp bars land on SMD parts. One step at a time; values in mm.</p>
+<h1>Front plate reprint</h1>
+<p class="sub">The v1 print's OLED window is ~3-4 mm off toward the pin edge, and the clamp bars land on SMD parts: the reprint screws the OLED on instead. One step at a time; values in mm.</p>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path fill="var(--dim)" d="M0 0L10 5L0 10z"/></marker></defs>
@@ -202,19 +202,19 @@ svg.big { max-width: 520px; margin: 8px 0 16px; }
       <text class="lab" x="62" y="116">header (back)</text>
     </svg>
   </li>
-  <li>
+  <li data-done>
     <label><input type="checkbox"><span><span class="who">Claude</span><b>6. Screw the OLED on (like mukklet), no clamps</b></span></label>
-    <p class="how">Posts on the plate at the 4 holes, screws from the back. Needs: room on the front between the top holes and the glass; screw head vs the flex at the bottom holes (0.77).</p>
+    <p class="how"><b>Done:</b> 4 posts at the corner holes, 1.52 tall (= the glass), flat on the glass side; pocket for the pins' soldered ends; clamps removed. 4 × 2×4 black from behind: the screw reaches 2.88 into a 2.92 pilot, 0.6 of plate left in front. <b>Still open:</b> the screw head vs the flex at the bottom holes (0.77 of room).</p>
   </li>
-  <li>
+  <li data-done>
     <label><input type="checkbox"><span><span class="who">Claude</span><b>7. <code>export.sh</code></b></span></label>
-    <p class="how">Clash check + pre-print asserts, new STLs.</p>
+    <p class="how">Clash check + pre-print asserts, new STLs. <b>OK</b> (2026-10-25).</p>
   </li>
   <li>
     <label><input type="checkbox"><span><span class="who">You</span><b>8. Check in OpenSCAD</b></span></label>
   </li>
   <li>
-    <label><input type="checkbox"><span><span class="who">You</span><b>9. Print the front plate + 2 clamps only</b></span></label>
+    <label><input type="checkbox"><span><span class="who">You</span><b>9. Print the front plate only</b></span></label>
   </li>
 </ol>
 </main>
