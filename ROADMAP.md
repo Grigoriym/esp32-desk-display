@@ -301,8 +301,9 @@ WiFi connect timeout: done 2026-09-25, see Open questions in `CLAUDE.md`.
     `enclosure/holders.html`, measurements in their Homebox entries):
     DS3231 and BME280 now screwed through their own holes into posts,
     SCD41 under two lips at its pin end + a finger from the hood (as
-    mukklet's ESP32 cradle). Next: the user checks base + hood in
-    OpenSCAD, then prints front + base + hood.
+    mukklet's ESP32 cradle). **v2 (front + base + hood) sent to print
+    2026-10-25** (`enclosure/printed/2026-10-25-v2/`). Next: parts back
+    -> fit check (OLED window + posts, module holders, carrier standoffs).
     Until then: hot glue at two corners holds the OLED.
   - Steps: [x] measure every part (`enclosure/MEASUREMENTS.md`, 2026-09-28)
     -> [x] OpenSCAD model + preview renders (`enclosure/`, see its README;
@@ -310,7 +311,8 @@ WiFi connect timeout: done 2026-09-25, see Open questions in `CLAUDE.md`.
     carrier is 60 x 40 mm) -> [x] KY-040 shaft position (~8.6 mm from
     the end away from the pins, not the middle) -> [x] sent to print
     (2026-10-21, no test print: all five parts at once) -> [x] parts back
-    (2026-10-23) -> [ ] front plate reprint
+    (2026-10-23) -> [x] v2 sent to print: front, base, hood (2026-10-25)
+    -> [ ] v2 parts back, fit check
     -> [ ] perfboard layout on a grid, solder -> [ ] assemble, then compare
     BME280 with a reference thermometer with the case open vs closed.
 
