@@ -167,6 +167,23 @@ svg.big { max-width: 520px; margin: 8px 0 16px; }
     </svg>
   </li>
   <li>
+    <label><input type="checkbox"><span><span class="who">You</span><b>5c. Board thickness (without the glass)</b></span></label>
+    <p class="how">Why: the posts fill the gap between the plate and the board's front, which is as high as the glass sticks out. The whole thing is 2.64 (board + glass); the board alone is a guess (1.0) so far.</p>
+    <p class="how">Caliper jaws on a bottom corner, where there's no glass (round a bottom hole): the black board's thickness, G.</p>
+    <svg viewBox="0 0 300 140" role="img" aria-label="Side view: board, glass on top of it; G is the board alone">
+      <rect class="pcb" x="30" y="70" width="240" height="14"/>
+      <rect class="glass" x="40" y="46" width="170" height="24"/>
+      <text class="lab" x="125" y="62" text-anchor="middle" style="fill:#ccc">glass</text>
+      <text class="lab" x="125" y="81" text-anchor="middle" style="fill:#fff">board</text>
+      <line x1="270" y1="70" x2="290" y2="70" stroke="var(--dim)" stroke-dasharray="3 3"/>
+      <line x1="270" y1="84" x2="290" y2="84" stroke="var(--dim)" stroke-dasharray="3 3"/>
+      <line class="d" x1="284" y1="56" x2="284" y2="70" marker-end="url(#a)"/>
+      <line class="d" x1="284" y1="98" x2="284" y2="84" marker-end="url(#a)"/>
+      <text class="t" x="258" y="116" style="font-size:15px">G</text>
+      <text class="lab" x="40" y="116">side view, front up</text>
+    </svg>
+  </li>
+  <li>
     <label><input type="checkbox"><span><span class="who">Claude</span><b>6. Screw the OLED on (like mukklet), no clamps</b></span></label>
     <p class="how">Posts on the plate at the 4 holes, screws from the back. Needs: room on the front between the top holes and the glass; screw head vs the flex at the bottom holes (0.77).</p>
   </li>
