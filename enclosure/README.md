@@ -117,6 +117,9 @@ Self-tapping screws from the two kits (Homebox: `parts.py show screws`):
 - 2 × 2 × 5, black kit (DS3231 → its posts; pilot 1.6)
 - 1 × 2.6 × 6, black kit (BME280 → its post; pilot 2.1, open through the
   floor: the tip ends about flush with the base's underside)
+  **Used instead (2026-10-29): 3 × 4** from the same kit, holds fine in
+  the 2.1 pilot. A reprint can size the pilot for it (~2.5, `bme_screw_l`
+  = 4) and keep the floor closed.
 - the SCD41 has no holes: its pin end tilts in under two lips on its
   pocket, the other end drops onto the ledges; a finger from the hood's
   roof holds that end once the hood is on
