@@ -40,7 +40,7 @@ rule: UI, or API with the user's OK, never silently). Rules that span parts:
   all on 3V3 (addresses: each part's entry, and `KNOWN_I2C` in `main/main.c`):
   | Part | Here |
   |---|---|
-  | OLED SSD1315 | mounted upside-down, fixed in software (see Display driver notes) |
+  | OLED SSD1315 | panel default orientation in the case (see Display driver notes) |
   | DS3231 RTC | boot time source since 2026-09-23 |
   | BME280 | read since 2026-09-23 (`main/bme280.c`) |
   | SCD41 CO2 | `main/scd41.c` since 2026-09-26 |
@@ -165,9 +165,10 @@ Here:
   not picolibc's parser of it).
 - **Brightness**: on/off only (why: the OLED's Homebox entry). Contrast
   is 0x40 (was 0xCF, no visible difference).
-- Panel orientation: `0xA0`/`0xC0` in the init sequence, flipped 180° from
-  the SSD1306 default to match how the OLED is mounted. New mounting → flip
-  these two bytes, not the wiring.
+- Panel orientation: `0xA1`/`0xC8` in the init sequence (SSD1306 default),
+  since the OLED went into the case (2026-10-29); on the breadboard it was
+  mounted upside-down and used `0xA0`/`0xC0`. New mounting → flip these two
+  bytes, not the wiring.
 
 ## Data source decisions (decided)
 - **Weather API**: Open-Meteo (free, no signup/API key), HTTPS.

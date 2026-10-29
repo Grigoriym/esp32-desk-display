@@ -15,8 +15,8 @@ static const uint8_t ssd1306_init_cmds[] = {
     0x40,       // start line = 0
     0x8D, 0x14, // charge pump on
     0x20, 0x02, // page addressing mode
-    0xA0,       // segment remap (rotated 180 from panel default)
-    0xC0,       // COM scan direction (rotated 180 from panel default)
+    0xA1,       // segment remap (panel default orientation)
+    0xC8,       // COM scan direction (panel default orientation)
     0xDA, 0x12, // COM pins config for 128x64
     0x81, 0x40, // contrast (0x00-0xFF; was 0xCF, 0x40 looks the same indoors)
     0xD9, 0xF1, // precharge
