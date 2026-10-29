@@ -52,11 +52,11 @@ Four printed parts:
   corner bosses, so the case opens without touching the wiring.
 - **hood**: roof + back wall of the sensor bay, sits on the base between
   two ribs.
-
-Inside:
   **Next time, fix it down** (2026-10-29): it only drops between ribs, so
   it wiggles and the cables under it push it up; fine once the case is
   closed, fiddly while assembling. A screw into the base or a clip.
+
+Inside:
 - **Sensor bay** (BME280, SCD41): low at the front, walled off by the hood.
   Air in through the floor slots, out through the strip and the side
   slots. Nothing warm inside it. Cables out through a notch in the hood's
