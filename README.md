@@ -1,9 +1,12 @@
 # ESP32 Desk Display
 
+![The desk display in its printed case](docs/images/desk-display.jpg)
+
 A small always-on desk companion: an ESP32 drives a 0.96" OLED that shows
 the time, the weather outside and inside, air quality and pollen, DWD
 weather warnings, public holidays and the next U-Bahn departures. A rotary
-knob switches between screens. Readings are also uploaded to a self-hosted
+knob switches between screens. It lives in a 3D-printed case
+(OpenSCAD model in [`enclosure/`](enclosure/README.md)). Readings are also uploaded to a self-hosted
 InfluxDB + Grafana dashboard, and a phone on the same WiFi can see them and
 switch screens at `http://desk.local`.
 
@@ -22,7 +25,7 @@ it back on. Turning the knob while the panel is off also wakes it.
 | **HOME** | DWD weather warning if one is out, otherwise the next public holiday; weather icon + outdoor temperature; indoor `IN 25C 43H`; rain hint (`RAIN 14:00`, `RAIN TILL 16:00`, `NO RAIN 12H`) |
 | **OUTDOOR** | Sunrise/sunset, wind speed, today's max UV index |
 | **AIR** | European AQI with its label, the two strongest pollen types and their levels |
-| **INDOOR** | Temperature, humidity, pressure in hPa (BME280) |
+| **INDOOR** | Temperature, humidity, pressure in hPa (BME280), CO2 in ppm (SCD41) |
 | **BVG** | Next U-Bahn departures from one stop in one direction, with a `LEAVE IN N` / `GO NOW` / `HURRY` hint. One click counter-clockwise from HOME |
 
 The font only has A-Z, 0-9, `:`, `-` and `/`, so `H` stands in for `%`.
@@ -37,7 +40,7 @@ OLED    OK   PWR     OK
 RTC     OK   BME     OK
 
 WIFI    OK   NTP     OK
-WEATHER OK
+WEATHER OK   CO2     OK
 ```
 
 `PWR NO` means the last reset was a brownout (weak USB port or cable).
@@ -53,6 +56,7 @@ WEATHER OK
 | Public holidays | [Nager.Date](https://date.nager.at/) (Berlin + nationwide) | once a year |
 | Departures | [VBB API](https://www.vbb.de/vbb-services/api-open-data/api/) (official, access ID by email) | 60 s, only while the BVG screen is showing |
 | Indoor | BME280 | 10 s |
+| CO2 | SCD41, low-power periodic mode | 30 s (first reading ~30 s after boot) |
 
 A failed weather fetch is retried after 30 s, then at growing intervals up
 to the normal 15 minutes.
@@ -71,10 +75,11 @@ to the normal 15 minutes.
 
 | Part | Notes |
 |---|---|
-| ESP32 DevKit (WROOM-32, 30-pin, 4 MB flash) | |
+| ESP32 mini (D1 mini layout, WROOM-32, CH9102F USB, 4 MB flash) | On a perfboard carrier in sockets. Any ESP32-WROOM DevKit works with the same GPIOs |
 | 0.96" 128x64 I2C OLED, SSD1306/SSD1315 | I2C `0x3C` |
 | DS3231 RTC module with coin cell | I2C `0x68`. Optional but recommended |
 | BME280 | I2C `0x76`. Optional (indoor readings) |
+| SCD41 CO2 sensor | I2C `0x62`. Optional |
 | KY-040 rotary encoder | GPIO25/26/27. Optional (screen switching) |
 
 All I2C modules share one bus (SDA GPIO21, SCL GPIO22), each wired
@@ -91,7 +96,7 @@ cp main/wifi_secrets.h.example    main/wifi_secrets.h     # SSID/password
 cp main/bvg_secrets.h.example     main/bvg_secrets.h      # stop + direction IDs
 cp main/metrics_secrets.h.example main/metrics_secrets.h  # dashboard host/token, empty = off
 . ~/esp/esp-idf/export.sh
-idf.py -p /dev/ttyUSB0 build flash monitor
+idf.py -p /dev/ttyACM0 build flash monitor   # ttyUSB0 on a CP2102 DevKit
 ```
 
 The `*_secrets.h` files are gitignored, so credentials never get committed.
@@ -136,7 +141,7 @@ Settings are hardcoded constants. Change them and reflash:
 | Timezone (default: Berlin, automatic DST) | `LOCAL_TZ` in `main/clock.c` |
 | Refresh intervals, WiFi timeout | `*_SECONDS` in `main/main.c` |
 | BVG stop, direction, walking time | `main/bvg_secrets.h` |
-| Display orientation | `0xA0`/`0xC0` in the init sequence in `main/display.c` (this build's panel is mounted upside-down; use `0xA1`/`0xC8` for the default orientation) |
+| Display orientation | `0xA1`/`0xC8` (panel default, as in the case) in the init sequence in `main/display.c`; `0xA0`/`0xC0` flips it 180° |
 
 ## Development
 
@@ -171,6 +176,7 @@ main/
   holidays.c        public holidays; holidays_parse.c
   bvg.c             departures, own task; bvg_parse.c
   bme280.c          indoor sensor driver
+  scd41.c           CO2 sensor driver; scd41_parse.c
   encoder.c         KY-040 ISR + button task; encoder_decode.c
   metrics.c         dashboard upload, own task; metrics_format.c
   health.c          periodic heap/stack report in the log
@@ -180,6 +186,7 @@ test/               host unit tests + fixtures
 tools/              test, format, lint, size and serial scripts
 server/             InfluxDB + Grafana (Docker Compose)
 docs/WIRING.md      pin table
+enclosure/          OpenSCAD case model, printed STL sets, assembly page
 ```
 
 Hardware bring-up tests (I2C scan, OLED pattern, BME280 chip ID, encoder)
