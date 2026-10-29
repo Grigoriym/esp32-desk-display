@@ -152,6 +152,11 @@ On the v1 print (2026-10-23) two of the four corner holes met their
 standoffs and two didn't: the model assumed 3.5 in from every edge. The
 holes were measured on 2026-10-25 (`perf_hole_xy`, ~2.4-2.8 in) and the
 reprinted base has the standoffs under them.
+On the v2 print (2026-10-29) they were still a bit off, moved slightly too
+far: the user bent the standoffs to get the screws in (works, not great).
+Which way and by how much wasn't measured. Before another reprint, measure
+hole centre to hole centre across the board (both directions) instead of
+edge to each hole, and check against a 1:1 paper print of the standoffs.
 
 ## Printed-part checklist
 
