@@ -212,8 +212,9 @@ WiFi connect timeout: done 2026-09-25, see Open questions in `CLAUDE.md`.
   room" hint on screen was considered and not built: not needed while
   the window is open anyway.
 
-- [ ] **15. Enclosure + soldered carrier board** (planned 2026-09-26;
-  **the current main task**).
+- [x] **15. Enclosure + soldered carrier board** (planned 2026-09-26;
+  **done 2026-10-29**: v2 printed, assembled on the mini #2, flashed, screen
+  right way up; the user worked around some printing issues, details to come).
   Everything is on a solderless breadboard now (a first all-soldered
   perfboard attempt was abandoned). The case comes first, the board is
   designed to fit it. No 3D printer here: the case is an OpenSCAD model in

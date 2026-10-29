@@ -360,6 +360,9 @@ part dimensions and how each part can be held: its Homebox entry.
   hood finger, carrier standoffs under its measured holes (ROADMAP 15;
   measuring checklists `enclosure/reprint.html`, `enclosure/holders.html`). `enclosure/assembly.html`
   = assembly order + every screw, for the user.
+  **Assembled and running 2026-10-29: the build is done.** The user hit
+  printing issues with v2 and worked around them (not told yet: ask before
+  the next reprint).
 
 ## Roadmap
 Next tasks live in `ROADMAP.md` as a checklist, one task per session — read it
