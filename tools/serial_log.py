@@ -9,7 +9,7 @@ Run with the IDF python env (has pyserial):
 Retries once if nothing matching comes back -- the first read after a flash
 or USB re-enumeration is sometimes empty.
 
-Port /dev/ttyUSB0; PORT=/dev/ttyACM0 in the environment picks another one.
+Port /dev/ttyACM0 (the mini); PORT=/dev/ttyUSB0 in the environment picks another one.
 """
 import os
 import re
@@ -18,7 +18,7 @@ import time
 
 import serial
 
-PORT = os.environ.get("PORT", "/dev/ttyUSB0")
+PORT = os.environ.get("PORT", "/dev/ttyACM0")
 MAX_BYTES = 200_000  # 115200 baud can't legitimately produce more in ~20s
 
 

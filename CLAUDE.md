@@ -2,7 +2,8 @@
 
 ## Concept
 A WiFi-connected desk companion on a small OLED screen: live clock (NTP) + current
-weather, always on. First "real" project after the esp32 lessons repo — not a
+weather, running all the time, with the panel lit for 5 minutes after the knob
+is touched (since 2026-11-01). First "real" project after the esp32 lessons repo — not a
 tutorial exercise, meant to actually sit on the desk.
 
 ## Hardware
@@ -11,21 +12,20 @@ tutorial exercise, meant to actually sit on the desk.
 pinout and pin order, voltage, current draw, I2C address, measured
 dimensions, mounting, quirks, test status, ports/MACs, counts. Read one with
 `python3 ../grappim-watcher/docs/esp32/inventory/parts.py show <part>`;
-`parts.py` lists free parts, `parts.py all` everything, `parts.py find
+`parts.py` lists everything, `parts.py find
 <text>` searches (read-only, API key from `~/.config/grappim/homebox.env`).
 **A new fact about a part goes in its Homebox entry, never here** (one
 source of truth per fact, no copies): the user does it in the UI, or a
 session through the API with the user's OK. This file holds only what is
 specific to this build: its pins, decisions, milestones, driver notes, its
 enclosure. Before suggesting a part or a purchase, check what's there.
-Each entry's description says `In use: N (project). [Reserved: ...] Free:
-N.`: when this build starts or stops using a part, that must change (same
-rule: UI, or API with the user's OK, never silently). Rules that span parts:
+Homebox doesn't track what's free or which project uses a part: ask the
+user. Rules that span parts:
 `../grappim-watcher/docs/esp32/WIRING_RULES.md`, `ENCLOSURE_PLAYBOOK.md`,
 `FIRMWARE_PLAYBOOK.md` (same folder).
 
 - **Board moving to the ESP32 mini #2** (user, 2026-10-18: "found a good
-  board for it"; Homebox already reserves unit #2 for this build). Same
+  board for it"). Same
   module, so the firmware and GPIO numbers carry over; it flashes on
   `/dev/ttyACM0`. Mounting: female headers soldered on the carrier first,
   then the mini's male headers plugged into them (long pins down, plastic
@@ -33,8 +33,8 @@ rule: UI, or API with the user's OK, never silently). Rules that span parts:
   The carrier is built (2026-10-20: mini in four 10-pin sockets, straight
   pin headers for the modules, Dupont jumpers) and `enclosure/enclosure.scad`
   models it (measurements: `enclosure/README.md`, Carrier). Since
-  2026-10-25 the mini #2 is this build's board in Homebox; the DevKit 30-pin
-  it replaces (`/dev/ttyUSB0`) is free again. The blue GPIO2
+  2026-10-25 the mini #2 is this build's board; it replaced the DevKit 30-pin
+  (`/dev/ttyUSB0`). The blue GPIO2
   LED is off in this firmware.
 - **Modules in this build**, all I2C ones in parallel on D21 (SDA) / D22 (SCL),
   all on 3V3 (addresses: each part's entry, and `KNOWN_I2C` in `main/main.c`):
@@ -96,7 +96,7 @@ Here:
 | Public holidays | Nager.Date (free, no key), `main/holidays.c` + pure `main/holidays_parse.c`: Berlin's (`DE-BE` + nationwide), fetched once a year (and the next year's after 26 Dec), shown on HOME page 1 unless a DWD warning is out. Its TLS chain is GTS Root R4 cross-signed by the old GlobalSign Root CA (not in the bundle), so `CONFIG_MBEDTLS_CERTIFICATE_BUNDLE_CROSS_SIGNED_VERIFY=y` (`sdkconfig.defaults`, ~700 B heap); symptom without it: `No matching trusted root certificate found` / `ESP_ERR_HTTP_CONNECT`. A new HTTPS host failing that way → check its chain with `openssl s_client -showcerts` |
 | HTTP GET | `main/http.c` `http_get(url, buf, size)`, shared by weather/air/alerts/holidays; big responses (alerts 16 KB, holidays 8 KB) get a heap buffer for the fetch only |
 | BVG departures | `esp_http_client` against the **official VBB API** (HAFAS ReST `departureBoard`, access ID + base URL in `bvg_secrets.h`, since 2026-10-17; **test system** `vbb.demo.hafas.cloud` until VBB opens production, which needs their terms accepted), in its own FreeRTOS task (`main/bvg.c`) so a slow/down API never blocks the main loop. ~4.2 KB of JSON per departure (notes, product info; no parameter found that trims it): fetched into a 32 KB heap buffer, and `bvg_parse.c` hands **one departure object at a time** to cJSON (whole response as a tree ~100 KB, one ~15 KB). Heap lowest since boot went 116 -> 60 KB with it (2026-10-17). Errors come back as `errorCode`/`errorText` in the JSON (logged) |
-| Dashboard upload | `esp_http_client` plain-HTTP POST of InfluxDB line protocol every 60 s, in its own task (`main/metrics.c`, 4 KB stack) so a down server never blocks the main loop; record and lines built by the pure `main/metrics_format.c` (host-tested). Lines carry the device's time. A failed upload goes to the `backlog` flash partition via the pure `main/backlog_ring.c` (host-tested on a fake flash, incl. power loss at every byte): 40 B per minute, ~44 days, oldest dropped when full, nothing written while uploads work; sent 12 per POST once the server answers. A 400/422 drops the batch (it would never pass); 401/5xx keep it. Log: `upload failed, saving ...`, `sent N saved readings`, `backlog empty`. **`metrics_record_t` layout change = new `MAGIC` in `backlog_ring.c`**. Server side (InfluxDB 2 + Grafana, Docker Compose) in `server/`, see `server/README.md`; runs on the always-on home box, Grafana at `http://192.168.0.139:34897/` (since 2026-09-25, the dev-machine copy is gone). `METRICS_TOKEN` must be the `INFLUX_TOKEN` of *that* server's `server/.env`: a token from another install gets `401` |
+| Dashboard upload | `esp_http_client` plain-HTTP POST of InfluxDB line protocol every 60 s, in its own task (`main/metrics.c`, 4 KB stack) so a down server never blocks the main loop; record and lines built by the pure `main/metrics_format.c` (host-tested). Lines carry the device's time. A failed upload goes to the `backlog` flash partition via the pure `main/backlog_ring.c` (host-tested on a fake flash, incl. power loss at every byte): 40 B per minute, ~44 days, oldest dropped when full, nothing written while uploads work; sent 12 per POST once the server answers. A 400/422 drops the batch (it would never pass); 401/5xx keep it. Log: `upload failed, saving ...`, `sent N saved readings`, `backlog empty`. **`metrics_record_t` layout change = new `MAGIC` in `backlog_ring.c`**. Server side (InfluxDB 2 + Grafana, Docker Compose) in `server/`, see `server/README.md`; runs on the always-on home box, Grafana at `http://192.168.0.139:34897/` (since 2026-09-25, the dev-machine copy is gone). `METRICS_TOKEN` must be the `INFLUX_TOKEN` of *that* server's `server/.env`: a token from another install gets `401`. The `server/.env` on this dev machine is such a leftover (rejected, 2026-11-01): to query InfluxDB from here, use the token in `main/metrics_secrets.h`. **Testing the backlog**: temporarily set `METRICS_PORT` to an unused port, flash, capture ~3.5 min, restore the port, flash again (`idf.py flash` leaves the partition alone), look for `sent N saved readings`, and query those minutes in InfluxDB. The server itself is a closed laptop that doesn't restart after a power cut |
 | Phone page + JSON API | `esp_http_server` + mDNS (`espressif/mdns`, component manager) in `main/web.c`: `http://desk.local`, page embedded from `main/web_index.html` (`EMBED_TXTFILES`), JSON built by the pure `main/web_api.c` (host-tested). Commands go to the main loop through the encoder queue (`input_event_t`, `main/input.h`). Contract for clients in `docs/API.md` + `docs/api/status.example.json` (a host test fails if the firmware's JSON drifts from that file: **API change → update both**). No auth, LAN only. Since 2026-09-26 (ROADMAP 11); the Android app (ROADMAP 12) is a separate repo |
 | JSON parsing | `cJSON` — **not bundled** in this ESP-IDF version (v6.1-dev); pulled via the component manager (`main/idf_component.yml` → `espressif/cjson`), lands in gitignored `managed_components/` |
 
@@ -296,7 +296,7 @@ from `extra_sources()` in `tools/test.sh`. Fixtures in `test/fixtures/` (see its
 
 ## Serial monitoring
 `idf.py monitor` doesn't work in Claude Code (no TTY). Use
-**`PORT=/dev/ttyACM0 tools/serial_log.py [seconds] [regex]`** (it defaults to the old DevKit's port) with the IDF python env
+**`tools/serial_log.py [seconds] [regex]`** with the IDF python env
 (`~/.espressif/python_env/idf6.2_py3.14_env/bin/python`); it resets the board.
 How to use it and its traps (empty first read, panic tags in the regex, checks
 that need the user's hands, ask what the screen shows when a capture looks

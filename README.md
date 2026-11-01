@@ -2,7 +2,7 @@
 
 ![The desk display in its printed case](docs/images/desk-display.jpg)
 
-A small always-on desk companion: an ESP32 drives a 0.96" OLED that shows
+A small desk companion: an ESP32 drives a 0.96" OLED that shows
 the time, the weather outside and inside, air quality and pollen, DWD
 weather warnings, public holidays and the next U-Bahn departures. A rotary
 knob switches between screens. It lives in a 3D-printed case
@@ -18,7 +18,8 @@ graphics library. All data sources are free and need no API key.
 Every screen has the time (`HH:MM`) flush left and the date (`DD/MM/YYYY`)
 flush right on the top row. Turn the knob to go to the next or previous
 screen (it wraps around). Press it to turn the panel off, and again to turn
-it back on. Turning the knob while the panel is off also wakes it.
+it back on. Turning the knob while the panel is off also wakes it, and the
+panel goes off by itself after 5 minutes without a knob or phone command.
 
 | Screen | Shows |
 |---|---|

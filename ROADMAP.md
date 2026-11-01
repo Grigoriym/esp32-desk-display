@@ -317,8 +317,9 @@ WiFi connect timeout: done 2026-09-25, see Open questions in `CLAUDE.md`.
     -> [ ] perfboard layout on a grid, solder -> [ ] assemble, then compare
     BME280 with a reference thermometer with the case open vs closed.
 
-- [x] **16. Panel off when idle + readings backlog** (2026-11-01; both seen
-  on the board). Raised by a power cut: the display came back, the home
+- [x] **16. Panel off when idle + readings backlog** (2026-11-01; idle off and
+  the backlog seen on the board; waking by knob left for the user to try, phone
+  commands checked). Raised by a power cut: the display came back, the home
   server (a closed laptop) didn't.
   - Panel goes off after 5 min without a knob or web command (`GET
     /api/status` doesn't count); a knob turn or press wakes it. BVG no longer
