@@ -10,7 +10,9 @@ on:
 
 jobs:
   check:
-    runs-on: ubuntu-latest
+    # Pinned: ubuntu-latest warns on every run while it moves to Ubuntu 26. The
+    # host hardly matters, all the steps run in the container below.
+    runs-on: ubuntu-24.04
     container: espressif/idf:latest
     defaults:
       run:
