@@ -48,7 +48,8 @@ static const char *TAG = "desk_display";
 #define PAGE_CLOCK 0 // time left, date right
 
 static screen_t s_screen;
-static bool s_panel_on = true; // knob press toggles it
+static bool s_panel_on = true;   // knob press toggles it
+static int s_panel_idle_seconds; // since the last knob or web command
 static screen_data_t s_data = {
     .bvg_walk_min = BVG_WALK_MIN_MINUTES,
     .bvg_walk_comfort = BVG_WALK_COMFORT_MINUTES,
@@ -161,6 +162,7 @@ static esp_err_t ntp_sync_with_retry(void)
 #define CO2_POLL_SECONDS            5 // the sensor itself measures every 30 s
 #define HEALTH_LOG_SECONDS          (5 * 60)
 #define METRICS_SECONDS             60
+#define PANEL_IDLE_OFF_SECONDS      (5 * 60)
 #define HOLIDAYS_RETRY_SECONDS      (30 * 60)
 
 // What the boot sequence found out, and the main loop's timers.
@@ -356,7 +358,8 @@ static bool tick_minute(app_state_t *st)
 // the screen doesn't fetch.
 static bool tick_bvg(void)
 {
-    bvg_set_active(s_screen == SCREEN_BVG || web_recently_polled());
+    // A dark panel left on the BVG screen shouldn't keep calling VBB.
+    bvg_set_active((s_screen == SCREEN_BVG && s_panel_on) || web_recently_polled());
     return bvg_take_update(&s_data.bvg, &s_data.bvg_ok, &s_data.bvg_failed);
 }
 
@@ -452,19 +455,26 @@ static void tick_health(app_state_t *st)
 // Readings to the dashboard (server/), handed to the upload task.
 static void tick_metrics(app_state_t *st)
 {
-    if (++st->seconds_since_metrics < METRICS_SECONDS || !wifi_is_connected()) return;
+    if (++st->seconds_since_metrics < METRICS_SECONDS) return;
     st->seconds_since_metrics = 0;
     metrics_device_t dev = {
         .uptime_s = (long)(xTaskGetTickCount() / configTICK_RATE_HZ), // wraps after ~497 days
         .heap_free_kb = (int)(esp_get_free_heap_size() / 1024),
     };
     dev.rssi_ok = wifi_rssi(&dev.rssi);
-    char lines[512];
-    if (metrics_format(&s_data, &dev, lines, sizeof(lines)) < 0) {
-        ESP_LOGW(TAG, "metrics batch too big");
-        return;
-    }
-    metrics_submit(lines);
+    metrics_record_t record;
+    metrics_record_make(&s_data, &dev, (long)time(NULL), &record);
+    metrics_submit(&record);
+}
+
+// The panel goes dark after PANEL_IDLE_OFF_SECONDS without a knob or web
+// command; reading /api/status doesn't count, so a polling app can't keep it lit.
+static void tick_panel_idle(void)
+{
+    if (!s_panel_on || ++s_panel_idle_seconds < PANEL_IDLE_OFF_SECONDS) return;
+    s_panel_on = false;
+    ESP_LOGI(TAG, "panel off (idle)");
+    display_set_on(false);
 }
 
 // Waits out the rest of this second, reacting to the encoder (and web API
@@ -483,6 +493,7 @@ static void wait_second_handling_encoder(TickType_t *next_second)
         if ((int32_t)(*next_second - now) <= 0) return;
         input_event_t ev;
         if (!encoder_wait_event(&ev, *next_second - now)) continue;
+        s_panel_idle_seconds = 0;
         int screen = s_screen;
         bool on = s_panel_on;
         do {
@@ -553,6 +564,7 @@ void app_main(void)
         changed |= tick_holidays(&st);
         tick_health(&st);
         tick_metrics(&st);
+        tick_panel_idle();
         if (changed) draw_screen();
         web_publish(&s_data, s_screen, s_panel_on);
         wait_second_handling_encoder(&next_second);

@@ -5,10 +5,12 @@
 CONFIG_ESP_MAIN_TASK_STACK_SIZE=8192
 
 # The ESP32 DevKits here have 4 MB flash; the IDF default assumes 2 MB with a
-# 1 MB app partition, which was down to 4% free (2026-09-25). Large single
-# app partition: 1.5 MB.
+# 1 MB app partition, which was down to 4% free (2026-09-25). 1.5 MB app
+# partition, and the rest of the flash holds readings the server missed
+# (partitions.csv).
 CONFIG_ESPTOOLPY_FLASHSIZE_4MB=y
-CONFIG_PARTITION_TABLE_SINGLE_APP_LARGE=y
+CONFIG_PARTITION_TABLE_CUSTOM=y
+CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="partitions.csv"
 
 # date.nager.at (holidays) sends GTS Root R4 cross-signed by the old
 # GlobalSign Root CA, which isn't in the bundle any more; without this the

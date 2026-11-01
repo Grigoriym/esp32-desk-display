@@ -317,5 +317,21 @@ WiFi connect timeout: done 2026-09-25, see Open questions in `CLAUDE.md`.
     -> [ ] perfboard layout on a grid, solder -> [ ] assemble, then compare
     BME280 with a reference thermometer with the case open vs closed.
 
+- [x] **16. Panel off when idle + readings backlog** (2026-11-01; both seen
+  on the board). Raised by a power cut: the display came back, the home
+  server (a closed laptop) didn't.
+  - Panel goes off after 5 min without a knob or web command (`GET
+    /api/status` doesn't count); a knob turn or press wakes it. BVG no longer
+    fetches for a dark panel left on its screen.
+  - Failed uploads go to a 2.5 MB `backlog` flash partition (`partitions.csv`,
+    `backlog_ring.c`, 40 B a minute, ~44 days; oldest dropped when full), then
+    are sent 12 per POST with their own timestamps. Every upload now carries
+    the device's time. Checked with a build pointed at a dead port: 3 readings
+    saved, reflashed with the real port, all 3 in InfluxDB at their original
+    minutes, not sent again after a reboot. Heap lowest 124 KB, metrics stack
+    2.5 KB left of 4. Worst case (a day-long gap) not run on the board: the
+    wrap and power-loss cases are host tests only.
+  - **Still on the user**: the laptop itself doesn't restart after a power cut.
+
 Other open items (not scheduled): battery backup — see Open questions in
 `CLAUDE.md`.

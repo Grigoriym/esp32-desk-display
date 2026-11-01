@@ -63,7 +63,7 @@ Top level:
 | `time` | string `"HH:MM"` | Display's local time (Europe/Berlin, DST handled), when the response was built |
 | `date` | string `"YYYY-MM-DD"` | Display's local date. Right after a cold boot without network/RTC it can be 1970 until the clock syncs |
 | `screen` | string | Screen currently on the panel: `home`, `outdoor`, `air`, `indoor`, `bvg` |
-| `panel_on` | bool | Whether the OLED is on (off = dark, the display still runs and fetches) |
+| `panel_on` | bool | Whether the OLED is on (off = dark, the display still runs and fetches). It goes off by itself after 5 minutes without a knob or `POST` command; `GET /api/status` doesn't count |
 | `outdoor` | object or `null` | Weather outside, see below |
 | `indoor` | object or `null` | Room sensor (BME280), see below |
 | `co2` | object or `null` | Room CO2 (SCD41, a separate sensor), see below |

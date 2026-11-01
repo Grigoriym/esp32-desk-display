@@ -1,5 +1,5 @@
-idf_component_register(SRCS "main.c" "display.c" "font.c" "wifi.c" "clock.c" "clock_time.c" "http.c" "weather.c" "weather_parse.c" "air_parse.c" "alerts_parse.c" "holidays.c" "holidays_parse.c" "bme280.c" "scd41.c" "scd41_parse.c" "encoder.c" "encoder_decode.c" "bvg.c" "bvg_parse.c" "screens.c" "health.c" "metrics.c" "metrics_format.c" "web.c" "web_api.c"
+idf_component_register(SRCS "main.c" "display.c" "font.c" "wifi.c" "clock.c" "clock_time.c" "http.c" "weather.c" "weather_parse.c" "air_parse.c" "alerts_parse.c" "holidays.c" "holidays_parse.c" "bme280.c" "scd41.c" "scd41_parse.c" "encoder.c" "encoder_decode.c" "bvg.c" "bvg_parse.c" "screens.c" "health.c" "metrics.c" "metrics_format.c" "backlog_ring.c" "web.c" "web_api.c"
                         INCLUDE_DIRS "."
                         REQUIRES esp_driver_i2c esp_driver_gpio esp_wifi esp_netif nvs_flash esp_event
-                                 esp_http_client esp_http_server mbedtls cjson mdns
+                                 esp_http_client esp_http_server esp_partition mbedtls cjson mdns
                         EMBED_TXTFILES "web_index.html")

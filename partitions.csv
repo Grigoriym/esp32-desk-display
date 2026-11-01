@@ -1,0 +1,7 @@
+# Same nvs, phy_init and factory as the stock "single app large" table, plus
+# the rest of the 4 MB flash as the readings backlog (main/backlog_ring.h).
+# Name,    Type, SubType, Offset,   Size
+nvs,       data, nvs,     0x9000,   24K
+phy_init,  data, phy,     0xf000,   4K
+factory,   app,  factory, 0x10000,  1500K
+backlog,   data, 0x40,    0x187000, 2500K

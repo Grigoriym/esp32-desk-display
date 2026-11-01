@@ -96,7 +96,7 @@ Here:
 | Public holidays | Nager.Date (free, no key), `main/holidays.c` + pure `main/holidays_parse.c`: Berlin's (`DE-BE` + nationwide), fetched once a year (and the next year's after 26 Dec), shown on HOME page 1 unless a DWD warning is out. Its TLS chain is GTS Root R4 cross-signed by the old GlobalSign Root CA (not in the bundle), so `CONFIG_MBEDTLS_CERTIFICATE_BUNDLE_CROSS_SIGNED_VERIFY=y` (`sdkconfig.defaults`, ~700 B heap); symptom without it: `No matching trusted root certificate found` / `ESP_ERR_HTTP_CONNECT`. A new HTTPS host failing that way → check its chain with `openssl s_client -showcerts` |
 | HTTP GET | `main/http.c` `http_get(url, buf, size)`, shared by weather/air/alerts/holidays; big responses (alerts 16 KB, holidays 8 KB) get a heap buffer for the fetch only |
 | BVG departures | `esp_http_client` against the **official VBB API** (HAFAS ReST `departureBoard`, access ID + base URL in `bvg_secrets.h`, since 2026-10-17; **test system** `vbb.demo.hafas.cloud` until VBB opens production, which needs their terms accepted), in its own FreeRTOS task (`main/bvg.c`) so a slow/down API never blocks the main loop. ~4.2 KB of JSON per departure (notes, product info; no parameter found that trims it): fetched into a 32 KB heap buffer, and `bvg_parse.c` hands **one departure object at a time** to cJSON (whole response as a tree ~100 KB, one ~15 KB). Heap lowest since boot went 116 -> 60 KB with it (2026-10-17). Errors come back as `errorCode`/`errorText` in the JSON (logged) |
-| Dashboard upload | `esp_http_client` plain-HTTP POST of InfluxDB line protocol every 60 s, in its own task (`main/metrics.c`, 4 KB stack) so a down server never blocks the main loop; lines built by the pure `main/metrics_format.c` (host-tested). Server side (InfluxDB 2 + Grafana, Docker Compose) in `server/`, see `server/README.md`; runs on the always-on home box, Grafana at `http://192.168.0.139:34897/` (since 2026-09-25, the dev-machine copy is gone). `METRICS_TOKEN` must be the `INFLUX_TOKEN` of *that* server's `server/.env`: a token from another install gets `401` |
+| Dashboard upload | `esp_http_client` plain-HTTP POST of InfluxDB line protocol every 60 s, in its own task (`main/metrics.c`, 4 KB stack) so a down server never blocks the main loop; record and lines built by the pure `main/metrics_format.c` (host-tested). Lines carry the device's time. A failed upload goes to the `backlog` flash partition via the pure `main/backlog_ring.c` (host-tested on a fake flash, incl. power loss at every byte): 40 B per minute, ~44 days, oldest dropped when full, nothing written while uploads work; sent 12 per POST once the server answers. A 400/422 drops the batch (it would never pass); 401/5xx keep it. Log: `upload failed, saving ...`, `sent N saved readings`, `backlog empty`. **`metrics_record_t` layout change = new `MAGIC` in `backlog_ring.c`**. Server side (InfluxDB 2 + Grafana, Docker Compose) in `server/`, see `server/README.md`; runs on the always-on home box, Grafana at `http://192.168.0.139:34897/` (since 2026-09-25, the dev-machine copy is gone). `METRICS_TOKEN` must be the `INFLUX_TOKEN` of *that* server's `server/.env`: a token from another install gets `401` |
 | Phone page + JSON API | `esp_http_server` + mDNS (`espressif/mdns`, component manager) in `main/web.c`: `http://desk.local`, page embedded from `main/web_index.html` (`EMBED_TXTFILES`), JSON built by the pure `main/web_api.c` (host-tested). Commands go to the main loop through the encoder queue (`input_event_t`, `main/input.h`). Contract for clients in `docs/API.md` + `docs/api/status.example.json` (a host test fails if the firmware's JSON drifts from that file: **API change → update both**). No auth, LAN only. Since 2026-09-26 (ROADMAP 11); the Android app (ROADMAP 12) is a separate repo |
 | JSON parsing | `cJSON` — **not bundled** in this ESP-IDF version (v6.1-dev); pulled via the component manager (`main/idf_component.yml` → `espressif/cjson`), lands in gitignored `managed_components/` |
 
@@ -129,8 +129,9 @@ Here:
   `overflow|Guru|Backtrace|rst:` in the `serial_log.py` regex, or the panic
   gets filtered out.
 - **Flash layout** (since 2026-09-25, in `sdkconfig.defaults`): 4 MB flash
-  (`CONFIG_ESPTOOLPY_FLASHSIZE_4MB`, the IDF default assumed 2 MB) and the
-  large single-app partition table: 1.5 MB app, ~35% free. Before that the
+  (`CONFIG_ESPTOOLPY_FLASHSIZE_4MB`, the IDF default assumed 2 MB) and
+  `partitions.csv` (since 2026-11-01): 1.5 MB app, 29% free, 2.5 MB readings
+  backlog. Before that the
   app was in a 1 MB partition with 4% left. Almost all of the ~980 KB is
   ESP-IDF (WiFi ~370 KB, TLS/crypto ~200 KB, lwIP ~100 KB); this project's
   own code is ~10 KB. `sdkconfig.defaults` only applies when `sdkconfig`
@@ -163,6 +164,9 @@ Here:
   (see Host unit tests), incl. `utc_to_epoch()` and the TZ rule's switch
   dates (`test/test_clock_time.c`, against glibc: it checks the rule string,
   not picolibc's parser of it).
+- **Idle off**: panel off after `PANEL_IDLE_OFF_SECONDS` (5 min, since
+  2026-11-01) without a knob or web command, polling `/api/status` doesn't
+  count. The firmware keeps running and fetching.
 - **Brightness**: on/off only (why: the OLED's Homebox entry). Contrast
   is 0x40 (was 0xCF, no visible difference).
 - Panel orientation: `0xA1`/`0xC8` in the init sequence (SSD1306 default),
@@ -219,7 +223,7 @@ already excludes `*_secrets.h` and `sdkconfig`.
 ## Build / flash
 Flashing and checking a build on the board: use the `esp32-flash-verify` skill
 (generic routine); this section keeps only what's specific to this repo.
-`. ~/esp/esp-idf/export.sh && idf.py -p /dev/ttyUSB0 build flash` (same for
+`. ~/esp/esp-idf/export.sh && idf.py -p /dev/ttyACM0 build flash` (same for
 `../esp32-hw-checks`; remember to flash this project back after a swap).
 Flash traps (transient errors, **checking the flash actually happened** with a
 case-insensitive `-iE "error|failed|Done"` filter, which build is running):
@@ -292,7 +296,7 @@ from `extra_sources()` in `tools/test.sh`. Fixtures in `test/fixtures/` (see its
 
 ## Serial monitoring
 `idf.py monitor` doesn't work in Claude Code (no TTY). Use
-**`tools/serial_log.py [seconds] [regex]`** with the IDF python env
+**`PORT=/dev/ttyACM0 tools/serial_log.py [seconds] [regex]`** (it defaults to the old DevKit's port) with the IDF python env
 (`~/.espressif/python_env/idf6.2_py3.14_env/bin/python`); it resets the board.
 How to use it and its traps (empty first read, panic tags in the regex, checks
 that need the user's hands, ask what the screen shows when a capture looks

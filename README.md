@@ -70,6 +70,9 @@ to the normal 15 minutes.
 - The BVG fetch and the dashboard upload run in their own tasks, so a slow
   or down server never freezes the clock or the knob.
 - Summer/winter time switches automatically (POSIX TZ rule).
+- Dashboard server down: each minute's readings are saved on the display's
+  flash, about 44 days' worth, then uploaded with their original times once
+  the server is back. They survive power cuts; past that, the oldest go first.
 
 ## Hardware
 
@@ -106,7 +109,8 @@ cJSON is pulled in automatically by the component manager.
 
 `server/` holds an InfluxDB 2 + Grafana setup in Docker Compose. The display
 POSTs indoor, outdoor, air-quality and device values (heap, WiFi signal,
-uptime) every minute. Run it on an always-on machine on the display's LAN:
+uptime) every minute, and catches up on what it saved if the server was
+down. Run it on an always-on machine on the display's LAN:
 see [`server/README.md`](server/README.md) and
 [`server/INSTALL.md`](server/INSTALL.md).
 
@@ -178,7 +182,8 @@ main/
   bme280.c          indoor sensor driver
   scd41.c           CO2 sensor driver; scd41_parse.c
   encoder.c         KY-040 ISR + button task; encoder_decode.c
-  metrics.c         dashboard upload, own task; metrics_format.c
+  metrics.c         dashboard upload, own task; metrics_format.c,
+                    backlog_ring.c (readings saved while the server is down)
   health.c          periodic heap/stack report in the log
   web.c             phone page + JSON API, mDNS; web_api.c (pure,
                     host-tested), page in web_index.html

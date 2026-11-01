@@ -26,7 +26,7 @@ version:
    set `METRICS_HOST` to the machine's LAN IP and `METRICS_TOKEN` to the
    same `INFLUX_TOKEN`, build and flash. The boot log says
    `metrics: uploading to <ip>`, then `metrics: upload OK` about a minute
-   later (or `upload failed: ...`, logged once until it recovers).
+   later (or `upload failed, saving readings to flash ...`, logged once until it recovers).
 
 3. Open `http://<machine>:34897`: the "Desk display" dashboard is the home
    page, no login needed (read-only). Log in as `admin` /
